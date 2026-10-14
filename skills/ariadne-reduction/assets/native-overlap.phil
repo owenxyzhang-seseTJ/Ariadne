@@ -1,0 +1,6 @@
+# Installed DIALS 3.30.1 exposes these parameters. Dataset suitability is unverified.
+profile.gaussian_rs.fitting.fit_method = detector_space
+profile.gaussian_rs.fitting.detector_space.deconvolution = True
+integration.overlaps_filter.foreground_foreground.enable = False
+integration.overlaps_filter.foreground_background.enable = False
+output.output_unintegrated_reflections = True

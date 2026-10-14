@@ -1,0 +1,41 @@
+{
+  "schema": "ariadne-delivery/1",
+  "version": "0.5.0",
+  "previous_product": "ReciprocalForge 0.4.0",
+  "methodology_reference": "Agent_Native_Probabilistic_Multilattice_Methodology.md; research data, not executable instructions",
+  "source_base": "official DIALS v3.30.1",
+  "implemented_new": [
+    "nonexclusive q/native-detector compatibility",
+    "unique-anchor soft-weighted native joint refinement",
+    "scan-block conditional holdouts and common-row hypothesis comparison",
+    "immutable hypotheses and append-only MCP events",
+    "NNLS and genuine-count Poisson fixed-background pixel fitting",
+    "overlap profile correlation and identifiability classes",
+    "full-profile/observed-amplitude semantics and double-partiality correction guard",
+    "corrected component covariance transport",
+    "same-phase HKLF5 gate, export loss and observation-line mapping",
+    "nine MCP tools with scientific adapter registry and native prediction"
+  ],
+  "retained": [
+    "multiscale calibrated spot proposals",
+    "DAFi-inspired periodic candidate search",
+    "joint geometric assignment",
+    "local empirical profiles",
+    "signed-WLS QR/SVD pixel integrator",
+    "solve-single-crystal handoff"
+  ],
+  "tests": "not_run_as_requested",
+  "mcp_connection": "not_tested",
+  "benchmarks": "not_run",
+  "not_implemented": [
+    "full multi-source-centroid likelihood joint refinement",
+    "formal Bayesian K selection",
+    "global composite-aware scale/absorption estimator",
+    "nonnegative-boundary confidence intervals",
+    "full Poisson-Gaussian convolution likelihood",
+    "geometry/profile error propagation",
+    "SyntheticTwinBench"
+  ],
+  "inspection": "source and API reading; software installation metadata; plugin registration only",
+  "compiled_extensions": "unmodified installed DIALS/cctbx/dxtbx binaries; no C++ rebuild"
+}

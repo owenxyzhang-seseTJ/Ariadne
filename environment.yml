@@ -1,0 +1,14 @@
+name: scxrd-open
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - dials=3.30.1
+  - dxtbx=3.30.0
+  - cctbx-base=2026.9
+  - fabio=2025.10.0
+  - gemmi=0.7.5
+  - numpy
+  - scipy
+  - matplotlib-base
+  - pyyaml

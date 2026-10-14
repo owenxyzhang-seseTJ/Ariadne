@@ -1,0 +1,6 @@
+interface:
+  display_name: "Ariadne 单晶数据工作流"
+  short_description: "处理 Bruker/Rigaku 原始衍射数据、孪晶与积分校正，并交接单晶解析"
+  default_prompt: "使用 $ariadne-reduction 处理我的原始单晶数据，读取模型证据并生成 INS/HKL，交接就绪后继续 solve-single-crystal。"
+policy:
+  allow_implicit_invocation: true
