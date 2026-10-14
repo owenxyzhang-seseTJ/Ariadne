@@ -20,9 +20,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-This license applies to the independently authored Ariadne software and
-documentation. DIALS-derived source portions retain the upstream BSD license
-reproduced in patches/DIALS-LICENSE. Third-party dependencies and referenced
-publications retain their respective licenses. Official DAFi binaries and
-proprietary vendor programs are not distributed with this software.
