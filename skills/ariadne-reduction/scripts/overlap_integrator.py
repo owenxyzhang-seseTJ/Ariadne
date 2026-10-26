@@ -62,6 +62,61 @@ def solve_joint(data, variance, profiles, valid, background, rcond):
             'chi2': chi2, 'dof': dof, 'reduced_chi2': chi2 / dof if dof > 0 else None}
 
 
+def solve_position_joint(data, variance, profiles, valid, background, derivatives, rcond, tolerance, max_shift):
+    """消去位置导数与背景，保留强度的完整边缘协方差。"""
+    count = profiles.shape[1]
+    nuisance = np.column_stack((background, derivatives))
+    weights = 1 / np.sqrt(variance[valid])
+    weighted = nuisance[valid] * weights[:, None]
+    norms = np.linalg.norm(weighted, axis=0)
+    nonzero = np.flatnonzero(norms > 1e-15)
+    Q, R, pivots = qr(weighted[:, nonzero] / norms[nonzero], mode='economic', pivoting=True)
+    diagonal = np.abs(np.diag(R))
+    nuisance_rank = int(np.sum(diagonal > diagonal.max() * rcond))
+    selected = nonzero[pivots[:nuisance_rank]]
+    basis = nuisance[:, selected] / norms[selected]
+    # 单独消去所有 nuisance 方向，避免不可辨识的位置参数制造强度信息。
+    result = solve_joint(data, variance, profiles, valid, basis, rcond)
+    coefficients = np.zeros(nuisance.shape[1])
+    coefficients[selected] = result['background_coefficients'] / norms[selected]
+    # 用完整设计检验每个 I*delta 是否可辨识，不发布任意零空间分解。
+    complete = np.column_stack((profiles, derivatives))
+    active = np.flatnonzero(np.linalg.norm(complete[valid] * weights[:, None], axis=0) > 1e-15)
+    full = solve_joint(data, variance, complete[:, active], valid, background, rcond)
+
+    def moment_contrast(index):
+        location = np.flatnonzero(active == index)
+        if not len(location):
+            return {'identifiable': False}
+        return contrast(full, np.eye(len(active))[location[0]], tolerance)
+
+    shifts, flags = [], []
+    for i in range(count):
+        amplitude = moment_contrast(i)
+        axes = []
+        for axis in range(3):
+            j = count + 3 * i + axis
+            moment = moment_contrast(j)
+            if not amplitude['identifiable'] or not moment['identifiable'] or abs(amplitude['intensity'] or 0) <= 1e-8:
+                axes.append({'identifiable': False, 'shift_px': None, 'variance_px2': None})
+                continue
+            value = moment['intensity'] / amplitude['intensity']
+            gradient = np.zeros(complete.shape[1])
+            gradient[i], gradient[j] = -value / amplitude['intensity'], 1 / amplitude['intensity']
+            error = float(gradient[active] @ full['covariance_identifiable_subspace'] @ gradient[active])
+            axes.append({'identifiable': True, 'shift_px': float(value), 'variance_px2': max(error, 0.)})
+            if abs(value) > max_shift:
+                flags.append('position_linearization_limit_exceeded')
+        shifts.append(axes)
+    result['background_coefficients'] = coefficients[:background.shape[1]]
+    result['position_model'] = {'method': 'first_order_independent_component_xyz_nuisance',
+                                'shifts_xyz': shifts, 'max_linear_shift_px': max_shift,
+                                'nuisance_rank': nuisance_rank, 'flags': sorted(set(flags)),
+                                'scope': 'local linearization; intensity covariance marginalizes fitted XYZ moments and background; not instrument calibration covariance'}
+    result['covariance_scope'] = 'linearized profile-position and background nuisance marginalized; conditional on supplied profile shape and calibrated noise'
+    return result
+
+
 def contrast(result, vector, tolerance):
     scaled = vector / result['column_scales']
     null_component = np.linalg.norm(result['nullspace'] @ scaled)
@@ -80,6 +135,17 @@ def fit_patch(path, metadata, args):
         variance = np.asarray(archive['variance'], dtype=float)
         mask = np.asarray(archive['valid'], dtype=bool)
         templates = np.asarray(archive['profiles'], dtype=float)
+        position_fit = getattr(args, 'fit_positions', False)
+        derivatives = None
+        if position_fit:
+            if 'position_derivatives_xyz' not in archive:
+                raise ValueError('Position fit requires patches built with --position-derivatives')
+            derivatives = np.asarray(archive['position_derivatives_xyz'], dtype=float)
+            if derivatives.shape != (len(templates), 3, *data.shape) or not np.all(np.isfinite(derivatives)):
+                raise ValueError('Expected finite position derivatives K,XYZ,Z,Y,X')
+            derivatives = derivatives.reshape(3 * len(templates), -1).T
+            if args.estimator != 'signed-wls':
+                raise ValueError('Position nuisance fitting currently requires signed-wls')
     if data.ndim != 3 or variance.shape != data.shape or mask.shape != data.shape or templates.shape[1:] != data.shape:
         raise ValueError('Expected data/variance/valid ZYX and profiles KZYX')
     if not 1 <= len(templates) <= args.max_components:
@@ -96,12 +162,19 @@ def fit_patch(path, metadata, args):
     B = background_basis(data.shape, args.background)
     y, v = data.ravel(), variance.ravel().copy()
     iterations = 1
-    result = solve_joint(y, v, profiles, valid, B, args.svd_rcond)
+    def solve(variance):
+        if position_fit:
+            return solve_position_joint(y, variance, profiles, valid, B, derivatives, args.svd_rcond,
+                                        args.estimability_tolerance, args.max_position_shift)
+        return solve_joint(y, variance, profiles, valid, B, args.svd_rcond)
+
+    result = solve(v)
     noise = metadata.get('noise_model')
     if args.estimator != 'signed-wls':
         if args.irls:
             raise ValueError('Constrained estimators do not reuse signed-WLS IRLS updates')
-        result = fit_constrained(y, v, profiles, valid, B, noise, args.estimator, args.svd_rcond)
+        result = fit_constrained(y, v, profiles, valid, B, noise, args.estimator, args.svd_rcond,
+                                 confidence_level=getattr(args, 'confidence_level', .95))
     if args.irls and not noise:
         raise ValueError('IRLS requested without calibrated pixel-noise model')
     if args.irls and noise:
@@ -111,7 +184,8 @@ def fit_patch(path, metadata, args):
         for iterations in range(2, args.max_iterations + 1):
             next_v = gain * np.maximum(result['fitted'], 0) + readout
             next_v = np.maximum(next_v, float(noise.get('variance_floor', gain)))
-            fitted = solve_joint(y, next_v, profiles, valid, B, args.svd_rcond)
+            fitted = solve(next_v)
+            v = next_v
             change = np.linalg.norm(fitted['fitted'][valid] - result['fitted'][valid]) / max(np.linalg.norm(result['fitted'][valid]), 1.)
             result = fitted
             if change < args.iteration_tolerance:
@@ -119,13 +193,23 @@ def fit_patch(path, metadata, args):
     total = contrast(result, np.ones(len(templates)), args.estimability_tolerance)
     components = [contrast(result, np.eye(len(templates))[i], args.estimability_tolerance) for i in range(len(templates))]
     status = 'joint_components' if all(c['identifiable'] for c in components) else ('total_only' if total['identifiable'] else 'unresolved')
-    quality = []
+    quality = list(result.get('position_model', {}).get('flags', []))
+    intervals = result.get('profile_intervals')
+    total_interval = result.get('total_interval')
+    if intervals is not None:
+        for component, interval in zip(components, intervals):
+            component['profile_likelihood_interval'] = interval
+        total['profile_likelihood_interval'] = total_interval
+        if any(c['identifiable'] and interval['status'] != 'ok' for c, interval in zip(components, intervals)):
+            quality.append('profile_likelihood_interval_failed')
+        if total['identifiable'] and total_interval['status'] != 'ok':
+            quality.append('total_profile_likelihood_interval_failed')
     if result.get('converged') is False:
         quality.append('constrained_fit_not_converged')
     if any(components[i]['identifiable'] for i in result.get('boundary_components', [])):
-        quality.append('nonnegative_boundary_requires_profile_likelihood_intervals')
+        quality.append('nonnegative_boundary_not_representable_by_gaussian_sigma')
     if args.estimator != 'signed-wls' and total['identifiable'] and total['intensity'] <= 1e-7:
-        quality.append('nonnegative_total_boundary_requires_profile_likelihood_intervals')
+        quality.append('nonnegative_total_boundary_not_representable_by_gaussian_sigma')
     whitened = profiles[valid] / np.sqrt(v[valid, None])
     gram = whitened.T @ whitened
     norms = np.sqrt(np.maximum(np.diag(gram), 1e-300))
@@ -146,6 +230,8 @@ def fit_patch(path, metadata, args):
             'observed_components': [{'intensity': c['intensity'] * float(m) if c['identifiable'] else None,
                                      'partiality_valid_mass': float(m)} for c, m in zip(components, masses)],
             'boundary_components': result.get('boundary_components', []),
+            'position_model': result.get('position_model'),
+            'likelihood_diagnostics': result.get('likelihood_diagnostics'),
             'overlap_diagnostics': {'bbox': 'conservative ROI/background-halo connectivity only',
                                     'profile_weighted_correlations': correlations.tolist(),
                                     'design_condition_number': condition,
@@ -163,7 +249,8 @@ def integrate(args):
     manifest = json.loads(args.manifest.read_text())
     if manifest.get('schema') != 'scxrd-pixel-patches/1':
         raise ValueError('Unsupported pixel manifest')
-    if not 0 < args.svd_rcond < 1 or args.max_iterations < 2 or args.min_profile_mass <= 0:
+    if (not 0 < args.svd_rcond < 1 or args.max_iterations < 2 or args.min_profile_mass <= 0
+            or not np.isfinite(args.max_position_shift) or not 0 < args.max_position_shift <= .5):
         raise ValueError('Invalid fit settings')
     args.output.mkdir(parents=True, exist_ok=False)
     results = []
@@ -195,13 +282,16 @@ def main():
     p.add_argument('manifest', type=Path)
     p.add_argument('output', type=Path)
     p.add_argument('--background', choices=('constant', 'plane'), default='plane')
-    p.add_argument('--estimator', choices=('signed-wls', 'nnls', 'poisson'), default='signed-wls')
+    p.add_argument('--estimator', choices=('signed-wls', 'nnls', 'poisson', 'poisson-gaussian'), default='signed-wls')
+    p.add_argument('--confidence-level', type=float, default=.95)
     p.add_argument('--poor-condition', type=float, default=10000.)
     p.add_argument('--svd-rcond', type=float, default=1e-6)
     p.add_argument('--estimability-tolerance', type=float, default=1e-6)
     p.add_argument('--min-profile-mass', type=float, default=.95)
     p.add_argument('--max-reduced-chi2', type=float, default=3.)
     p.add_argument('--max-components', type=int, default=32)
+    p.add_argument('--fit-positions', action='store_true', help='Marginalize first-order XYZ position nuisance in signed-WLS')
+    p.add_argument('--max-position-shift', type=float, default=.3, help='Flag fitted shifts outside the local linearization range (pixels)')
     p.add_argument('--irls', action='store_true')
     p.add_argument('--max-iterations', type=int, default=12)
     p.add_argument('--iteration-tolerance', type=float, default=1e-5)

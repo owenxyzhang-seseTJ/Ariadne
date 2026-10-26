@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""DIALS joint crystal refinement from unique anchors, preserving ambiguous spots.
+"""Joint crystal refinement with fixed instrument geometry.
 
-Nonexclusive centroid matches are not duplicated into independent measurements.
-Their intensity contributions belong to the pixel model. This first adapter
-uses soft weights on unique anchors and fixes the shared instrument geometry.
+Default: native DIALS unique-anchor weighting (legacy interface).
+--method em: full-covariance exclusive single-source centroid EM; independent
+single-source/overlap evidence is mandatory via --centroid-selection. Predeclared
+--compare-models share raw scan-block holdout rows and normalized density.
 """
 from __future__ import annotations
 
@@ -110,10 +111,35 @@ def main():
     p.add_argument('--min-weight', type=float, default=.05)
     p.add_argument('--max-iterations', type=int, default=20)
     p.add_argument('--seed', type=int, default=42)
+    p.add_argument('--method', choices=('anchors', 'em'), default='anchors')
+    p.add_argument('--centroid-selection', type=Path,
+                   help='JSON: single_source_source_rows, composite_source_rows, provenance; optional upstream training row provenance')
+    p.add_argument('--compare-models', type=Path, nargs='*', default=[],
+                   help='Predeclared alternatives, independently fitted on the same training rows')
+    p.add_argument('--em-iterations', type=int, default=8)
+    p.add_argument('--em-tolerance', type=float, default=1e-6)
+    p.add_argument('--outlier-fraction', type=float, default=.05)
+    p.add_argument('--max-predictions', type=int, default=20000)
+    p.add_argument('--max-pairs', type=int, default=2000000)
+    p.add_argument('--max-hypotheses', type=int, default=4)
+    p.add_argument('--max-prediction-calls', type=int, default=500)
+    p.add_argument('--max-seconds', type=float, default=300.)
+    p.add_argument('--orientation-bound-mrad', type=float, default=5.)
+    p.add_argument('--cell-relative-bound', type=float, default=.02)
     args = p.parse_args()
+    if (args.em_iterations < 1 or args.em_tolerance <= 0
+            or not 0 < args.outlier_fraction < 1 or args.max_predictions < 1
+            or args.max_pairs < 1 or args.max_hypotheses < 1
+            or args.max_prediction_calls < 2 or args.max_seconds <= 0
+            or args.orientation_bound_mrad <= 0 or not 0 < args.cell_relative_bound < .1):
+        raise ValueError('Invalid EM budget/noise settings')
     if args.block_frames < 1 or not 0 < args.holdout_fraction < .5 or args.max_iterations < 1 or args.min_anchors < 5 or not 0 < args.min_weight <= 1:
         raise ValueError('Invalid refinement/holdout budget')
-    refine(args)
+    if args.method == 'em':
+        from centroid_em import run
+        run(args)
+    else:
+        refine(args)
 
 
 if __name__ == '__main__':

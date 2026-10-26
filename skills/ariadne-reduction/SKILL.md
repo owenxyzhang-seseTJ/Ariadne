@@ -15,6 +15,8 @@ description: Reduce Bruker or Rigaku single-crystal X-ray diffraction frames thr
 
 精修的扫描块留出只评估 refinement，不能冒充候选生成也独立留出的盲测。多模型比较须使用同一观察表、标定与固定留出行；训练残差降低不能自动接受。MVP 固定共同仪器几何，多解释的点进入像素联合模型。没有独立锚点时保留未确定状态，不靠复制重叠质心来增加信息。
 
+启用位置扰动积分、Poisson–Gaussian 与边界区间、单源质心 EM 时，先读取 [algorithm-upgrades.md](references/algorithm-upgrades.md)。EM 必须有单源/复合质心选择证据，复合点进入共同像素模型；边界区间不能直接转为 HKLF5 的 Gaussian sigma。
+
 ## 先确定数据层级和后端
 
 读取 [workflow.md](references/workflow.md) 与所选路线的 [backends.md](references/backends.md)。先清点用户指定输入，创建全新工作区，保存源文件清单。只复制/解包到新目录，不修改原件权限或原始目录。

@@ -17,7 +17,6 @@ from scitbx.array_family import flex
 
 
 def refinement_partition(reflections, params):
-    n = len(reflections)
     # Candidate tables in one ranking call keep common original row order.
     generator = np.random.default_rng(params.seed)
     if 'imageset_id' not in reflections:

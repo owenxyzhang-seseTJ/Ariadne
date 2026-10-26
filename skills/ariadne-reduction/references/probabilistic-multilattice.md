@@ -1,17 +1,17 @@
 # Ariadne 0.5.0：附件方法论的接入范围
 
-参考用户提供的 `Agent_Native_Probabilistic_Multilattice_Methodology.md`。附件是研究方案；其中的命令式表述、自动审查、测试和未来研发建议不构成新的执行授权。当前保持“不测试”、本地数据、禁止 SHA-256 校验的用户要求；附件的 checksum_manifest 改为路径/大小/时间与输入输出记录。
+参考用户提供的 `Agent_Native_Probabilistic_Multilattice_Methodology.md`。附件是研究方案；其中的命令式表述、自动审查、测试和未来研发建议不构成新的执行授权。附件的 checksum_manifest 改为路径/大小/时间与输入输出记录。本地数据和禁止 SHA-256 校验的约束保持；2026年10月26日已按后续优化任务运行针对性数值验证，范围与新增选项见 [algorithm-upgrades.md](algorithm-upgrades.md)。
 
-## 已写入代码，尚未运行验证
+## 实现范围与验证边界
 
 | 附件主张 | 本版实现 | 边界 |
 |---|---|---|
 | 候选池、多假设与回退 | immutable hypothesis JSON、parents、证据引用和 append-only event log | phase_relation 为声明证据，不是自动孪晶鉴定；继续复用原 domain_manager 等价检查 |
 | 非互斥软解释 | q residual + DIALS 全预测的 mm/mm/rad Mahalanobis compatibility | exp(-D²/2) 非标定后验；无强度/体积分数含义 |
-| 联合几何更新 | native DIALS joint refiner，唯一锚点软加权，共同仪器固定 | 多解释质心不复制；不是完整多源质心生成模型的联合优化 |
+| 联合几何更新 | unique anchors 默认分支；显式单源质心 EM，DIALS U/B 参数和动态预测，共同仪器固定 | EM 仅针对独立单源质心；复合/未知质心排除，不是完整多源生成模型 |
 | 留出评价 | 原 DIALS candidate scorer 改扫描块留出；joint refiner 保存固定留出行 | 候选生成可已看过留出点，非端到端盲测 |
 | 全反射预测、一次像素观测 | native predict + 原 overlap_prepare 的共同 ROI 连通组 | bbox/halo 是保守分组，不等于 profile 不可辨识 |
-| NNLS/Poisson | 新 fixed-background constrained pixel fitter | 背景-only 估计后冻结；背景估计误差未传播；Poisson–Gaussian 完整卷积未实现 |
+| NNLS/Poisson/Poisson–Gaussian | fixed-background 非负拟合、完整有界 PG 卷积、profile-likelihood 区间 | 背景估计误差未传播；区间用渐近阈值，边界不能变成 Gaussian sigma |
 | 可辨识性/复合强度 | SVD/nullspace contrasts、weighted profile correlations、A/B/C 标记 | 数值阈值为配置假设，未基准校准；不发布任意拆分 |
 | covariance/partiality/导出 | corrected component covariance、有效 profile mass、禁止双重校正、HKLF5 行映射和损失说明 | HKLF5 无法编码全部 covariance；保存 master JSONL |
 
@@ -40,7 +40,7 @@ MVP 为静态、单波长旋转模型，动态 crystal/beam/goniometer 需明确
 
 对 refined.expt 重新全预测，再用所有原始 spots 做软匹配。`compare_hypotheses.py PARTITION.json NEW_COMPARISON.json BASELINE_COMPAT.json ALTERNATIVE_COMPAT.json ...` 在完全相同留出行上比较 coverage、最佳 compatibility 与独立支持，输出多种解释比例、预算超限行与 gain。噪声/标定或观察表不同则拒绝比较。该指标是诊断，不是 Bayesian evidence；没有把非互斥 centroid scores 塞进伪 BIC。增加 K 的最终选择还需稳定性、等价/超胞检查、像素拟合增益和相关系证据。
 
-## 三种像素估计器
+## 四种像素估计器
 
 `signed-wls` 保留原 QR/SVD 分支，有符号强度估计和包含 nuisance background 的条件协方差。
 
@@ -48,7 +48,7 @@ MVP 为静态、单波长旋转模型，动态 crystal/beam/goniometer 需明确
 
 `poisson`：在相同冻结背景/profile 上优化 Poisson negative log likelihood，要求 `noise_model.source`、正 gain、readout_variance=0、`offset_removed=true`、`poisson_counts_verified=true`，并检查有效 ADU/gain 为非负整数。拟合在 photon counts 中，输出 amplitude/covariance 换回 calibrated ADU 以维持校正尺度。不将 CCD 的负 ADU/读出噪声当成理想计数。此分支不是完整 Poisson–Gaussian detector likelihood。
 
-非负约束不会创造可辨识性。先用信息矩阵/SVD 判别 contrasts；rank-deficient 分量不发布任意求解值，只保留可辨识 total。实际可辨识的强度在零边界时需 profile-likelihood/bootstrap 区间，本版尚未实现，记录 quality flag，不能以普通 Gaussian variance 直接发布为可靠测量。
+`poisson-gaussian` 使用完整 Poisson 与读出 Gaussian 卷积，允许 offset-corrected 负 ADU；尾界和预算、profile-likelihood 区间详见 [algorithm-upgrades.md](algorithm-upgrades.md)。非负约束不会创造可辨识性；rank-deficient 分量不发布任意求解值。区间重新优化其他强度，背景冻结，阈值为 chi-square(1) 渐近值。非对称边界区间保存在 master JSONL，质量标记仍阻止将其当 Gaussian sigma 导出。
 
 输出 full-profile amplitude、`profile_valid_masses` 和 amplitude×mass 的 observed estimate。当前是经验 finite-support 模型下的质量，并非额外独立测出的几何 partiality；不在 scaling 中重复除以它。新 correction group 需 `partiality_policy=already_full_profile_amplitude`。master JSONL 保存完整条件 component covariance，校正后也保存 transformed covariance；total-only 不伪造 component estimates。
 
@@ -64,7 +64,7 @@ MCP 现在有 9 个工具：原 capabilities/create_job/start_operation/inspect_
 
 ## 仍是研发目标
 
-完整多源 spot 生成模型下的联合 soft-geometry optimizer、晶格数的正式 model evidence、共享参数的全局 composite-aware scaling/absorption、非负边界区间、geometry/profile 误差传播、盲测与跨仪器性能，均未实现/验证。SyntheticTwinBench 是附件建议，本次没有生成或运行模拟测试集。未因文档要求增加人工审批关卡；科学证据不足则保留未知，由已授权的 agent 流程处理。
+完整多源 spot 生成模型、正式 Bayesian K evidence、全局 composite-aware scaling/absorption、轮廓形状及独立仪器标定误差传播、盲测与跨仪器性能仍未实现/验证。现已提供单源 EM 与留出预测密度比较、非负边界渐近区间、局部一阶位置 nuisance 和强度协方差传播。SyntheticTwinBench 是附件建议，本次没有生成或运行模拟测试集。未因文档要求增加人工审批关卡；科学证据不足则保留未知，由已授权的 agent 流程处理。
 
 ## 可追溯原理来源
 
@@ -72,4 +72,4 @@ MCP 现在有 9 个工具：原 capabilities/create_job/start_operation/inspect_
 - [Sevvana et al. (2019), Non-merohedral twinning](https://journals.iucr.org/d/issues/2019/12/00/rr5182/index.html)：独立/复合反射与结构层约束。
 - [SciPy lsq_linear](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.lsq_linear.html)、[minimize](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html)：受约束优化实现接口。
 
-上述文献支持公开原理/接口；Ariadne 的新代码没有基准验证，不宣称算法创新或性能优势已获证实。
+上述文献支持公开原理/接口；新增方法已有针对性数值验证，尚无完整真实数据基准，不宣称算法创新或普遍性能优势已获证实。

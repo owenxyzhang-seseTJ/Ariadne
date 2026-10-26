@@ -21,6 +21,7 @@ from mcp.server.fastmcp import FastMCP
 from ariadne.evidence import append_event, save_hypothesis
 
 mcp = FastMCP("Ariadne")
+WORKERS = {}  # pid -> Popen for workers started by this server; poll() reaps exited children.
 Operation = Literal['import', 'find_spots', 'index', 'refine', 'integrate', 'scale', 'export', 'predict']
 Stage = Literal['intake', 'import', 'harvest', 'index', 'domains', 'integrate', 'correct', 'export']
 OPERATIONS = {
@@ -47,7 +48,7 @@ OPTIONS = {
               'indexing.basis_vector_combinations.solution_scorer': ('weighted', 'filter', 'ariadne'),
               'indexing.basis_vector_combinations.max_refine': int,
               'indexing.basis_vector_combinations.ariadne.q_sigma': float,
-              'indexing.max_lattices': int},
+              'indexing.multiple_lattice_search.max_lattices': int},
     'refine': {'refinement.parameterisation.scan_varying': bool},
     'integrate': {'profile.gaussian_rs.fitting.fit_method': ('reciprocal_space', 'detector_space'),
                   'profile.gaussian_rs.fitting.detector_space.deconvolution': bool},
@@ -91,16 +92,43 @@ def inside(job, relative):
     return target
 
 
+def worker_alive(pid):
+    """True while the worker or its workflow child (same process group) still runs."""
+    process = WORKERS.get(pid)
+    if process is not None and process.poll() is not None:
+        WORKERS.pop(pid, None)
+    try:
+        os.killpg(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+MISSING_WORKER = {'status': 'worker_missing_requires_review',
+                  'next': 'inspect worker.log, attempt logs and descendants; do not automatically replay the calculation'}
+
+
 @contextmanager
 def job_lock(job):
     with (job / '.ariadne.lock').open('a') as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise ValueError('A worker or another mutation holds the job lock; inspect_job and retry later') from None
         try:
             active = job / 'control/active.json'
             if active.exists():
-                task = read_json(active)
-                if not (job / 'control' / task['operation_id'] / 'result.json').exists():
-                    raise ValueError('A submitted operation is active; inspect its status before another mutation')
+                operation = job / 'control' / read_json(active)['operation_id']
+                output = operation / 'result.json'
+                if not output.exists():
+                    pid = read_json(operation / 'task.json').get('worker_pid')
+                    if not pid or worker_alive(pid) or output.exists():
+                        raise ValueError('A submitted operation is active; inspect its status before another mutation')
+                    # The worker died without a result: record that once so the job is not locked forever.
+                    atomic_json(output, {'operation_id': operation.name, **MISSING_WORKER})
+                    append_event(job, 'operation_worker_missing', {'operation_id': operation.name, 'worker_pid': pid})
             yield
         finally:
             fcntl.flock(lock, fcntl.LOCK_UN)
@@ -145,11 +173,9 @@ def inspect_job(job: str, operation_id: str | None = None) -> dict:
         result['submitted'] = read_json(operation / 'task.json')
         output = operation / 'result.json'
         result['operation'] = read_json(output) if output.exists() else {'status': 'submitted_or_running'}
-        if not output.exists() and result['submitted'].get('worker_pid'):
-            try:
-                os.kill(result['submitted']['worker_pid'], 0)
-            except ProcessLookupError:
-                result['operation'] = {'status': 'worker_missing_requires_review', 'next': 'inspect worker.log and descendants; do not automatically replay the calculation'}
+        pid = result['submitted'].get('worker_pid')
+        if pid and not worker_alive(pid) and not output.exists():
+            result['operation'] = dict(MISSING_WORKER)
     return result
 
 
@@ -246,6 +272,7 @@ def submit_operation(path, stage, operation, argv, expected_outputs, timeout_sec
             except OSError as error:
                 atomic_json(control / 'result.json', {'status': 'launch_failed', 'error': str(error)})
                 raise
+        WORKERS[process.pid] = process
         task['worker_pid'] = process.pid
         atomic_json(control / 'task.json', task)
         append_event(path, 'operation_submitted', {'operation_id': token, 'stage': stage, 'command': command})
@@ -298,12 +325,16 @@ Analysis = Literal['soft_assign', 'joint_refine', 'learn_profiles', 'build_overl
 
 
 @mcp.tool(annotations={'readOnlyHint': False, 'destructiveHint': False})
-def start_analysis(job: str, analysis: Analysis, inputs: list[str], estimator: Literal['signed-wls', 'nnls', 'poisson'] = 'signed-wls',
-                   timeout_seconds: int = 3600) -> dict:
+def start_analysis(job: str, analysis: Analysis, inputs: list[str],
+                   estimator: Literal['signed-wls', 'nnls', 'poisson', 'poisson-gaussian'] = 'signed-wls',
+                   timeout_seconds: int = 3600, refinement_method: Literal['anchors', 'em'] = 'anchors',
+                   fit_positions: bool = False, position_derivatives: bool = False,
+                   confidence_level: float = .95) -> dict:
     """Run a fixed Ariadne scientific adapter asynchronously, with immutable outputs.
 
 soft_assign inputs: observed EXPT, spots REFL, model EXPT, predictions REFL, calibration JSON.
-joint_refine: model EXPT, spots REFL, compatibility JSON.
+joint_refine anchors: model EXPT, spots REFL, compatibility JSON.
+joint_refine em: same first three, selection JSON, then up to three alternative model EXPTs.
 learn_profiles: references REFL, calibration JSON.
 build_overlaps: model EXPT, full predictions REFL, profile library JSON.
 joint_fit: patches manifest JSON. export_hklf5: corrected observation JSONL.
@@ -321,7 +352,23 @@ compare_hypotheses: fixed partition JSON followed by baseline/alternative compat
     }
     if analysis not in routes or not 1 <= timeout_seconds <= 14400:
         raise ValueError('Invalid scientific operation or budget')
+    if estimator not in ('signed-wls', 'nnls', 'poisson', 'poisson-gaussian') or refinement_method not in ('anchors', 'em'):
+        raise ValueError('Invalid scientific estimator or refinement method')
+    if type(fit_positions) is not bool or type(position_derivatives) is not bool:
+        raise ValueError('Position settings require booleans')
+    if type(confidence_level) not in (int, float) or not math.isfinite(confidence_level) or not .5 < confidence_level < 1:
+        raise ValueError('Confidence level must be finite and between .5 and 1')
+    if fit_positions and estimator != 'signed-wls':
+        raise ValueError('Position nuisance fitting requires signed-wls')
+    if (refinement_method != 'anchors' and analysis != 'joint_refine'
+            or fit_positions and analysis != 'joint_fit'
+            or position_derivatives and analysis != 'build_overlaps'
+            or estimator != 'signed-wls' and analysis != 'joint_fit'
+            or confidence_level != .95 and analysis != 'joint_fit'):
+        raise ValueError('Scientific option does not apply to the selected analysis')
     stage, executable, minimum, maximum, expected = routes[analysis]
+    if analysis == 'joint_refine' and refinement_method == 'em':
+        minimum, maximum = 4, 7
     if not minimum <= len(inputs) <= maximum:
         raise ValueError('Wrong number of scientific inputs')
     paths = [inside(path, name) for name in inputs]
@@ -331,10 +378,22 @@ compare_hypotheses: fixed partition JSON followed by baseline/alternative compat
     argv = [sys.executable, str(tool)]
     if analysis == 'compare_hypotheses':
         argv += [str(paths[0]), 'comparison.json', *map(str, paths[1:])]
+    elif analysis == 'joint_refine' and refinement_method == 'em':
+        if [p.suffix.lower() for p in paths[:4]] != ['.expt', '.refl', '.json', '.json'] or any(p.suffix.lower() != '.expt' for p in paths[4:]):
+            raise ValueError('EM inputs require model EXPT, spots REFL, compatibility JSON, selection JSON, optional alternative EXPTs')
+        argv += [*map(str, paths[:3]), 'analysis', '--centroid-selection', str(paths[3])]
+        if len(paths) > 4:
+            argv += ['--compare-models', *map(str, paths[4:])]
     else:
         argv += [*map(str, paths), 'twin.hkl' if analysis == 'export_hklf5' else 'analysis']
     if analysis == 'joint_fit':
-        argv += ['--estimator', estimator]
+        argv += ['--estimator', estimator, '--confidence-level', str(confidence_level)]
+        if fit_positions:
+            argv += ['--fit-positions']
+    if analysis == 'joint_refine':
+        argv += ['--method', refinement_method]
+    if analysis == 'build_overlaps' and position_derivatives:
+        argv += ['--position-derivatives']
     return submit_operation(path, stage, analysis, argv, [expected], timeout_seconds)
 
 

@@ -230,11 +230,13 @@ $$
 \qquad \lambda_j=b_j+\sum_a I_aP_{ja},\quad I_a\geq0.
 $$
 
-该分支需要已标定增益、已去除偏置、零读出方差，以及有效像素上的非负整数光子计数。结果和协方差换回 calibrated-ADU 约定，以与后续校正相容。存在明显读出噪声的积分型探测器应使用适当的加权近似，不采用理想计数 Poisson 分支。
+该分支需要已标定增益、已去除偏置、零读出方差，以及有效像素上的非负整数光子计数。结果和协方差换回 calibrated-ADU 约定，以与后续校正相容。存在读出噪声时可显式选择 `poisson-gaussian`，使用完整有界卷积并支持负 ADU；超出求和预算明确失败。
 
-有符号 WLS 的条件协方差包含 nuisance background 的不确定性，条件为给定轮廓、几何与噪声模型。冻结背景的非负分支不传播背景估计误差，其高斯/Fisher 近似也不是边界置信区间；位于非负边界的可辨识强度带质量标记。目前不提供 profile-likelihood 或 bootstrap 边界区间。
+有符号 WLS 的条件协方差包含 nuisance background 的不确定性，条件为给定轮廓、几何与噪声模型。冻结背景的非负分支不传播背景估计误差，其高斯/Fisher 近似也不是边界置信区间；位于非负边界的可辨识强度带质量标记。现在为可辨识分量与总量提供条件 profile-likelihood 区间，使用 chi-square(1) 渐近阈值；不宣称低计数边界的精确覆盖率。
 
 实现：[`overlap_prepare.py`](skills/ariadne-reduction/scripts/overlap_prepare.py)、[`overlap_integrator.py`](skills/ariadne-reduction/scripts/overlap_integrator.py) 和 [`constrained_pixels.py`](skills/ariadne-reduction/scripts/constrained_pixels.py)。
+
+位置 nuisance、Poisson–Gaussian、非负区间及单源多晶格 EM 的启用方式与限制见 [新增算法说明](skills/ariadne-reduction/references/algorithm-upgrades.md)。
 
 ## 6. 强度定义、校正与导出
 
