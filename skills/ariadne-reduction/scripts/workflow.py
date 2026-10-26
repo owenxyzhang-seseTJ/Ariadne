@@ -174,6 +174,15 @@ def run_stage(args):
     try:
         with (work / 'stdout.log').open('wb') as stdout, (work / 'stderr.log').open('wb') as stderr:
             process = subprocess.Popen(argv, cwd=work, stdout=stdout, stderr=stderr, start_new_session=True)
+            # The child runs in its own session, so killing the worker does not reach it.
+            # Publish its pid for cancellation and progress; the parent may lack this dir.
+            control = os.environ.get('ARIADNE_CONTROL_DIR')
+            if control:
+                try:
+                    atomic_json(Path(control) / 'child.json', {'pid': process.pid, 'stage': args.stage,
+                                                               'attempt': number, 'work': str(work)})
+                except OSError:
+                    pass
             try:
                 process.wait(timeout=args.timeout)
             except subprocess.TimeoutExpired:

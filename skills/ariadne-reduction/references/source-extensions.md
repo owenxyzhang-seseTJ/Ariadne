@@ -64,7 +64,7 @@ ariadne-env python scripts/learn_profile_library.py REFERENCES.refl calibration.
 
 ## Agent 原生接口
 
-MCP stdio server 使用官方 Python SDK 1.30.0，配置在 plugin 根目录 `.mcp.json`。工具：`capabilities`、`create_job`、`start_operation`、`inspect_job`、`read_artifact`、`record_acceptance`、`make_handoff`、`start_analysis`、`propose_hypothesis`。每个工具声明输入模型与 `outputSchema`；`capabilities().analyses` 给出各分析的脚本、输入角色、期望输出和适用选项，`start_analysis` 用同一张声明表校验，避免契约与实现各写一份。长计算立即返回 operation id，后台 worker 保存状态、argv 与日志。只允许固定 DIALS 操作和 typed 参数；输出固定为当前新 attempt 内文件，不接受 shell command。单任务文件锁避免 MCP 并发修改同一个科学状态，超时终止该计算进程组。
+MCP stdio server 使用官方 Python SDK 1.30.0，配置在 plugin 根目录 `.mcp.json`。工具：`capabilities`、`create_job`、`start_operation`、`start_analysis`、`inspect_job`、`read_artifact`、`cancel_operation`、`record_acceptance`、`make_handoff`、`propose_hypothesis`。每个工具声明输入模型与 `outputSchema`；`capabilities().analyses` 给出各分析的脚本、输入角色、期望输出和适用选项，`start_analysis` 用同一张声明表校验，避免契约与实现各写一份。长计算立即返回 operation id，后台 worker 保存状态、argv 与日志；`inspect_job` 报告 worker/子进程存活、已运行时间与日志尾行，`cancel_operation` 终止两层进程并标记 cancelled。报错带 `E_*` 前缀码，便于调用方区分重试、等待与需人工判断的情形。只允许固定 DIALS 操作和 typed 参数；输出固定为当前新 attempt 内文件，不接受 shell command。单任务文件锁避免 MCP 并发修改同一个科学状态，超时终止该计算进程组。
 
 Ariadne 0.5.0 另加入 `start_analysis`、`propose_hypothesis` 和事件/假设记录，当前总计 9 个 MCP tools；新的 NNLS/Poisson、软匹配、native joint refinement 和固定留出比较契约见 [probabilistic-multilattice.md](probabilistic-multilattice.md)。
 

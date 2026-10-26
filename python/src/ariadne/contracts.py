@@ -68,6 +68,26 @@ class SubmittedTask(_Open):
     timeout_seconds: int | None = None
 
 
+class Progress(_Open):
+    """Observable liveness, so a caller never has to guess whether a stage is hung."""
+    worker_alive: bool
+    child_pid: int | None = None
+    child_alive: bool | None = None
+    started: str | None = None
+    elapsed_seconds: float | None = None
+    last_activity: str | None = None
+    log_tail: list[str] = []
+    cancellable: bool = False
+
+
+class Cancellation(_Open):
+    operation_id: str
+    status: Literal['cancel_requested']
+    signalled: list[int] = []
+    warning: str | None = None
+    next: str
+
+
 class JobInspection(_Open):
     """State plus, when operation_id is given, that operation's task and result."""
     job: str
@@ -76,6 +96,7 @@ class JobInspection(_Open):
     event_log: str | None = None
     submitted: SubmittedTask | None = None
     operation: OperationResult | None = None
+    progress: Progress | None = None
 
 
 class ArtifactText(_Open):

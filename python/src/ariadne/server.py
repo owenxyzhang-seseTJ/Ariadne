@@ -8,18 +8,22 @@ from __future__ import annotations
 from contextlib import contextmanager
 import fcntl
 import json
+from datetime import datetime, timezone
 import math
 import os
 import re
 from pathlib import Path
+import signal
 import subprocess
 import sys
 from typing import Literal
 import uuid
 
 from mcp.server.fastmcp import FastMCP
-from ariadne.contracts import (AcceptanceRecord, ArtifactText, Capabilities, CreatedJob, Handoff,
-                               Hypothesis, JobInspection, OperationHandle, analysis_contracts, spec_for)
+from ariadne.contracts import (AcceptanceRecord, ArtifactText, Cancellation, Capabilities, CreatedJob,
+                               Handoff, Hypothesis, JobInspection, OperationHandle, Progress,
+                               analysis_contracts, spec_for)
+from ariadne.errors import ToolError
 from ariadne.evidence import append_event, save_hypothesis
 
 mcp = FastMCP("Ariadne")
@@ -79,18 +83,21 @@ def atomic_json(path, value):
 
 def job_path(job):
     path = Path(job).expanduser().resolve()
-    state = read_json(path / 'state.json')
+    try:
+        state = read_json(path / 'state.json')
+    except (OSError, ValueError) as exc:
+        raise ToolError('E_NOT_FOUND', 'Require an initialized Ariadne/SCXRD job') from exc
     if state.get('schema') != 'scxrd-job/1':
-        raise ValueError('Require an initialized Ariadne/SCXRD job')
+        raise ToolError('E_NOT_FOUND', 'Require an initialized Ariadne/SCXRD job')
     return path
 
 
 def inside(job, relative):
     if Path(relative).is_absolute():
-        raise ValueError('Use a job-relative artifact path')
+        raise ToolError('E_INPUT', 'Use a job-relative artifact path')
     target = (job / relative).resolve()
     if not target.is_relative_to(job):
-        raise ValueError('Artifact path escapes job')
+        raise ToolError('E_INPUT', 'Artifact path escapes job')
     return target
 
 
@@ -108,6 +115,72 @@ def worker_alive(pid):
     return True
 
 
+TERMINAL = 'cancel.json'
+
+
+def pid_alive(pid, group=False):
+    """A DIALS child runs in its own session, so probe it as a process group.
+
+    A zombie still answers signal 0, but it is no longer doing work; treating it as
+    alive would report a finished operation as running and block cancellation.
+    """
+    try:
+        os.killpg(pid, 0) if group else os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    try:
+        state = subprocess.run(['ps', '-o', 'stat=', '-p', str(pid)],
+                               capture_output=True, text=True, timeout=5).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return True
+    return bool(state) and not state.startswith('Z')
+
+
+def log_tail(path, lines=12, width=400):
+    try:
+        text = path.read_text(errors='replace')
+    except OSError:
+        return []
+    return [line[-width:] for line in text.rstrip().splitlines()[-lines:]]
+
+
+def describe_progress(path, operation):
+    """Summarize liveness from the worker, the stage child and the current attempt logs."""
+    task = read_json(operation / 'task.json') if (operation / 'task.json').exists() else {}
+    result_file = operation / 'result.json'
+    worker_pid = task.get('worker_pid')
+    alive = bool(worker_pid) and worker_alive(worker_pid)
+    child_file = operation / 'child.json'
+    child = read_json(child_file) if child_file.exists() else {}
+    attempt = path / 'attempts' / str(task.get('stage')) / f"{int(child['attempt']):02d}" if child.get('attempt') else None
+    newest = max((p.stat().st_mtime for p in (attempt.glob('*.log') if attempt else [])), default=None)
+    started = task.get('submitted_at') or (read_json(path / 'state.json').get('created') if child else None)
+    elapsed = None
+    if started and alive:
+        try:
+            elapsed = max(0., datetime.now(timezone.utc).timestamp() - datetime.fromisoformat(started).timestamp())
+        except ValueError:
+            elapsed = None
+    activity = datetime.fromtimestamp(newest, timezone.utc).isoformat() if newest else None
+    tail = []
+    if attempt:
+        tail = log_tail(attempt / 'stdout.log') + log_tail(attempt / 'stderr.log')
+    if not tail:
+        # Before the first attempt exists (or while it is still starting) the worker
+        # log is the only observable progress.
+        tail = log_tail(operation / 'worker.log', lines=8)
+    return {'worker_alive': alive,
+            'child_pid': child.get('pid'),
+            'child_alive': pid_alive(child['pid'], group=True) if child.get('pid') else None,
+            'started': started,
+            'elapsed_seconds': round(elapsed, 1) if elapsed is not None else None,
+            'last_activity': activity,
+            'log_tail': tail,
+            'cancellable': alive and not result_file.exists() and not (operation / TERMINAL).exists()}
+
+
 MISSING_WORKER = {'status': 'worker_missing_requires_review',
                   'next': 'inspect worker.log, attempt logs and descendants; do not automatically replay the calculation'}
 
@@ -118,7 +191,7 @@ def job_lock(job):
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
-            raise ValueError('A worker or another mutation holds the job lock; inspect_job and retry later') from None
+            raise ToolError('E_BUSY', 'A worker or another mutation holds the job lock; inspect_job and retry later') from None
         try:
             active = job / 'control/active.json'
             if active.exists():
@@ -127,7 +200,7 @@ def job_lock(job):
                 if not output.exists():
                     pid = read_json(operation / 'task.json').get('worker_pid')
                     if not pid or worker_alive(pid) or output.exists():
-                        raise ValueError('A submitted operation is active; inspect its status before another mutation')
+                        raise ToolError('E_BUSY', 'A submitted operation is active; inspect its status before another mutation')
                     # The worker died without a result: record that once so the job is not locked forever.
                     atomic_json(output, {'operation_id': operation.name, **MISSING_WORKER})
                     append_event(job, 'operation_worker_missing', {'operation_id': operation.name, 'worker_pid': pid})
@@ -152,12 +225,12 @@ def capabilities() -> Capabilities:
 def create_job(input_path: str, jobs_root: str, sample: str = 'sample', max_attempts: int = 6) -> CreatedJob:
     """Copy user-selected input into a new isolated job; preserve raw originals."""
     if not 1 <= max_attempts <= 50:
-        raise ValueError('Attempt budget must be between 1 and 50')
+        raise ToolError('E_INPUT', 'Attempt budget must be between 1 and 50')
     process = subprocess.run([sys.executable, str(script()), 'init', input_path, jobs_root,
                               '--sample', sample, '--max-attempts', str(max_attempts)],
                              capture_output=True, text=True, check=False)
     if process.returncode:
-        raise ValueError(process.stderr[-4000:])
+        raise ToolError('E_UPSTREAM', process.stderr[-4000:])
     append_event(process.stdout.strip(), 'job_created', {'input': input_path, 'sample': sample, 'max_attempts_per_stage': max_attempts})
     return {'job': process.stdout.strip(), 'next': 'review inventory and record intake evidence'}
 
@@ -171,7 +244,7 @@ def inspect_job(job: str, operation_id: str | None = None) -> JobInspection:
     result['event_log'] = 'events.jsonl' if (path / 'events.jsonl').exists() else None
     if operation_id:
         if len(operation_id) != 32 or any(c not in '0123456789abcdef' for c in operation_id):
-            raise ValueError('Invalid operation id')
+            raise ToolError('E_INPUT', 'Invalid operation id')
         operation = path / 'control' / operation_id
         result['submitted'] = read_json(operation / 'task.json')
         output = operation / 'result.json'
@@ -179,19 +252,67 @@ def inspect_job(job: str, operation_id: str | None = None) -> JobInspection:
         pid = result['submitted'].get('worker_pid')
         if pid and not worker_alive(pid) and not output.exists():
             result['operation'] = dict(MISSING_WORKER)
+        result['progress'] = describe_progress(path, operation)
     return result
+
+
+@mcp.tool(annotations={'readOnlyHint': False, 'destructiveHint': True})
+def cancel_operation(job: str, operation_id: str, reason: str) -> Cancellation:
+    """Stop a submitted operation and mark it cancelled; partial outputs are not a result.
+
+Terminates the worker and the stage child, which runs in its own session. Existing files
+are left on disk for inspection; this never deletes evidence and never accepts a stage.
+"""
+    path = job_path(job)
+    if len(operation_id) != 32 or any(c not in '0123456789abcdef' for c in operation_id):
+        raise ToolError('E_INPUT', 'Invalid operation id')
+    if not isinstance(reason, str) or not reason.strip():
+        raise ToolError('E_INPUT', 'Record why the operation is being cancelled')
+    operation = path / 'control' / operation_id
+    with job_lock(path):
+        if not (operation / 'task.json').exists():
+            raise ToolError('E_NOT_FOUND', 'Unknown operation id for this job')
+        if (operation / 'result.json').exists():
+            raise ToolError('E_IMMUTABLE', 'Operation already finished; write a new attempt instead')
+        marker = operation / TERMINAL
+        if not marker.exists():
+            atomic_json(marker, {'requested_at': datetime.now(timezone.utc).isoformat(),
+                                 'reason': reason, 'requested_by': 'mcp-cancel_operation'})
+        task = read_json(operation / 'task.json')
+        child_file = operation / 'child.json'
+        child = read_json(child_file) if child_file.exists() else {}
+        targets = [('worker', task.get('worker_pid')), ('stage', child.get('pid'))]
+        signalled, warning = [], None
+        for label, pid in targets:
+            if not pid:
+                continue
+            try:
+                os.killpg(pid, signal.SIGTERM)
+                signalled.append(pid)
+            except ProcessLookupError:
+                continue
+            except PermissionError:
+                warning = f'Cannot signal {label} {pid} without permission; stop it manually'
+        append_event(path, 'operation_cancel_requested',
+                     {'operation_id': operation_id, 'reason': reason, 'signalled': signalled})
+    return {'operation_id': operation_id, 'status': 'cancel_requested', 'signalled': signalled,
+            'warning': warning,
+            'next': 'inspect_job until status is cancelled; a cancelled attempt is not acceptable evidence'}
 
 
 @mcp.tool(annotations={'readOnlyHint': True})
 def read_artifact(job: str, relative_path: str, max_characters: int = 24000) -> ArtifactText:
     """Read bounded text/JSON evidence or logs inside a job, with explicit truncation."""
     if not 1 <= max_characters <= 256000:
-        raise ValueError('Invalid text limit')
+        raise ToolError('E_INPUT', 'Invalid text limit')
     path = inside(job_path(job), relative_path)
     if path.suffix.lower() not in ('.json', '.jsonl', '.log', '.txt', '.md', '.phil'):
-        raise ValueError('This tool reads text evidence, not diffraction images')
-    with path.open(encoding='utf-8', errors='replace') as handle:
-        content = handle.read(max_characters + 1)
+        raise ToolError('E_INPUT', 'This tool reads text evidence, not diffraction images')
+    try:
+        with path.open(encoding='utf-8', errors='replace') as handle:
+            content = handle.read(max_characters + 1)
+    except FileNotFoundError as exc:
+        raise ToolError('E_NOT_FOUND', 'Artifact does not exist: ' + relative_path) from exc
     return {'path': relative_path, 'text': content[:max_characters], 'truncated': len(content) > max_characters}
 
 
@@ -205,38 +326,38 @@ Scale/export are single-phase native routes; composite observations need the
 joint integration/correction scripts and their separate scientific acceptance.
 """
     if not 1 <= timeout_seconds <= 14400 or operation not in OPERATIONS:
-        raise ValueError('Invalid operation or time budget')
+        raise ToolError('E_INPUT', 'Invalid operation or time budget')
     path = job_path(job)
     stage, minimum, maximum, outputs = OPERATIONS[operation]
     if not minimum <= len(inputs) <= maximum:
-        raise ValueError('Wrong number of inputs')
+        raise ToolError('E_INPUT', 'Wrong number of inputs')
     input_paths = [inside(path, name) for name in inputs]
     if any(not p.exists() for p in input_paths):
-        raise ValueError('Missing operation input')
+        raise ToolError('E_NOT_FOUND', 'Missing operation input')
     suffixes = ['.expt'] if operation in ('find_spots', 'predict') else ['.expt', '.refl']
     if operation != 'import' and [p.suffix.lower() for p in input_paths] != suffixes:
-        raise ValueError('Use one EXPT or an ordered EXPT/REFL pair; PHIL files are not operation inputs')
+        raise ToolError('E_INPUT', 'Use one EXPT or an ordered EXPT/REFL pair; PHIL files are not operation inputs')
     argv = ['dials.' + operation, *map(str, input_paths)]
     options = options or {}
     for name, value in options.items():
         expected = OPTIONS[operation].get(name)
         if expected is None:
-            raise ValueError('Unsupported typed option: ' + name)
+            raise ToolError('E_INPUT', 'Unsupported typed option: ' + name)
         if isinstance(expected, tuple):
             if value not in expected:
-                raise ValueError('Invalid choice: ' + name)
+                raise ToolError('E_INPUT', 'Invalid choice: ' + name)
         elif expected is bool:
             if type(value) is not bool:
-                raise ValueError('Expected boolean: ' + name)
+                raise ToolError('E_INPUT', 'Expected boolean: ' + name)
         elif expected is int:
             if type(value) is not int or value < 1:
-                raise ValueError('Expected positive integer: ' + name)
+                raise ToolError('E_INPUT', 'Expected positive integer: ' + name)
         elif expected is str:
             if not isinstance(value, str) or not re.fullmatch(r'(?:[A-Z][a-z]?\d*)+', value):
-                raise ValueError('Expected explicit known elements/composition without whitespace: ' + name)
+                raise ToolError('E_INPUT', 'Expected explicit known elements/composition without whitespace: ' + name)
         elif expected is float:
             if type(value) not in (int, float) or not math.isfinite(value):
-                raise ValueError('Expected finite number: ' + name)
+                raise ToolError('E_INPUT', 'Expected finite number: ' + name)
         argv.append(name + '=' + str(value))
     if operation == 'index':
         argv += ['refinement.parameterisation.beam.fix=all', 'refinement.parameterisation.detector.fix=all',
@@ -252,10 +373,10 @@ def submit_operation(path, stage, operation, argv, expected_outputs, timeout_sec
         state = read_json(path / 'state.json')
         order = list(state['stages'])
         if any(state['stages'][s]['status'] != 'accepted' for s in order[:order.index(stage)]):
-            raise ValueError('Preceding stages require scientific evidence acceptance')
+            raise ToolError('E_NEEDS_EVIDENCE', 'Preceding stages require scientific evidence acceptance')
         current = state['stages'][stage]
         if current['status'] == 'accepted' or len(current['attempts']) >= state['max_attempts']:
-            raise ValueError('Stage already accepted or attempt budget exhausted')
+            raise ToolError('E_IMMUTABLE', 'Stage already accepted or attempt budget exhausted')
         token = uuid.uuid4().hex
         control = path / 'control' / token
         control.mkdir(parents=True)
@@ -265,7 +386,8 @@ def submit_operation(path, stage, operation, argv, expected_outputs, timeout_sec
         atomic_json(control / 'command.json', command)
         task = {'schema': 'ariadne-operation/1', 'operation_id': token, 'job': str(path),
                 'stage': stage, 'workflow_script': str(script()), 'command_json': str(control / 'command.json'),
-                'timeout_seconds': timeout_seconds, 'status': 'submitted'}
+                'timeout_seconds': timeout_seconds, 'status': 'submitted',
+                'submitted_at': datetime.now(timezone.utc).isoformat()}
         atomic_json(control / 'task.json', task)
         atomic_json(path / 'control/active.json', {'operation_id': token})
         with (control / 'worker.log').open('wb') as log:
@@ -300,7 +422,7 @@ it is not independent physical validation and never hides stated limitations.
         process = subprocess.run([sys.executable, str(script()), 'accept', str(path), stage, str(location)],
                                  capture_output=True, text=True, check=False)
         if process.returncode:
-            raise ValueError(process.stderr[-4000:])
+            raise ToolError('E_UPSTREAM', process.stderr[-4000:])
         append_event(path, 'stage_accepted', {'stage': stage, 'reason': reason, 'artifacts': artifacts, 'limitations': limitations or []})
         return {'stage': stage, 'status': 'accepted', 'evidence': 'evidence/' + stage + '.json'}
 
@@ -314,12 +436,12 @@ def make_handoff(job: str, solution_ins: str, solution_hkl: str,
         argv = [sys.executable, str(script()), 'handoff', str(path),
                 '--solution-ins', str(inside(path, solution_ins)), '--solution-hkl', str(inside(path, solution_hkl))]
         if bool(refinement_ins) != bool(refinement_hkl):
-            raise ValueError('Provide both refinement paths')
+            raise ToolError('E_INPUT', 'Provide both refinement paths')
         if refinement_ins:
             argv += ['--refinement-ins', str(inside(path, refinement_ins)), '--refinement-hkl', str(inside(path, refinement_hkl))]
         process = subprocess.run(argv, capture_output=True, text=True, check=False)
         if process.returncode:
-            raise ValueError(process.stderr[-4000:])
+            raise ToolError('E_UPSTREAM', process.stderr[-4000:])
         return {'handoff': process.stdout.strip(), 'target_skill': 'solve-single-crystal',
                 'next': 'read handoff evidence and invoke the available downstream skill'}
 
@@ -342,30 +464,30 @@ Options that do not apply to the selected analysis are rejected.
     path = job_path(job)
     spec = spec_for(analysis, refinement_method)
     if spec is None or not 1 <= timeout_seconds <= 14400:
-        raise ValueError('Invalid scientific operation or budget')
+        raise ToolError('E_INPUT', 'Invalid scientific operation or budget')
     if estimator not in ('signed-wls', 'nnls', 'poisson', 'poisson-gaussian') or refinement_method not in ('anchors', 'em'):
-        raise ValueError('Invalid scientific estimator or refinement method')
+        raise ToolError('E_INPUT', 'Invalid scientific estimator or refinement method')
     if type(fit_positions) is not bool or type(position_derivatives) is not bool:
-        raise ValueError('Position settings require booleans')
+        raise ToolError('E_INPUT', 'Position settings require booleans')
     if type(confidence_level) not in (int, float) or not math.isfinite(confidence_level) or not .5 < confidence_level < 1:
-        raise ValueError('Confidence level must be finite and between .5 and 1')
+        raise ToolError('E_INPUT', 'Confidence level must be finite and between .5 and 1')
     if fit_positions and estimator != 'signed-wls':
-        raise ValueError('Position nuisance fitting requires signed-wls')
+        raise ToolError('E_INPUT', 'Position nuisance fitting requires signed-wls')
     if (refinement_method != 'anchors' and analysis != 'joint_refine'
             or fit_positions and analysis != 'joint_fit'
             or position_derivatives and analysis != 'build_overlaps'
             or estimator != 'signed-wls' and analysis != 'joint_fit'
             or confidence_level != .95 and analysis != 'joint_fit'):
-        raise ValueError('Scientific option does not apply to the selected analysis')
+        raise ToolError('E_INPUT', 'Scientific option does not apply to the selected analysis')
     stage, executable, expected = spec.stage, spec.executable, spec.expected_output
     if not spec.minimum_inputs <= len(inputs) <= spec.maximum_inputs:
-        raise ValueError('Wrong number of scientific inputs')
+        raise ToolError('E_INPUT', 'Wrong number of scientific inputs')
     paths = [inside(path, name) for name in inputs]
     if any(not p.is_file() for p in paths):
-        raise ValueError('Scientific input must be an existing job-relative file')
+        raise ToolError('E_NOT_FOUND', 'Scientific input must be an existing job-relative file')
     suffixes = spec.required_suffixes + spec.optional_suffixes[:len(paths) - len(spec.inputs)]
     if suffixes and [p.suffix.lower() for p in paths] != suffixes:
-        raise ValueError('Scientific input suffixes do not match the declared input roles')
+        raise ToolError('E_INPUT', 'Scientific input suffixes do not match the declared input roles')
     tool = root() / 'skills/ariadne-reduction/scripts' / executable
     argv = [sys.executable, str(tool)]
     if analysis == 'compare_hypotheses':
@@ -394,11 +516,11 @@ def propose_hypothesis(job: str, model_artifacts: list[str], evidence_artifacts:
     """Store an immutable candidate and parent links; does not prove a twin law or accept a model."""
     path = job_path(job)
     if not model_artifacts or not evidence_artifacts or not rationale.strip():
-        raise ValueError('Require model artifacts, scientific evidence and a rationale')
+        raise ToolError('E_INPUT', 'Require model artifacts, scientific evidence and a rationale')
     for name in model_artifacts + evidence_artifacts:
         artifact = inside(path, name)
         if not artifact.is_file() or not artifact.stat().st_size:
-            raise ValueError('Missing hypothesis artifact')
+            raise ToolError('E_NOT_FOUND', 'Missing hypothesis artifact')
     with job_lock(path):
         return save_hypothesis(path, {'models': model_artifacts, 'evidence': evidence_artifacts,
                                      'phase_relation': phase_relation, 'parents': parents or [], 'rationale': rationale,

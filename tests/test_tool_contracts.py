@@ -28,13 +28,23 @@ def call(name, arguments):
 class ContractTableTests(unittest.TestCase):
     def test_every_tool_declares_an_output_schema(self):
         tools = {t.name: t for t in asyncio.run(server.mcp.list_tools())}
-        self.assertEqual(set(tools), {
-            'capabilities', 'create_job', 'inspect_job', 'read_artifact', 'start_operation',
-            'record_acceptance', 'make_handoff', 'start_analysis', 'propose_hypothesis'})
+        # The set is asserted to be covered by declarations, not frozen: adding a tool
+        # is expected, shipping one without a contract is not.
+        self.assertTrue({'capabilities', 'create_job', 'inspect_job', 'read_artifact',
+                         'start_operation', 'record_acceptance', 'make_handoff',
+                         'start_analysis', 'propose_hypothesis'} <= set(tools))
         for name, tool in tools.items():
             with self.subTest(tool=name):
                 self.assertIsNotNone(tool.outputSchema, f'{name} publishes no outputSchema')
                 self.assertIn('properties', tool.outputSchema)
+
+    def test_every_tool_returns_fields_its_schema_declares(self):
+        declared = {t.name: set(t.outputSchema['properties'])
+                    for t in asyncio.run(server.mcp.list_tools())}
+        self.assertEqual(declared['start_operation'], {'operation_id', 'worker_pid', 'status', 'next'})
+        self.assertIn('progress', declared['inspect_job'])
+        self.assertEqual(declared['cancel_operation'],
+                         {'operation_id', 'status', 'signalled', 'warning', 'next'})
 
     def test_declared_input_count_matches_every_registered_analysis(self):
         for (analysis, variant), spec in ANALYSIS_SPECS.items():
@@ -85,7 +95,11 @@ class ToolBehaviourTests(unittest.TestCase):
                                       'jobs_root': str(self.root / 'jobs')})
         self.assertEqual(set(created), {'job', 'next'})
         seen = call('inspect_job', {'job': self.job})
-        self.assertEqual(set(seen), {'job', 'state', 'hypotheses', 'event_log', 'submitted', 'operation'})
+        # progress is always serialized and stays null without an operation id, matching
+        # the published schema rather than disappearing by omission.
+        self.assertEqual(set(seen), {'job', 'state', 'hypotheses', 'event_log',
+                                     'submitted', 'operation', 'progress'})
+        self.assertIsNone(seen['progress'])
         self.assertEqual(seen['state']['schema'], 'scxrd-job/1')
         self.assertEqual(len(seen['state']['stages']), 8)
         self.assertIsNone(seen['operation'])
