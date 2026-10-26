@@ -258,12 +258,14 @@ $$
 
 本地 MCP server 提供有时间预算的类型化操作、不可覆盖的假设记录和追加式事件日志。科学接受与进程成功退出是独立决策。
 
+每个工具都发布 `outputSchema`，客户端可据此校验返回结构而无需读源码；未在模型中逐一列出的字段仍然保留。`capabilities().analyses` 以机器可读形式给出每个分析阶段的脚本、按序输入角色、可选输入、期望输出和适用选项，`start_analysis` 直接执行同一份声明，因此文档与行为不会分叉。
+
 | 工具 | 职责 |
 |---|---|
-| `capabilities` | 读取软件配置与支持的操作。 |
+| `capabilities` | 读取软件配置、原生操作与结构化分析契约。 |
 | `create_job` | 创建独立工作数据集，保留原始输入。 |
 | `start_operation` | 异步提交固定的 DIALS 原生操作。 |
-| `start_analysis` | 提交已注册的 Ariadne 科学适配器。 |
+| `start_analysis` | 按 `capabilities().analyses` 声明校验输入后提交科学适配器。 |
 | `inspect_job` | 读取阶段、假设和计算状态。 |
 | `read_artifact` | 读取有长度限制的文本证据和日志。 |
 | `propose_hypothesis` | 保存候选、证据引用及 parent 关系。 |

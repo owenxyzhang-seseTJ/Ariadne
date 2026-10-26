@@ -18,6 +18,8 @@ from typing import Literal
 import uuid
 
 from mcp.server.fastmcp import FastMCP
+from ariadne.contracts import (AcceptanceRecord, ArtifactText, Capabilities, CreatedJob, Handoff,
+                               Hypothesis, JobInspection, OperationHandle, analysis_contracts, spec_for)
 from ariadne.evidence import append_event, save_hypothesis
 
 mcp = FastMCP("Ariadne")
@@ -135,18 +137,19 @@ def job_lock(job):
 
 
 @mcp.tool(annotations={'readOnlyHint': True})
-def capabilities() -> dict:
+def capabilities() -> Capabilities:
     """Read configured software and algorithm status without running calculations."""
     config = read_json(os.environ['SCXRD_RUNTIME_CONFIG'])
     return {'product': 'Ariadne', 'version': '0.5.0', 'runtime': config,
             'operations': list(OPERATIONS), 'typed_options': {op: list(v) for op, v in OPTIONS.items()},
             'acceptance': 'process completion requires separate scientific evidence decision',
+            'analyses': analysis_contracts(),
             'composite_absorption_scaling': 'shared empirical log-scale/degree-2 directional fit on equivalent composite observations; local identifiable fits only',
             'tests': 'not_run_as_requested'}
 
 
 @mcp.tool(annotations={'readOnlyHint': False, 'destructiveHint': False})
-def create_job(input_path: str, jobs_root: str, sample: str = 'sample', max_attempts: int = 6) -> dict:
+def create_job(input_path: str, jobs_root: str, sample: str = 'sample', max_attempts: int = 6) -> CreatedJob:
     """Copy user-selected input into a new isolated job; preserve raw originals."""
     if not 1 <= max_attempts <= 50:
         raise ValueError('Attempt budget must be between 1 and 50')
@@ -160,7 +163,7 @@ def create_job(input_path: str, jobs_root: str, sample: str = 'sample', max_atte
 
 
 @mcp.tool(annotations={'readOnlyHint': True})
-def inspect_job(job: str, operation_id: str | None = None) -> dict:
+def inspect_job(job: str, operation_id: str | None = None) -> JobInspection:
     """Read job/operation status; never infer scientific success from exit code."""
     path = job_path(job)
     result = {'job': str(path), 'state': read_json(path / 'state.json')}
@@ -180,7 +183,7 @@ def inspect_job(job: str, operation_id: str | None = None) -> dict:
 
 
 @mcp.tool(annotations={'readOnlyHint': True})
-def read_artifact(job: str, relative_path: str, max_characters: int = 24000) -> dict:
+def read_artifact(job: str, relative_path: str, max_characters: int = 24000) -> ArtifactText:
     """Read bounded text/JSON evidence or logs inside a job, with explicit truncation."""
     if not 1 <= max_characters <= 256000:
         raise ValueError('Invalid text limit')
@@ -194,7 +197,7 @@ def read_artifact(job: str, relative_path: str, max_characters: int = 24000) -> 
 
 @mcp.tool(annotations={'readOnlyHint': False, 'destructiveHint': False})
 def start_operation(job: str, operation: Operation, inputs: list[str],
-                    options: dict | None = None, timeout_seconds: int = 3600) -> dict:
+                    options: dict | None = None, timeout_seconds: int = 3600) -> OperationHandle:
     """Start a fixed DIALS operation asynchronously in a new attempt with a time budget.
 
 Use only for an authorized real reduction task. Does not run installation tests.
@@ -282,7 +285,7 @@ def submit_operation(path, stage, operation, argv, expected_outputs, timeout_sec
 
 @mcp.tool(annotations={'readOnlyHint': False, 'destructiveHint': False})
 def record_acceptance(job: str, stage: Stage, artifacts: list[str], reason: str,
-                      reviewed_by: str, limitations: list[str] | None = None) -> dict:
+                      reviewed_by: str, limitations: list[str] | None = None) -> AcceptanceRecord:
     """Record a scientific acceptance supported by existing artifacts and rationale.
 
 Caller must inspect the actual evidence. This writes an agent-reviewed decision;
@@ -304,7 +307,7 @@ it is not independent physical validation and never hides stated limitations.
 
 @mcp.tool(annotations={'readOnlyHint': False, 'destructiveHint': False})
 def make_handoff(job: str, solution_ins: str, solution_hkl: str,
-                 refinement_ins: str | None = None, refinement_hkl: str | None = None) -> dict:
+                 refinement_ins: str | None = None, refinement_hkl: str | None = None) -> Handoff:
     """Package accepted same-stem INS/HKL for solve-single-crystal; preserve full logs."""
     path = job_path(job)
     with job_lock(path):
@@ -329,32 +332,16 @@ def start_analysis(job: str, analysis: Analysis, inputs: list[str],
                    estimator: Literal['signed-wls', 'nnls', 'poisson', 'poisson-gaussian'] = 'signed-wls',
                    timeout_seconds: int = 3600, refinement_method: Literal['anchors', 'em'] = 'anchors',
                    fit_positions: bool = False, position_derivatives: bool = False,
-                   confidence_level: float = .95) -> dict:
+                   confidence_level: float = .95) -> OperationHandle:
     """Run a fixed Ariadne scientific adapter asynchronously, with immutable outputs.
 
-soft_assign inputs: observed EXPT, spots REFL, model EXPT, predictions REFL, calibration JSON.
-joint_refine anchors: model EXPT, spots REFL, compatibility JSON.
-joint_refine em: same first three, selection JSON, then up to three alternative model EXPTs.
-learn_profiles: references REFL, calibration JSON.
-build_overlaps: model EXPT, full predictions REFL, profile library JSON.
-joint_fit: patches manifest JSON. export_hklf5: corrected observation JSONL.
-compare_hypotheses: fixed partition JSON followed by baseline/alternative compatibility JSONs.
-scaling_geometry: integrated groups JSONL, model EXPT, full predictions REFL, symmetry/audit evidence JSON.
-global_scale: integrated groups JSONL, scaling geometry JSON; inspect fit status before scientific acceptance.
+Input roles, allowed options and expected outputs are declared per analysis in
+capabilities().analyses; this function enforces that declaration rather than restating it.
+Options that do not apply to the selected analysis are rejected.
 """
     path = job_path(job)
-    routes = {
-        'soft_assign': ('domains', 'soft_multi_indexer.py', 5, 5, 'analysis/compatibility.json'),
-        'joint_refine': ('domains', 'joint_geometry_refine.py', 3, 3, 'analysis/joint_refinement.json'),
-        'learn_profiles': ('integrate', 'learn_profile_library.py', 2, 2, 'analysis/profiles.json'),
-        'build_overlaps': ('integrate', 'overlap_prepare.py', 3, 3, 'analysis/patches.json'),
-        'joint_fit': ('integrate', 'overlap_integrator.py', 1, 1, 'analysis/integrated_groups.jsonl'),
-        'export_hklf5': ('export', 'export_hklf5.py', 1, 1, 'twin.hkl'),
-        'compare_hypotheses': ('domains', 'compare_hypotheses.py', 3, 5, 'comparison.json'),
-        'scaling_geometry': ('correct', 'scaling_geometry.py', 4, 4, 'analysis/scaling_geometry.json'),
-        'global_scale': ('correct', 'global_scale.py', 2, 2, 'analysis/scaling.json'),
-    }
-    if analysis not in routes or not 1 <= timeout_seconds <= 14400:
+    spec = spec_for(analysis, refinement_method)
+    if spec is None or not 1 <= timeout_seconds <= 14400:
         raise ValueError('Invalid scientific operation or budget')
     if estimator not in ('signed-wls', 'nnls', 'poisson', 'poisson-gaussian') or refinement_method not in ('anchors', 'em'):
         raise ValueError('Invalid scientific estimator or refinement method')
@@ -370,21 +357,20 @@ global_scale: integrated groups JSONL, scaling geometry JSON; inspect fit status
             or estimator != 'signed-wls' and analysis != 'joint_fit'
             or confidence_level != .95 and analysis != 'joint_fit'):
         raise ValueError('Scientific option does not apply to the selected analysis')
-    stage, executable, minimum, maximum, expected = routes[analysis]
-    if analysis == 'joint_refine' and refinement_method == 'em':
-        minimum, maximum = 4, 7
-    if not minimum <= len(inputs) <= maximum:
+    stage, executable, expected = spec.stage, spec.executable, spec.expected_output
+    if not spec.minimum_inputs <= len(inputs) <= spec.maximum_inputs:
         raise ValueError('Wrong number of scientific inputs')
     paths = [inside(path, name) for name in inputs]
     if any(not p.is_file() for p in paths):
         raise ValueError('Scientific input must be an existing job-relative file')
+    suffixes = spec.required_suffixes + spec.optional_suffixes[:len(paths) - len(spec.inputs)]
+    if suffixes and [p.suffix.lower() for p in paths] != suffixes:
+        raise ValueError('Scientific input suffixes do not match the declared input roles')
     tool = root() / 'skills/ariadne-reduction/scripts' / executable
     argv = [sys.executable, str(tool)]
     if analysis == 'compare_hypotheses':
         argv += [str(paths[0]), 'comparison.json', *map(str, paths[1:])]
     elif analysis == 'joint_refine' and refinement_method == 'em':
-        if [p.suffix.lower() for p in paths[:4]] != ['.expt', '.refl', '.json', '.json'] or any(p.suffix.lower() != '.expt' for p in paths[4:]):
-            raise ValueError('EM inputs require model EXPT, spots REFL, compatibility JSON, selection JSON, optional alternative EXPTs')
         argv += [*map(str, paths[:3]), 'analysis', '--centroid-selection', str(paths[3])]
         if len(paths) > 4:
             argv += ['--compare-models', *map(str, paths[4:])]
@@ -404,7 +390,7 @@ global_scale: integrated groups JSONL, scaling geometry JSON; inspect fit status
 @mcp.tool(annotations={'readOnlyHint': False, 'destructiveHint': False})
 def propose_hypothesis(job: str, model_artifacts: list[str], evidence_artifacts: list[str],
                        phase_relation: Literal['unknown', 'same_phase_supported', 'different_phases_supported', 'independent_crystals_supported'] = 'unknown',
-                       parents: list[str] | None = None, rationale: str = '') -> dict:
+                       parents: list[str] | None = None, rationale: str = '') -> Hypothesis:
     """Store an immutable candidate and parent links; does not prove a twin law or accept a model."""
     path = job_path(job)
     if not model_artifacts or not evidence_artifacts or not rationale.strip():

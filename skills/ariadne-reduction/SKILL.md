@@ -7,7 +7,7 @@ description: Reduce Bruker or Rigaku single-crystal X-ray diffraction frames thr
 
 用简体中文沟通。以原始衍射证据决定还原路线。默认在交接就绪后继续 `solve-single-crystal`，除非用户要求停在还原阶段。本技能是 AI 决策流程，脚本承担确定性辅助；需要真实、适用的积分和吸收校正软件。
 
-优先读取 `ariadne` MCP 的 `capabilities`，用 `create_job → start_operation → inspect_job/read_artifact → record_acceptance` 管理真实任务。长任务返回 operation id 后再读取状态，避免同步等待整轮积分。MCP 不运行安装测试，不自动接受计算结果。复合重叠和分域使用下述脚本；MCP 的 native scale/export 仅用于适用的单相分支。
+优先读取 `ariadne` MCP 的 `capabilities`，据 `analyses` 的输入角色与适用选项决定调用，并用 `create_job → start_operation → inspect_job/read_artifact → record_acceptance` 管理真实任务。长任务返回 operation id 后再读取状态，避免同步等待整轮积分。MCP 不运行安装测试，不自动接受计算结果。复合重叠和分域使用下述脚本；MCP 的 native scale/export 仅用于适用的单相分支。
 
 运行前读取 [source-extensions.md](references/source-extensions.md)，选择 baseline 或 experimental 算法。`ariadne-env` 配置修改过的 DIALS Python 源码；`scxrd-env` 保留原始 DIALS。新算法需显式选择，未获实测证据时不得声称提高准确率或速度。MCP 未连接时通过启动器和现有 CLI 执行同一工作流。
 

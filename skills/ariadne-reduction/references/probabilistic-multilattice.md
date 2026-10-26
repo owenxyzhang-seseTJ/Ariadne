@@ -56,7 +56,7 @@ HKLF5 twin export 要求 `phase_relation=same_phase_supported` 和 `phase_eviden
 
 ## Agent 工具与执行关系
 
-MCP 现在有 9 个工具：原 capabilities/create_job/start_operation/inspect_job/read_artifact/record_acceptance/make_handoff，加 `start_analysis` 与 `propose_hypothesis`。native operations 新增 `predict`。`start_analysis` 的枚举包括 soft_assign、joint_refine、learn_profiles、build_overlaps、joint_fit、compare_hypotheses、export_hklf5，各绑定固定脚本及参数/输出契约，无 shell 任意执行入口。
+MCP 现在有 9 个工具：原 capabilities/create_job/start_operation/inspect_job/read_artifact/record_acceptance/make_handoff，加 `start_analysis` 与 `propose_hypothesis`。native operations 新增 `predict`。`start_analysis` 的枚举包括 soft_assign、joint_refine、learn_profiles、build_overlaps、joint_fit、compare_hypotheses、export_hklf5、scaling_geometry、global_scale，各绑定固定脚本及参数/输出契约，并由 `capabilities().analyses` 以机器可读形式发布，无 shell 任意执行入口。
 
 实际循环：提议 hypothesis → native predict → soft_assign → joint_refine → new predict/soft_assign → fixed holdout compare → agent 根据证据接受或保存备选 → profile/overlap/joint_fit → 真实校正因子传播 → phase-aware HKLF5/可信 HKLF4 → solve-single-crystal。
 
