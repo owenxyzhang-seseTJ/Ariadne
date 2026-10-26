@@ -141,7 +141,7 @@ def capabilities() -> dict:
     return {'product': 'Ariadne', 'version': '0.5.0', 'runtime': config,
             'operations': list(OPERATIONS), 'typed_options': {op: list(v) for op, v in OPTIONS.items()},
             'acceptance': 'process completion requires separate scientific evidence decision',
-            'composite_absorption_scaling': 'global observation-model estimation remains unimplemented',
+            'composite_absorption_scaling': 'shared empirical log-scale/degree-2 directional fit on equivalent composite observations; local identifiable fits only',
             'tests': 'not_run_as_requested'}
 
 
@@ -321,7 +321,7 @@ def make_handoff(job: str, solution_ins: str, solution_hkl: str,
                 'next': 'read handoff evidence and invoke the available downstream skill'}
 
 
-Analysis = Literal['soft_assign', 'joint_refine', 'learn_profiles', 'build_overlaps', 'joint_fit', 'export_hklf5', 'compare_hypotheses']
+Analysis = Literal['soft_assign', 'joint_refine', 'learn_profiles', 'build_overlaps', 'joint_fit', 'export_hklf5', 'compare_hypotheses', 'scaling_geometry', 'global_scale']
 
 
 @mcp.tool(annotations={'readOnlyHint': False, 'destructiveHint': False})
@@ -339,6 +339,8 @@ learn_profiles: references REFL, calibration JSON.
 build_overlaps: model EXPT, full predictions REFL, profile library JSON.
 joint_fit: patches manifest JSON. export_hklf5: corrected observation JSONL.
 compare_hypotheses: fixed partition JSON followed by baseline/alternative compatibility JSONs.
+scaling_geometry: integrated groups JSONL, model EXPT, full predictions REFL, symmetry/audit evidence JSON.
+global_scale: integrated groups JSONL, scaling geometry JSON; inspect fit status before scientific acceptance.
 """
     path = job_path(job)
     routes = {
@@ -349,6 +351,8 @@ compare_hypotheses: fixed partition JSON followed by baseline/alternative compat
         'joint_fit': ('integrate', 'overlap_integrator.py', 1, 1, 'analysis/integrated_groups.jsonl'),
         'export_hklf5': ('export', 'export_hklf5.py', 1, 1, 'twin.hkl'),
         'compare_hypotheses': ('domains', 'compare_hypotheses.py', 3, 5, 'comparison.json'),
+        'scaling_geometry': ('correct', 'scaling_geometry.py', 4, 4, 'analysis/scaling_geometry.json'),
+        'global_scale': ('correct', 'global_scale.py', 2, 2, 'analysis/scaling.json'),
     }
     if analysis not in routes or not 1 <= timeout_seconds <= 14400:
         raise ValueError('Invalid scientific operation or budget')

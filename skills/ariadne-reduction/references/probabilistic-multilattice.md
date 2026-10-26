@@ -64,7 +64,7 @@ MCP 现在有 9 个工具：原 capabilities/create_job/start_operation/inspect_
 
 ## 仍是研发目标
 
-完整多源 spot 生成模型、正式 Bayesian K evidence、全局 composite-aware scaling/absorption、轮廓形状及独立仪器标定误差传播、盲测与跨仪器性能仍未实现/验证。现已提供单源 EM 与留出预测密度比较、非负边界渐近区间、局部一阶位置 nuisance 和强度协方差传播。SyntheticTwinBench 是附件建议，本次没有生成或运行模拟测试集。未因文档要求增加人工审批关卡；科学证据不足则保留未知，由已授权的 agent 流程处理。
+完整多源 spot 生成模型、正式 Bayesian K evidence、轮廓形状及独立仪器标定误差传播、盲测与跨仪器性能仍未实现/验证。全局 composite-aware scaling/absorption 已实现共享扫描尺度与低阶方向项，见 [global scaling](global-scaling.md)；它不估计独立 domain multiplier。现已提供单源 EM 与留出预测密度比较、非负边界渐近区间、局部一阶位置 nuisance 和强度协方差传播。SyntheticTwinBench 是附件建议，本次没有生成或运行模拟测试集。未因文档要求增加人工审批关卡；科学证据不足则保留未知，由已授权的 agent 流程处理。
 
 ## 可追溯原理来源
 

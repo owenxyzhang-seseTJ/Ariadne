@@ -45,7 +45,7 @@ python3 scripts/workflow.py init INPUT JOBS_ROOT --sample sample-name
 3. **Index**：先无强制高对称性的指标化；依据几何、强度相关性、RMSD、约化晶胞、未指标化点与消光比较候选。记录每次基变换，并同步矩阵和 HKL。晶胞几何不能独自确定空间群。必要时校准光束中心；旋转轴反向需要元数据依据。
 4. **Domains**：读取 [twins.md](references/twins.md)。多 sweep 不等于多晶畴，低指标化率不自动等于孪晶。区分同相不同取向、非面网孪晶、面网/赝面网/反演孪晶、异相集合体、调制和无序。保留剩余点。多晶格搜索须比较每一晶畴的独立证据。对未知多相/多晶集合体，读取 [domain-finder.md](references/domain-finder.md)，可用本包的独立 DAFi-inspired 模块生成候选，逐组进入 DIALS 指标化与三维索引残差核验。它是未测试的实验实现，不等同官方 DAFi；候选晶列组不能直接当已接受晶畴。
 5. **Integrate**：先静态精修；仅在连续漂移证据和覆盖足够时考虑 scan-varying，跳变分段。比较预测/观测质心、轮廓、背景、过载、峰宽和跨帧截断。涉及重叠时读取 [overlap-integration.md](references/overlap-integration.md)：DIALS 有原生 detector-space deconvolution；本版另实现从原始像素联合拟合、背景消除、完整协方差与可辨识总强度。不能以指标化或文件格式转换代替这些观测处理。
-6. **Correct**：检查缩放、吸收、衰减、按扫描角/晶畴/壳层统计，保留校正前后未合并数据、Friedel 对与拒绝记录。经验球谐/多扫描和面指数解析校正按可用证据选择；不能默认 DIALS 等同 TWINABS，也不重复校正已校正数据。高 outlier 比例提示回看模型，不套用固定禁止阈值。分辨率以多项统计与信息量判断，不为降低 Rint 删弱点。
+6. **Correct**：检查缩放、吸收、衰减、按扫描角/晶畴/壳层统计，保留校正前后未合并数据、Friedel 对与拒绝记录。经验球谐/多扫描和面指数解析校正按可用证据选择；复合观测可先建几何侧表再运行全局共享尺度/吸收拟合，须核对 rank 与残差分布。不能默认 DIALS 等同 TWINABS，也不重复校正已校正数据。高 outlier 比例提示回看模型，不套用固定禁止阈值。分辨率以多项统计与信息量判断，不为降低 Rint 删弱点。
 7. **Export**：写同名 `.ins/.hkl` 和完整还原报告，保留 CELL/基变换/校正记录。未知化学式、Z、cell esd 不得编造；可先用明确标注的解析初始元素/UNIT 占位，必须下游替换，不能作为最终组成。优先厂商或 DIALS 原生导出，避免手拼/截断对称操作。
 
 ## 辅助算子

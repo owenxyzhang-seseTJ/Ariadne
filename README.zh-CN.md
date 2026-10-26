@@ -248,9 +248,9 @@ $$
 C_z=FC_IF+JC_fJ+FC_{If}J+JC_{If}^{\mathsf T}F.
 $$
 
-组总强度的方差为 $\mathbf1^{\mathsf T}C_z\mathbf1$。存在校正因子不确定性或强度–因子交叉协方差时，须提供对应信息。若只能辨识原始总强度，当前校正适配器要求共同校正因子；不同分量因子需要全局观测模型。
+组总强度的方差为 $\mathbf1^{\mathsf T}C_z\mathbf1$。存在校正因子不确定性或强度–因子交叉协方差时，须提供对应信息。若只能辨识原始总强度，校正适配器要求共同校正因子；各分量因子不同时，`global_scale.py` 仍把这些组放进跨等效反射的联合估计，但不拆出分量强度导出。
 
-校正适配器应用有来源的 Lorentz/偏振、尺度与吸收因子，不估计完整的全局孪晶感知吸收/缩放模型，也不通过将各晶畴强度等均值化来消除真实相对贡献。
+校正适配器应用有来源的 Lorentz/偏振、尺度与吸收因子。`global_scale.py` 在各晶畴共享一组扫描尺度与二阶方向吸收参数，等效反射在畴内共享强度、畴间不强制相等，因而不通过等均值化消除真实相对贡献。该吸收是经验相对传输，不估计绝对 $\mu$ 或晶体外形，见 [全局缩放规范](skills/ariadne-reduction/references/global-scaling.md)。
 
 内部 JSON/JSONL 保留贡献者映射、协方差、来源和假设关系。HKLF 5 是真实、已校正、同相组合观测的下游视图，并附观察组到导出行的映射；它无法编码全部分量或跨观测协方差。HKLF 4 解析输入与 HKLF 5 孪晶精修输入保持独立，不将无关晶相导出为一个孪晶结构。
 
@@ -300,13 +300,13 @@ ariadne-env dials.index imported.expt strong.refl \
   indexing.basis_vector_combinations.ariadne.evidence_directory=candidate_evidence
 ```
 
-通过 Agent 执行还原时调用 `$ariadne-reduction`。[技能入口](skills/ariadne-reduction/SKILL.md) 定义数据层级路由和证据要求。详细适配器契约见 [多晶格方法说明](skills/ariadne-reduction/references/probabilistic-multilattice.md)、[源码扩展规范](skills/ariadne-reduction/references/source-extensions.md) 和 [重叠积分规范](skills/ariadne-reduction/references/overlap-integration.md)。
+通过 Agent 执行还原时调用 `$ariadne-reduction`。[技能入口](skills/ariadne-reduction/SKILL.md) 定义数据层级路由和证据要求。详细适配器契约见 [多晶格方法说明](skills/ariadne-reduction/references/probabilistic-multilattice.md)、[源码扩展规范](skills/ariadne-reduction/references/source-extensions.md) 和 [重叠积分规范](skills/ariadne-reduction/references/overlap-integration.md)、[全局缩放规范](skills/ariadne-reduction/references/global-scaling.md)。
 
 ## 9. 科学适用性
 
 提供的算法属于尚无公开基准验证的实验性实现。数值阈值与不确定性假设需结合具体数据评价；本仓库不提出量化准确率或吞吐量结论。
 
-当前几何适配器采用静态旋转模型。完整多源质心似然优化、正式的贝叶斯晶格数选择、全局组合观测吸收/缩放及轮廓/几何估计误差传播，均不属于已实现数值模型。动态结构解释需要独立标定和可辨识的仪器–样品模型。
+当前几何适配器采用静态旋转模型。完整多源质心似然优化、正式的贝叶斯晶格数选择及轮廓/几何估计误差传播，均不属于已实现数值模型。全局缩放吸收要求几何、LP 与方向有可追溯来源，且只覆盖可辨识的共享低阶项。动态结构解释需要独立标定和可辨识的仪器–样品模型。
 
 ## 10. 开源许可与参考资料
 

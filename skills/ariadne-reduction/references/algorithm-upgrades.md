@@ -38,16 +38,31 @@ M 步用 DIALS 保持对称性的晶体取向/晶胞参数和原生预测，仪�
 
 MCP `start_analysis(analysis='joint_refine', refinement_method='em')` 的 inputs 顺序为 MODEL.expt、SPOTS.refl、COMPATIBILITY.json、SELECTION.json，后接最多三个候选 EXPT。位置和积分选项与不同 analysis 错配时明确拒绝。
 
+## 复合观测的全局尺度与方向吸收
+
+`scaling_geometry.py INTEGRATED.jsonl MODEL.expt FULL_PREDICTIONS.refl EVIDENCE.json NEW_GEOMETRY` 先把每个贡献者的原生预测行、HKL、LP/QE 与晶体 Cartesian 下的入射/出射方向固化成侧表；随后 `global_scale.py INTEGRATED.jsonl NEW_GEOMETRY/scaling_geometry.json NEW_SCALE` 做全部观测组的联合拟合。核心解算在 `composite_scaling.py`，只依赖 NumPy/SciPy。
+
+可辨识分量组使用完整分量协方差和单位设计；仅总量可测组使用一行求和设计。模型为 `y_g = D_g [known_forward * exp(X beta) * I_equiv]`，同一空间群等效类在每个晶畴内共享带符号强度，不同晶畴不强制相等，保留畴间比例。全部晶畴共享扫描偏置、每扫描 0–2 阶角度趋势和入射+出射方向的五个实 l=2 偶次谐波和。特征按全部贡献记录整体中心化，固定共同尺度规范；组内特征均值只作诊断，不参与约束。
+
+交替最小二乘每一步都实际执行：固定 beta 的精确 signed WLS、固定强度的非线性 `least_squares`，仅在梯度仍大时追加联合 polish。任何候选状态 chi2 增加都不接受。成功要求梯度、相对目标变化、中心化约定和完整联合 Jacobian 满秩同时成立；退化、超预算或求解器失败保留 `unresolved` 与诊断，不生成校正表，也不用正则项制造信息。
+
+协方差是已知绝对观测协方差下的局部 Gauss–Newton 结果，`Cov(theta)=(Jw^T Jw)^+`，不乘 reduced chi-square。校正因子 `f=1/(known*exp(X beta))`，`df/dbeta=-f X`；同源强度–因子交叉项由 `Cov(theta,y_g)` 传播，不只做独立误差相加。总量可测且各分量校正不同的组仍参与全局估计，但标为 fit-only，不用等效平均预测拆出分量导出。
+
+MCP `start_analysis(analysis='scaling_geometry')` 的 inputs 为上述四个文件；`analysis='global_scale'` 为积分 JSONL 与几何 JSON。进程成功只表示写出结果，科学接受须读 `scaling.json` 的 status、rank 与残差分布。
+
 ## 验证入口
 
 在匹配 DIALS 3.30.1 的环境中运行 `python -m unittest discover -s tests -v`。不需要下载数据或启动 MCP 服务。测试包含解析概率、中心扰动、协方差、不可辨识分量及相应的似然/EM 检查。测试不会执行文件散列校验。
 
 ## 本次验证记录（2026年10月26日）
 
-- 正常运行配置下，`python -m unittest discover -s tests -v`：35 tests OK，7.866 秒。包含 4 个位置/概率检查、21 个受约束似然检查、10 个 EM 检查；DIALS 环境下的原生适配检查实际执行。
+- 正常运行配置下，`python -m unittest discover -s tests -p 'test_*.py'`：51 tests OK，8.921 秒。包含 4 个位置/概率检查、21 个受约束似然检查、10 个 EM 检查、12 个复合缩放内核检查和 4 个全局缩放适配检查；DIALS 环境下的原生适配检查实际执行。
 - 双峰真实位移算例：固定位置的分量强度误差 -2.814% / +9.353%，一阶位置 nuisance 后 -1.395% / +1.859%。单个已知真值算例，不代表真实数据普遍增益。
 - 双晶格 DIALS：6240 个完整预测、18 个参数、rank=18，位置 RMSD 从 [0.0070651, 0.00189798, 0.000391690] 降至 [1.30691e-8, 4.16547e-9, 6.23230e-11]（mm/mm/rad）；仪器字典前后相等。无噪声合成数据可检验实现，不代表实验精度。
 - 最终留出改变不影响拟合矩阵；额外无支持晶格的留出平均 log density 增益为 -0.405678，支持不足仍输出 unresolved。
+- 复合缩放已知真值算例：90 个混合分量/总量观测组、12 个等效类、6 个共享 beta 与 90 组已知 LP forward 因子，`status='converged'`，chi2=3.8e-27，67 组可校正、23 组 fit-only；校正后 JSONL 到 HKLF5 全链路生成成功。无噪声算例只检验实现一致性。
+- 复合缩放内核的 12 项检查含独立数值 Jacobian 对照：联合协方差、数据响应、同源交叉协方差与 factor 导数的相对误差在 1e-8 内量级；单块秩不足、特征规范退化、参数/测量/迭代/时间预算与求解器失败均返回 unresolved。
+- 真实 DIALS 两晶格几何上，`scaling_geometry.py` 的 prediction 行号、HKL、单位方向与 `lp_forward=qe/lp` 逐项核对通过。
 - MCP 固定命令路由检查：EM/备选模型、PG/置信度、位置导数和拟合参数通过，无效组合拒绝；未启动真实 MCP 客户端会话。
 - 受约束数值测试在 `-W error` 下通过；完整测试在相同 warning 策略下首次以代码 139 退出。随后正常配置打印 DIALS/SWIG 的 DeprecationWarning 并全量通过。代码 139 的底层原因尚未确认，不把严格 warning 配置称为通过。
 

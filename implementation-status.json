@@ -36,7 +36,6 @@
   "not_implemented": [
     "full multi-source-centroid likelihood joint refinement",
     "formal Bayesian K selection",
-    "global composite-aware scale/absorption estimator",
     "SyntheticTwinBench",
     "nonlinear profile-shape and independent instrument-calibration uncertainty propagation",
     "full real-data comparative benchmark and exact boundary-interval coverage calibration"

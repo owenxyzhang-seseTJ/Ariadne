@@ -68,7 +68,7 @@ MCP stdio server 使用官方 Python SDK 1.30.0，配置在 plugin 根目录 `.m
 
 Ariadne 0.5.0 另加入 `start_analysis`、`propose_hypothesis` 和事件/假设记录，当前总计 9 个 MCP tools；新的 NNLS/Poisson、软匹配、native joint refinement 和固定留出比较契约见 [probabilistic-multilattice.md](probabilistic-multilattice.md)。
 
-科学接受始终需读取真实 evidence；结果存在、退出码 0、文件格式正确都不足以代替科学判断。MCP native scale/export 对适用的单相路线有效。复合观测的全局尺度/吸收估计尚未实现；已有 correction 脚本只能传播真实外部因子与协方差，不能冒充 TWINABS。
+科学接受始终需读取真实 evidence；结果存在、退出码 0、文件格式正确都不足以代替科学判断。MCP native scale/export 对适用的单相路线有效。复合观测的共享全局尺度/吸收由 `global_scale.py` 估计，须先建几何侧表并检查 fit status；不能冒充 TWINABS。
 
 重启后的 active operation 若没有 result，先查 worker.log 与进程状态；不自动重放科学计算。下游 ready 后调用可用 `solve-single-crystal` skill，保留 HKLF4 解结构/HKLF5 精修的区别。
 
