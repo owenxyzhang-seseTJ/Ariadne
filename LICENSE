@@ -1,22 +1,29 @@
-MIT License
+Ariadne Commercial License
 
-Copyright (c) 2026 SCXRD Workflow contributors
-Copyright (c) 2026 Ariadne contributors
+Copyright (c) 2026 Ariadne contributors. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+The software in this repository - source code, documentation, schemas,
+configuration, models and reports - is proprietary and is not open source.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+No right to use, copy, modify, merge, publish, distribute, sublicense, sell,
+host for third parties, or prepare derivative works is granted except under a
+separate written commercial license agreement from the copyright holder.
+
+Evaluation: a prospective licensee may use the software for thirty (30) days
+for non-production evaluation, without redistribution or commercial use, as
+described in LICENSING.md.
+
+Releases published up to and including 2026-10-29 (commit 407d193) were
+distributed under the MIT License. That grant is reproduced in LICENSE-MIT and
+remains in force for copies obtained under it.
+
+Files derived from DIALS remain under the BSD-3-Clause license reproduced in
+patches/DIALS-LICENSE. Third-party components retain their own licenses as
+listed in NOTICE.md.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

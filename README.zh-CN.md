@@ -2,7 +2,7 @@
 
 **面向单晶衍射数据还原、多晶格分析与反射强度联合估计的 Agent 原生计算框架。**
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [MIT 开源许可](LICENSE)
+[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [商业许可](LICENSE)
 
 Ariadne 将旋转衍射图像接入保留科学证据的晶体学工作流，覆盖仪器几何、寻峰、晶格假设、联合精修、全反射预测、重叠积分、校正及结构解析交接。应用对象包括小分子、配位化合物和材料晶体，重点关注大晶胞、多取向畴及多个独立晶体共同受照的情形。
 
@@ -313,9 +313,9 @@ ariadne-env dials.index imported.expt strong.refl \
 
 当前几何适配器采用静态旋转模型。完整多源质心似然优化、正式的贝叶斯晶格数选择及轮廓/几何估计误差传播，均不属于已实现数值模型。全局缩放吸收要求几何、LP 与方向有可追溯来源，且只覆盖可辨识的共享低阶项。动态结构解释需要独立标定和可辨识的仪器–样品模型。
 
-## 10. 开源许可与参考资料
+## 10. 许可与参考资料
 
-Ariadne 独立编写的软件和文档采用 [MIT License](LICENSE) 开源。DIALS 派生源码保留其上游 BSD 条款，见 [`patches/DIALS-LICENSE`](patches/DIALS-LICENSE)。第三方依赖保留各自许可。本仓库不分发官方 DAFi 二进制或专有采集/还原程序。
+Ariadne 独立编写的软件和文档为专有软件，商业使用需依据 [LICENSE](LICENSE) 与 [LICENSING.md](LICENSING.md) 取得书面许可；截至提交 407d193 的版本仍可按 [MIT License](LICENSE-MIT) 使用。DIALS 派生源码保留其上游 BSD 条款，见 [`patches/DIALS-LICENSE`](patches/DIALS-LICENSE)。第三方依赖保留各自许可。本仓库不分发官方 DAFi 二进制或专有采集/还原程序。
 
 - Winter 等：**DIALS: implementation and evaluation of a new integration package.** *Acta Crystallographica D* 74, 85–97。[DOI: 10.1107/S2059798317017235](https://doi.org/10.1107/S2059798317017235)。
 - Sevvana 等：**Non-merohedral twinning: from minerals to proteins.** *Acta Crystallographica D*。[DOI: 10.1107/S2059798319010179](https://doi.org/10.1107/S2059798319010179)。

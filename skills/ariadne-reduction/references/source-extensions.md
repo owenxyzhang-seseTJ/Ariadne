@@ -10,7 +10,7 @@
 - `src/dials/algorithms/indexing/model_evaluation.py`：显式选择新评分器时划分 refinement training/holdout，固定共同仪器几何，返回精修晶胞和结构化评分。
 - `src/dials/extensions/ariadne_spotfinder_threshold_ext.py`：加入可配置的候选像素检测插件。
 
-核心补丁位于 plugin 根目录 `patches/dials-3.30.1-ariadne.patch`；DIALS 原许可保留在 `patches/DIALS-LICENSE`。新 companion 模块和工作流为 MIT。启动器通过显式 PYTHONPATH 加载匹配源码和 companion metadata，复用已安装的 DIALS/cctbx/dxtbx 编译扩展；没有修改或重新编译 C++。这不是经过完整编译验证的独立 DIALS 发行版。
+核心补丁位于 plugin 根目录 `patches/dials-3.30.1-ariadne.patch`；DIALS 原许可保留在 `patches/DIALS-LICENSE`。新 companion 模块和工作流随本仓库采用商业许可（见根目录 LICENSE），DIALS 派生部分保留 BSD。启动器通过显式 PYTHONPATH 加载匹配源码和 companion metadata，复用已安装的 DIALS/cctbx/dxtbx 编译扩展；没有修改或重新编译 C++。这不是经过完整编译验证的独立 DIALS 发行版。
 
 ## 寻峰：多尺度统计提议
 
