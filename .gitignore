@@ -26,6 +26,7 @@ delivery.json
 .env.*
 *.log
 *.zip
+!benchmarks/baseline-2b9bd04.zip
 *.tar.gz
 *.expt
 *.refl
