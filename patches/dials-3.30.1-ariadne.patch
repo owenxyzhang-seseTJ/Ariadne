@@ -1,66 +1,76 @@
 --- a/src/dials/algorithms/indexing/model_evaluation.py
 +++ b/src/dials/algorithms/indexing/model_evaluation.py
-@@ -28,7 +28,9 @@
-         "n_indexed",
-         "fraction_indexed",
-         "hkl_offset",
+@@ -30,0 +31 @@
 +        "evidence",
-     ),
+@@ -31,0 +33 @@
 +    defaults=(None,),
- )
- 
- 
-@@ -339,6 +341,18 @@
-     def evaluate(self, experiments, reflections):
-         with LoggingContext("dials.algorithms.refinement", level=logging.ERROR):
-             indexed_reflections = reflections.select(reflections["id"] > -1)
-+            rf = self._params.indexing.basis_vector_combinations.solution_scorer == "ariadne"
+@@ -37 +39,2 @@
+-    for i1, s1 in enumerate(solutions):
++    cells = [(s, s.crystal.get_unit_cell()) for s in solutions]
++    for s1, _ in cells:
+@@ -38,0 +42,2 @@
++        a, b, c = (matrix.col(v) for v in s1.crystal.get_real_space_vectors())
++        space_group = s1.crystal.get_space_group()
+@@ -50 +54,0 @@
+-            a, b, c = (matrix.col(v) for v in s1.crystal.get_real_space_vectors())
+@@ -55 +59 @@
+-                space_group=s1.crystal.get_space_group(),
++                space_group=space_group,
+@@ -58 +62 @@
+-            for s2 in solutions:
++            for s2, unit_cell in cells:
+@@ -62 +66 @@
+-                    s2.crystal.get_unit_cell(), relative_length_tolerance=0.05
++                    unit_cell, relative_length_tolerance=0.05
+@@ -310 +314 @@
+-    def __init__(self, params):
++    def __init__(self, params, *, validation_selection=None):
+@@ -311,0 +316,8 @@
++        self._validation_selection = validation_selection
++        self._ariadne = (
++            self._params.indexing.basis_vector_combinations.solution_scorer == "ariadne"
++        )
++        if self._ariadne:
++            self._params.refinement.parameterisation.beam.fix = ["all"]
++            self._params.refinement.parameterisation.detector.fix = "all"
++            self._params.refinement.parameterisation.goniometer.fix = ["all"]
+@@ -341 +353,14 @@
+-            indexed_reflections = reflections.select(reflections["id"] > -1)
 +            validation = None
-+            if rf:
++            if self._ariadne:
 +                from ariadne.ranking import refinement_partition
-+                partition = refinement_partition(reflections, self._params.indexing.basis_vector_combinations.ariadne)
++
++                partition = refinement_partition(
++                    reflections,
++                    self._params.indexing.basis_vector_combinations.ariadne,
++                    self._validation_selection,
++                )
 +                if partition is None:
 +                    return
 +                indexed_reflections, validation = partition
-+                # Reciprocal-space comparison needs one common instrument geometry.
-+                self._params.refinement.parameterisation.beam.fix = ["all"]
-+                self._params.refinement.parameterisation.detector.fix = "all"
-+                self._params.refinement.parameterisation.goniometer.fix = ["all"]
-             if (
-                 len(indexed_reflections)
-                 < self._params.indexing.basis_vector_combinations.n_indexed_threshold
-@@ -361,12 +375,20 @@
-                 ):
-                     return
-                 model_likelihood = 1.0 - xy_rmsds
++            else:
++                indexed_reflections = reflections.select(reflections["id"] > -1)
+@@ -363,0 +389,7 @@
 +                crystal = experiments.crystals()[0]
 +                candidate_evidence = None
-+                if rf:
++                if self._ariadne:
 +                    from ariadne.ranking import evidence
 +                    crystal = refiner.get_experiments().crystals()[0]
 +                    candidate_evidence = evidence(crystal, validation,
 +                        self._params.indexing.basis_vector_combinations.ariadne)
-                 result = Result(
-                     model_likelihood=model_likelihood,
+@@ -366 +398 @@
 -                    crystal=experiments.crystals()[0],
 +                    crystal=crystal,
-                     rmsds=rmsds,
-                     n_indexed=len(indexed_reflections),
-                     fraction_indexed=float(len(indexed_reflections)) / len(reflections),
-                     hkl_offset=(0, 0, 0),
+@@ -370,0 +403 @@
 +                    evidence=candidate_evidence,
-                 )
-                 return result
 --- a/src/dials/algorithms/indexing/lattice_search/__init__.py
 +++ b/src/dials/algorithms/indexing/lattice_search/__init__.py
-@@ -40,9 +40,40 @@
-         .expert_level = 1
-     sys_absent_threshold = 0.9
-         .type = float(value_min=0.0, value_max=1.0)
+@@ -2,0 +3 @@
++import copy
+@@ -43 +44 @@
 -    solution_scorer = filter *weighted
 +    solution_scorer = filter *weighted ariadne
-         .type = choice
-         .expert_level = 1
+@@ -45,0 +47,31 @@
 +    ariadne
 +    {
 +        holdout_fraction = 0.2
@@ -92,33 +102,76 @@
 +        evidence_directory = None
 +            .type = path
 +    }
-     xy_rmsd_threshold = Auto
-         .type = float(value_min=0.0)
-         .help = "Discard solutions with an xy RMSD (in pixels) greater than this value"
-@@ -171,7 +202,10 @@
-         from dials.algorithms.indexing import model_evaluation
- 
-         solution_scorer = self.params.basis_vector_combinations.solution_scorer
+@@ -174 +206,4 @@
 -        if solution_scorer == "weighted":
 +        if solution_scorer == "ariadne":
 +            from ariadne.ranking import EvidenceRank
 +            solutions = EvidenceRank()
 +        elif solution_scorer == "weighted":
-             weighted_params = self.params.basis_vector_combinations.weighted
-             solutions = model_evaluation.ModelRankWeighted(
-                 power=weighted_params.power,
-@@ -281,6 +315,11 @@
-             preserve_exception_message=True,
-         )
- 
+@@ -191,0 +227,23 @@
++        sel = self.reflections["id"] == -1
++        if self.d_min is not None:
++            sel &= 1 / self.reflections["rlp"].norms() > self.d_min
++        zo = self.reflections["xyzobs.mm.value"].parts()[2]
++        imageset_id = self.reflections["imageset_id"]
++        for i_expt, expt in enumerate(self.experiments):
++            if expt.scan is not None and expt.scan.has_property("oscillation"):
++                start, end = expt.scan.get_oscillation_range()
++                if (end - start) > 360:
++                    # 每轮候选共用首个 360° 的观测范围。
++                    sel.set_selected(
++                        (imageset_id == i_expt)
++                        & (zo > ((start * math.pi / 180) + 2 * math.pi)),
++                        False,
++                    )
++        reflections = self.reflections.select(sel)
++        validation_selection = None
++        if solution_scorer == "ariadne":
++            from ariadne.ranking import holdout_selection
++
++            validation_selection = holdout_selection(
++                reflections, self.params.basis_vector_combinations.ariadne
++            )
+@@ -194,5 +251,0 @@
+-            sel = self.reflections["id"] == -1
+-            if self.d_min is not None:
+-                sel &= 1 / self.reflections["rlp"].norms() > self.d_min
+-            xo, yo, zo = self.reflections["xyzobs.mm.value"].parts()
+-            imageset_id = self.reflections["imageset_id"]
+@@ -200,11 +253 @@
+-            for i_expt, expt in enumerate(self.experiments):
+-                # XXX Not sure if we still need this loop over self.experiments
+-                if expt.scan is not None and expt.scan.has_property("oscillation"):
+-                    start, end = expt.scan.get_oscillation_range()
+-                    if (end - start) > 360:
+-                        # only use reflections from the first 360 degrees of the scan
+-                        sel.set_selected(
+-                            (imageset_id == i_expt)
+-                            & (zo > ((start * math.pi / 180) + 2 * math.pi)),
+-                            False,
+-                        )
++            for expt in self.experiments:
+@@ -221 +264 @@
+-            refl = self.reflections.select(sel)
++            refl = copy.deepcopy(reflections)
+@@ -275 +318,3 @@
+-        evaluator = model_evaluation.ModelEvaluation(self.all_params)
++        evaluator = model_evaluation.ModelEvaluation(
++            self.all_params, validation_selection=validation_selection
++        )
+@@ -284,4 +329,8 @@
+-        for soln in results:
+-            if soln is None:
+-                continue
+-            solutions.append(soln)
 +        if solution_scorer == "ariadne":
 +            from ariadne.ranking import write_trace
 +            write_trace(self.params.basis_vector_combinations.ariadne.evidence_directory,
 +                        results, len(args))
 +
-         for soln in results:
-             if soln is None:
-                 continue
++        accepted = [soln for soln in results if soln is not None]
++        if accepted:
++            solutions.extend(accepted)
 --- /dev/null
 +++ b/src/dials/extensions/ariadne_spotfinder_threshold_ext.py
 @@ -0,0 +1,53 @@

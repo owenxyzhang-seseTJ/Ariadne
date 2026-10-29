@@ -1,0 +1,353 @@
+\documentclass[UTF8,11pt,a4paper,fontset=fandol]{ctexart}
+\usepackage[margin=24mm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,bm,booktabs,array,longtable,tabularx,microtype}
+\usepackage{xcolor,enumitem,fancyhdr}
+\usepackage[unicode,colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!45!black,citecolor=blue!45!black]{hyperref}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.25em}
+\setlist{nosep,leftmargin=2em}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{DIALS / Ariadne：衍射数据处理与算法优化}
+\fancyhead[R]{技术报告}
+\fancyfoot[C]{\thepage}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\T}{\mathsf{T}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\argmax}{\operatorname*{arg\,max}}
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\title{从衍射图像到反射强度：\\DIALS 数据处理的概率原理与计算优化}
+\author{DIALS 3.30.1 / Ariadne 技术报告}
+\date{2026年10月29日}
+\begin{document}
+\maketitle
+\begin{abstract}
+单晶衍射数据处理把探测器上的光子计数转化为带晶格标签、强度和不确定度的反射观测。这一过程同时包含几何反演、离散归属、连续参数估计与噪声传播，因此天然适合用概率推断和数值线性代数统一理解。本文首先建立面向晶体学与人工智能读者的数学框架，解释倒易晶格、Ewald 球、指标化、轮廓积分、多晶格归属和全局缩放之间的联系；随后给出两项计算方法：周期 Gaussian 证据的实空间--Fourier 自适应表示，以及相关 Gaussian 体素概率的条件解析降维。配合候选批量分析、共同留出分区、QR 因子复用和同参数回调复用，计算资源集中到随候选、体素或参数实际变化的部分。固定源码基线的实测显示，候选过滤、周期证据和窄相关轮廓积分获得明显加速；严格等价路径保持原有选择结果、统计模型和不确定度语义，相关轮廓路径则以独立高阶积分验证更高精度。本文将这些改动作为 DIALS Python 源码与 Ariadne 数值扩展的一体化优化交付。
+\end{abstract}
+\tableofcontents
+\newpage
+
+\section{问题定义：数据处理在求什么}
+晶体可视为一个三维基本单元的周期重复。X 射线被电子散射后，在某些方向发生相长干涉，形成探测器上的亮点。实验通常旋转晶体并连续采集图像；同一反射可能跨越多个像素与多张图像。数据处理的任务是确定每个亮点对应哪一组晶面，并估计其总散射强度。
+
+处理结果可概括为
+\begin{equation}
+\bigl\{h,k,l,\ d,\ I,\ \sigma^2(I),\ \text{geometry},\ \text{provenance}\bigr\}.
+\end{equation}
+其中 $(h,k,l)$ 为 Miller 指数，$d$ 在多晶格情形中表示晶畴标签，$I$ 为反射强度。本文用 $d_{hkl}$ 表示晶面间距，避免与晶畴标签混淆。强度对应结构因子模平方，仍需后续结构求解与精修恢复原子模型。
+
+对熟悉 AI 的读者，这是一类带物理前向模型的逆问题：实验几何与晶格参数是连续变量，反射指数及晶畴是离散隐变量，像素是噪声观测。与一般图像分类不同，一个亮点是否有效，最终由它能否加入一致的三维晶格与衍射预测来判断。
+
+\begin{table}[htbp]
+\centering\small
+\caption{晶体学概念与统计学习语言的对应关系。}
+\begin{tabularx}{\linewidth}{@{}lXX@{}}\toprule
+晶体学对象 & 数学对象 & AI 读者可采用的理解 \\\midrule
+晶格与实验几何 & 可微前向映射 & 带物理结构的生成模型 \\
+Miller 指数、晶畴 & 离散标签与隐变量 & 数据关联及混合模型分量 \\
+亮点轮廓 & 归一化空间概率密度 & 观测在像素上的分布核 \\
+积分强度 & 轮廓的幅度参数 & 连续回归系数 \\
+部分重叠反射 & 混合线性观测 & 多源解混与可辨识性 \\
+对称等效反射 & 共享潜在强度 & 参数共享与重复观测 \\
+扫描块留出 & 分组验证划分 & 避免邻近样本泄漏的验证集 \\\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{衍射几何与指标化的数学基础}
+\subsection{实空间周期性为何产生倒易晶格}
+设晶胞的实空间基矢组成矩阵 $D=[\bm a,\bm b,\bm c]$，则平移向量为 $D\bm n$，$\bm n\in\mathbb Z^3$。若采用不含 $2\pi$ 的倒易矢量约定，倒易基矩阵为
+\begin{equation}
+B=D^{-\T},\qquad \bm g_{\bm h}=B\bm h,\qquad \bm h=(h,k,l)^\T\in\mathbb Z^3.
+\end{equation}
+周期电子密度的 Fourier 分量集中在这些倒易点上。散射在满足动量转移等于倒易矢量时增强，因此指标化就是寻找一个晶格，使大量观测散射向量同时接近整数晶格点。
+
+结构因子可写为
+\begin{equation}
+F_{\bm h}=\int_{\rm cell}\rho(\bm r)
+\exp\!\left(2\pi i\bm g_{\bm h}^{\T}\bm r\right)d\bm r,
+\qquad I_{\bm h}\propto |F_{\bm h}|^2.
+\end{equation}
+晶胞度量决定反射位置，胞内原子及电子密度决定反射强弱。数据处理先恢复位置与强度，为后续原子结构反演提供观测。
+
+\subsection{从探测器坐标到散射向量与 Ewald 球}
+设入射、出射波矢分别为 $\bm s_0$ 与 $\bm s_1$，长度均为 $1/\lambda$。像素坐标通过已标定的探测器平面、距离和像素尺寸转换为出射方向，进而得到
+\begin{equation}
+\bm q=\bm s_1-\bm s_0,\qquad
+\|\bm s_0+\bm q\|=\lambda^{-1}.
+\end{equation}
+后一条件描述 Ewald 球。晶体随扫描角 $\varphi$ 旋转，衍射条件成为
+\begin{equation}
+\bm q(\varphi)=R(\varphi)UB\bm h,
+\qquad A=UB.
+\end{equation}
+$U$ 表示晶体取向，$B$ 表示晶胞度量。对应的分辨率关系为 $d_{hkl}=1/\|B\bm h\|$。图像编号提供旋转角，因此三维观测是结合探测器位置与扫描角的几何约束。由散射角 $2\theta$ 可得熟悉的 Bragg 定律 $2d_{hkl}\sin\theta=\lambda$。它与倒易空间的球面相交描述同一衍射条件。有限晶体尺寸、马赛克取向分布和束流发散使理想倒易点展宽，形成跨像素、跨扫描帧的实际轮廓。
+
+\subsection{指标化、整数关联与几何精修}
+给定候选 $A$，分数指数为 $\bm f=A^{-1}\bm q$。接近整数的 $\bm f$ 支持该候选晶格。对于倾斜晶胞，逐坐标四舍五入提供局部整数中心，最近晶格点仍应在实际倒易空间距离下搜索：
+\begin{equation}
+\bm h^*=\argmin_{\bm h\in\mathbb Z^3}\|\bm q-A\bm h\|^2.
+\end{equation}
+关联得到初始整数标签后，几何精修最小化预测与观测位置的白化残差：
+\begin{equation}
+\mathcal L(\theta)=\frac12\sum_i
+\left(\bm x_i-\widehat{\bm x}_i(\bm h_i;\theta)\right)^\T
+C_i^{-1}
+\left(\bm x_i-\widehat{\bm x}_i(\bm h_i;\theta)\right).
+\end{equation}
+$\theta$ 包括允许精修的晶胞、取向及仪器参数，$C_i$ 为质心观测协方差。白化使像素平面与扫描角的不同量纲进入同一统计尺度。DIALS 提供实验模型、反射表、指标分配、预测和精修；Ariadne 在此基础上加入条件证据、多晶格与重叠积分模型。
+
+\section{像素观测、寻峰与积分}
+\subsection{计数噪声与多尺度亮点提议}
+采用标定增益 $g$ 和读出方差 $\sigma_r^2$，像素观测模型为
+\begin{equation}
+N_j\sim\operatorname{Poisson}(\lambda_j),\qquad
+Y_j=o+gN_j+\epsilon_j,\qquad
+\epsilon_j\sim\N(0,\sigma_r^2).
+\end{equation}
+$o$ 为偏置；$g$ 将光子计数转换为 ADU。纯 Poisson 情形适用于真实计数观测；带读出噪声时可以采用 Poisson--Gaussian 卷积似然。
+
+寻峰阶段首先估计局部背景，再在多个尺度聚合超额计数。记某窗口内观测总量为 $O$，背景期望为 $E$，Poisson 偏差分数可写为
+\begin{equation}
+S=\sqrt{2\left[O_+\log(O_+/E)-O_++E\right]},
+\qquad O_+=\max(O,E).
+\end{equation}
+程序保留原有期望计数下限和有效像素比例规则。背景采用带中心排除区的局部环带，并迭代去除正向污染。Poisson--Gaussian 近似分数还包含读出噪声与背景估计方差。窗口求和由可分离 running filter 完成，因此每尺度为 $O(P)$，$P$ 为像素数；不会对每个像素再次遍历整个窗口。阈值输出是后续指标化的候选点，其含义是局部超额信号。
+
+\subsection{强度为何需要轮廓积分}
+一个反射的总强度分散在多个像素和扫描帧上。设第 $k$ 个反射的单位归一化轮廓为 $p_k(\bm x)$，第 $j$ 个体素对应探测器像素面积与扫描角区间 $V_j$，则
+\begin{equation}
+P_{jk}=\int_{V_j}p_k(\bm x)\,d\bm x,\qquad
+\mu_j=b_j+\sum_kP_{jk}I_k.
+\end{equation}
+这里 $I_k$ 是完整轮廓的幅度；有限支持内的概率和可以小于一，描述真实截断质量。轮廓积分将亚像素位置、峰宽和三维相关性传递到强度设计矩阵。经验模板则通过已学习轮廓的插值构造同一个 $P$。
+
+在高计数或给定像素方差时，带符号加权最小二乘为
+\begin{equation}
+\min_{\bm I,\bm\beta}
+\|W(\bm y-P\bm I-B_0\bm\beta)\|^2,
+\qquad W=\diag(v_j^{-1/2}).
+\end{equation}
+$B_0$ 是背景基，$\bm\beta$ 是背景系数。带符号估计可保留弱反射的统计信息。需要非负强度及低计数模型时，使用对应的约束似然；Poisson--Gaussian 的单像素密度为
+\begin{equation}
+p(y\mid\lambda)=\sum_{n=0}^{\infty}
+\frac{e^{-\lambda}\lambda^n}{n!}
+\frac{\exp[-(y-o-gn)^2/(2\sigma_r^2)]}{\sqrt{2\pi\sigma_r^2}}.
+\end{equation}
+实现通过有预算的对数求和计算该卷积。似然区间在固定目标分量或总量时重新优化其他强度；其阈值采用一自由度卡方渐近标度。该路径的背景由背景像素 WLS 估计后固定，区间对应这一条件模型。
+
+\subsection{位置 nuisance 与可辨识性}
+位置偏差也会改变像素分配。对每个轮廓作一阶展开，
+\begin{equation}
+p_k(\bm x;\bm c_k+\bm\delta_k)
+\simeq p_k(\bm x;\bm c_k)
++\sum_{a=1}^3D_{ka}(\bm x)\delta_{ka}.
+\end{equation}
+引入矩变量 $m_{ka}=I_k\delta_{ka}$ 后，局部模型保持线性：$\bm\mu=P\bm I+D\bm m+B_0\bm\beta$。将位置导数与背景一起消去，可得到边缘化这些 nuisance 后的强度协方差。
+
+重叠轮廓的两列若几乎相同，单个强度不能稳定分开，总强度却仍可能确定。对归一化后的设计矩阵作 SVD，$\widetilde P=USV^\T$，以保留奇异子空间求解，并用零空间判断线性对比 $\bm c^\T\bm I$ 是否可辨识。若列尺度矩阵为 $D_s$，条件为
+\begin{equation}
+V_0^\T D_s^{-1}\bm c=0.
+\end{equation}
+这将“能拟合出一个数”与“观测能够唯一确定这个量”分开，是重叠反射处理中比单纯残差更关键的判断。
+
+\section{多晶格与全局尺度：一个统一的概率视角}
+\subsection{多晶格质心关联与 EM}
+多个晶畴同时衍射时，观测亮点可能对应不同取向的晶格。利用各晶格的完整预测集合，质心密度可写成
+\begin{equation}
+p(\bm x_i\mid\theta)=\pi_0u(\bm x_i)+
+\sum_d\pi_d\sum_{h\in\mathcal H_d}w_{dh}
+\N\!\left(\bm x_i;\widehat{\bm x}_{dh}(\theta_d),C_i\right).
+\end{equation}
+$u$ 表示背景或未匹配成分，$w_{dh}$ 是归一化预测权重。EM 的 E 步计算归属责任度，M 步在责任度加权下更新连续几何参数。对 AI 读者，这等同于带可微物理预测器的混合模型，而不是把每个亮点提前硬分配给一个晶格。
+
+完整协方差控制白化距离；预测集合与混合归一化决定密度尺度。扫描块留出评价新增晶格是否能改善未参与精修的数据。本文的候选证据仍属于条件精修留出：候选生成与初始整数关联看到了完整输入，因此报告保留这一验证语义。
+
+\subsection{共享全局缩放与吸收}
+同一个等效反射在不同扫描位置会受到照射、尺度与方向吸收的影响。复合观测块 $b$ 的模型为
+\begin{equation}
+\bm\mu_b=D_b\left[
+\bm k_b\odot\exp(X_b\bm\gamma)\odot\bm I_{e_b}
+\right].
+\end{equation}
+$D_b$ 将多个贡献映射到可观测分量或总量，$\bm k_b$ 包含已知前向因子，$X_b\bm\gamma$ 包括共享扫描尺度与二阶方向项。等效反射在同一晶畴内共享 $I_e$；不同晶畴可有不同强度。已分开的分量使用完整协方差，只有总量可辨识的组使用求和观测。
+
+固定 $\bm\gamma$ 时，$\bm I$ 由线性 WLS 求解；固定 $\bm I$ 时，尺度由非线性最小二乘更新，随后可对耦合方向联合优化。特征全局中心化固定尺度规范。最终以完整联合 Jacobian $J_w$ 计算
+\begin{equation}
+\operatorname{Cov}(\widehat\theta)=(J_w^\T J_w)^+,
+\qquad \theta=(\bm I,\bm\gamma).
+\end{equation}
+输出同时包含同源参数--观测交叉协方差，用于向校正强度传播不确定度。总量可辨识而分量校正不同的组参与拟合，保留 fit-only 语义。
+
+\subsection{对称等效、合并与输出质量}
+晶体的空间群为反射之间提供对称关系。若空间群操作将 $\bm h$ 映射到 $\bm h'$，相应观测在规定的散射模型下共享等效强度。吸收、曝光与几何因子应先校正，再将重复观测汇总。存在反常散射时，Friedel 对 $\bm h$ 与 $-\bm h$ 按数据处理设定分别保留。
+
+在相互独立的标量误差近似下，一组等效观测 $J_i$ 的合并估计为
+\begin{equation}
+\overline I_h=\frac{\sum_{i\in h}w_iJ_i}{\sum_{i\in h}w_i},\qquad
+\operatorname{Var}(\overline I_h)=\frac1{\sum_{i\in h}w_i},\qquad
+w_i=\operatorname{Var}(J_i)^{-1}.
+\end{equation}
+全局尺度或重叠积分使误差相关时，可使用协方差矩阵 $C$ 的广义最小二乘形式
+\begin{equation}
+\overline I_h=\frac{\bm1^\T C^{-1}\bm J}{\bm1^\T C^{-1}\bm1},\qquad
+\operatorname{Var}(\overline I_h)=(\bm1^\T C^{-1}\bm1)^{-1}.
+\end{equation}
+常见质量描述包括完备度（测得的独立反射占目标范围理论反射的比例）、冗余度（每个独立反射的平均重复次数）、信噪比 $I/\sigma(I)$ 和分辨率。$R_{\rm merge}=\sum_{hi}|J_{hi}-\overline I_h|/\sum_{hi}J_{hi}$ 描述重复观测离散程度，$CC_{1/2}$ 则比较随机分成两半后独立合并强度的相关性。这些量分别回答覆盖是否充分、重复信息多少、观测是否精确及半数据是否一致。结构模型的正确性还需要后续结构求解与精修证据。
+
+\section{算法贡献一：周期证据的双表示计算}
+\subsection{将候选晶格看作周期概率模型}
+单个晶格的证据不宜只统计“离整数够近”的比例。晶胞越大，倒易晶格越密，随机观测也越容易靠近某个点。周期密度比同时引入噪声尺度与基本胞体积：
+\begin{equation}\label{eq:real}
+r(\bm f)=\frac{|\det A|}{(2\pi\sigma^2)^{3/2}}
+\sum_{\bm n\in\mathbb Z^3}
+\exp\left[-\frac{\|A(\bm f-\bm n)\|^2}{2\sigma^2}\right].
+\end{equation}
+该量相对于基本胞中的均匀密度归一化；得分使用 Gaussian 与均匀成分的混合对数密度
+\begin{equation}
+\ell(\bm f)=\log\bigl[(1-\eta)+\eta r(\bm f)\bigr].
+\end{equation}
+最终可用性仍由匹配数、非零 HKL、三维秩和均值证据阈值共同决定。
+
+\subsection{Poisson 求和把宽峰变成短 Fourier 级数}
+式\eqref{eq:real} 在 $\sigma$ 很小时只需少量近邻图像；当 Gaussian 相对倒易胞变宽，实空间项数快速增长。Poisson 求和给出同一无限周期模型的对偶表示：
+\begin{equation}\label{eq:fourier}
+r(\bm f)=\sum_{\bm k\in\mathbb Z^3}
+\exp\left[-2\pi^2\sigma^2\|A^{-\T}\bm k\|^2\right]
+\exp(2\pi i\bm k^\T\bm f).
+\end{equation}
+将 $\pm\bm k$ 共轭项配对，得到 $1+2\sum_{\bm k\in K_+}c_k\cos(2\pi\bm k^\T\bm f)$。Gaussian 越宽，Fourier 系数衰减越快；这与实空间恰好互补。
+
+实现按截断盒项数选择表示。Fourier 截断半径采用
+\begin{equation}
+K_j=\left\lceil\frac{\max(8,t)\,\|A_{:j}\|}{2\pi\sigma}\right\rceil,
+\end{equation}
+其中 $t$ 为既有尾部尺度。只有 Fourier 项数更少且共轭系数总和小于 $1/2$ 时进入该路径；后一条件同时给出 $r>1/2$ 的正下界。该切换规则针对宽峰区域，保持稳定的对数求值。两种有限截断对应同一个无限模型，数值误差由独立直接求和比较记录。
+
+最近晶格点匹配与密度计算分别求解：实空间使用标量平方距离矩阵，Fourier 路径通过对原有有限图像集合建立 KD-tree 得到最近距离与整数偏移。这样既保留匹配和 HKL 诊断，又避免为每个观测建立 $N\times T\times3$ 位移张量。已有周期半径预算继续决定候选接受范围。
+
+\section{算法贡献二：相关体素概率的条件解析降维}
+三维中点 cubature 的节点数随三个轴的分辨率相乘，且每节点重新建立位移张量。新的计算方式先解析消去一个轴，再对另外两轴高阶求积。
+
+令 Gaussian 精度矩阵为 $Q=\Sigma^{-1}$，选择条件最窄的轴 $a=\argmax_iQ_{ii}$，剩余轴记为 $B$。则
+\begin{equation}
+X_a\mid X_B=\bm x_B\sim\N\!\left(
+\mu_a-\frac{Q_{aB}(\bm x_B-\bm\mu_B)}{Q_{aa}},\ \frac1{Q_{aa}}\right).
+\end{equation}
+对体素 $V=V_a\times V_B$，有
+\begin{equation}\label{eq:conditional}
+P(V)=\int_{V_B}\phi_2(\bm x_B;\bm\mu_B,\Sigma_{BB})
+\left[\Phi\!\left(\frac{u_a-m_a(\bm x_B)}{s_a}\right)
+-\Phi\!\left(\frac{l_a-m_a(\bm x_B)}{s_a}\right)\right]d\bm x_B.
+\end{equation}
+式\eqref{eq:conditional} 中括号是精确条件区间概率；二维积分采用 Gauss--Legendre 节点。各数值轴节点数为
+\begin{equation}
+n_j=\max\!\left(6,\left\lceil3\sqrt{Q_{jj}}\right\rceil+2\right).
+\end{equation}
+联合条件宽度同时约束边际密度和条件 CDF 变化的分辨率。64 节点预算施加在两个数值轴上；解析轴无需离散节点。该规则由旋转峰、窄峰与强相关峰的独立积分比较验证，误差数据对应所测试的参数域。
+
+计算使用三个一维广播坐标，条件区间关于零反射以稳定计算尾部 CDF 差。对角协方差继续使用三个一维区间概率的外积。方法同时减少三维节点乘积、删除向量位移临时数组，并改善窄峰积分精度。
+
+\section{让计算遵循不变量与子空间结构}
+\subsection{候选搜索：共同输入只准备一次}
+一次候选搜索内，未索引反射选择、分辨率范围及首个 $360^\circ$ 扫描范围相同。新路径在候选循环外准备反射子集，每个候选再取得独立深拷贝用于赋值。scan-block 留出掩膜同样共享；训练集始终与当前候选的已索引掩膜相交。共同划分从约 $O(CN\log N)$ 变为 $O(N\log N+CN)$。
+
+原生过滤排序器已提供 \code{extend} 接口。旧循环每追加一个候选都重新分析已收集结果，倍胞筛查最坏累计 $O(C^3)$；批量加入后分析一次，降为 $O(C^2)$。进一步把晶胞、实空间矢量和空间群读取移到内循环外，删除重复对象访问。默认 weighted 和 Ariadne 排序保留候选次序及并列选择规则。
+
+\subsection{积分：一个 nuisance 子空间只分解一次}
+设白化 nuisance 矩阵 $N_w$ 的带主元分解为
+\begin{equation}
+N_w\Pi=QR,\qquad Q_r=Q_{:r},\quad R_r=R_{:r,:r}.
+\end{equation}
+选定的独立 nuisance 基已经具有 $Q_rR_r$ 分解，可直接用于
+\begin{equation}
+\widetilde P=P_w-Q_r(Q_r^{\T}P_w),\qquad
+\widetilde y=y_w-Q_r(Q_r^{\T}y_w).
+\end{equation}
+新路径复用这些因子、白化信号与观测，不再为同一基重复 QR；强度 SVD、背景回代及完整位置矩的独立可辨识性求解仍按原数学关系执行。被删除的重复 QR 约需 $O(N_vr^2)$ 工作。
+
+Gaussian 模板分派在入口直接返回；三维网格只在经验模板插值时创建。对角 Gaussian 尤其受益，因为它本来只需要一维坐标。
+
+\subsection{缩放与寻峰：围绕数据寿命复用}
+非线性优化器经常在同一参数点分别请求残差和 Jacobian。\code{fit_global} 共享最近一次精确参数 $(\bm I,\bm\gamma)$ 的完整模型结果，参数副本保证原地修改后失效；预算检查仍在每次调用时执行。优化器、迭代与协方差模型保持原样。
+
+寻峰中，共同背景和像素数组在最后一次背景估计后复用。完成依赖原值的支持掩膜后，对本次调用拥有的数组原位掩膜；尺度分数原位归约。其收益来自减少数组准备和分配，不改变 running filter 的次数。
+
+\section{性能与数值证据}
+\subsection{测量口径}
+性能基线固定为 Ariadne 提交 \code{2b9bd04} 的相应模块与优化前 DIALS overlay。基准在 Python 3.12.15、NumPy 2.5.4、SciPy 1.18.1、macOS arm64 上运行，BLAS 线程固定为 1；随机种子为 20261029。每项先执行一次预热，再以五次 wall-clock 测量的中位数报告
+\begin{equation}
+\text{速度比}=T_{\rm before}/T_{\rm after}.
+\end{equation}
+内存采用单独运行中的 \code{tracemalloc} 峰值分配。原始重复耗时、尺寸、环境和误差存入随附 JSON。以下数字属于相应计算核心；原始图像读取、完整实验约化及文件 I/O 未计入。
+
+\begin{table}[htbp]
+\centering\small
+\caption{相应计算核心的实测速度比。速度比大于 1 表示优化后更快。}
+\begin{tabular}{@{}lrrr@{}}\toprule
+计算核心 & 原耗时 / ms & 新耗时 / ms & 速度比 \\\midrule
+原生候选过滤与倍胞分析 & 774.394 & 7.135 & 108.54$\times$ \\
+周期证据：宽峰 Fourier 表示 & 156.394 & 5.018 & 31.16$\times$ \\
+周期证据：窄峰实空间 & 3.748 & 1.694 & 2.21$\times$ \\
+共同 scan-block 留出分区 & 433.927 & 70.536 & 6.15$\times$ \\
+Gaussian 模板分派 & 6.910 & 1.459 & 4.73$\times$ \\
+位置 nuisance QR 复用 & 12.649 & 11.235 & 1.13$\times$ \\
+全局缩放：已收敛样例 & 35.686 & 18.479 & 1.93$\times$ \\
+全局缩放：带噪压力样例 & 2027.243 & 1831.596 & 1.11$\times$ \\
+多尺度寻峰 & 219.411 & 207.010 & 1.06$\times$ \\
+\bottomrule\end{tabular}
+\end{table}
+\begin{table}[htbp]
+\centering\small
+\caption{条件解析积分的速度与精度。绝对误差相对于独立 96 阶三维积分的代表体素概率。}
+\begin{tabular}{@{}lrrrr@{}}\toprule
+轮廓类型 & 原 / ms & 新 / ms & 速度比 & 绝对误差：原 $\to$ 新 \\\midrule
+宽相关峰 & 0.977 & 1.135 & 0.86$\times$ & $2.91\times10^{-4} \to 1.64\times10^{-15}$ \\
+普通旋转峰 & 5.543 & 1.780 & 3.11$\times$ & $1.36\times10^{-3} \to 3.78\times10^{-13}$ \\
+窄相关峰 & 67.465 & 9.257 & 7.29$\times$ & $6.63\times10^{-4} \to 3.33\times10^{-16}$ \\
+\bottomrule\end{tabular}
+\end{table}
+宽峰周期证据的峰值追踪分配从 51.09 MiB 降到 1.44 MiB；Gaussian 模板分派从 30.38 MiB 降到 3.54 MiB。Fourier 路径的对数密度最大差为 $2.31\times10^{-15}$，窄峰实空间为 $1.14\times10^{-13}$。位置复用的强度最大差为 $9.95\times10^{-14}$，协方差最大差为 $8.67\times10^{-19}$。缩放参数及协方差在对照样例中逐元素精确一致。
+寻峰峰值追踪分配从 108.00 MiB 变为 116.00 MiB；位置求解及缩放复用也保留部分最近结果，因此加速并不等同于所有核心的峰值内存同时下降。
+
+\subsection{为什么这些改动有效}
+周期证据的优势来自表示切换：宽峰不再为每个观测遍历庞大的实空间位移张量；窄峰则保留短实空间求和。批量排序的优势来自删除重复全体分析，在候选数增加时收益更突出。共享留出分区减少了重复排序和分块，Gaussian 分派删除了确定无用的三维网格。
+
+条件积分同时改变精度与成本：普通旋转峰和窄峰减少节点工作并提高精度；宽峰原中点节点很少，新方法将更多计算用于高精度概率。该宽峰结果与其他模型共同保留在表中。缩放的带噪声压力样例保持原有迭代耗尽状态，旧新参数与协方差一致；另有已知真值样例在两版中均收敛，其性能单独报告。
+
+\subsection{能力保持的验证}
+最终科学算法回归共 75 项通过，无失败或跳过。等价路径的检查包括：不同候选赋值下共享分区与旧版逐次划分一致；两种噪声模型的寻峰掩膜精确相同；原生候选循环的扫描/分辨率选择及赋值隔离成立；七种倍胞组合保留原决策；排序结果和文本次序一致。位置积分与重新 QR、完整 WLS 参考比较强度和边缘协方差；缓存路径比较强度、尺度、联合协方差与响应矩阵。
+
+相关轮廓以独立的 NumPy 72/96 阶三维 Gaussian 密度求积检验。参考自身的最大收敛差为 $5.55\times10^{-15}$，14 个参考体素上的生产结果最大绝对差为 $4.96\times10^{-13}$。另外验证六种轴置换、正负尾、边界边际质量和对角退化。像素低计数似然、非负区间、多晶格 EM 与全局校正导出的既有回归继续验证相连能力。
+
+DIALS 安装补丁从官方原始文件重建，重新应用后与开发 overlay 逐字节一致。修改通过 Python overlay 使用现有 DIALS 编译扩展，交付不要求重编译 C++。
+
+\section{实现组织与复现}
+本次工作分为三层：DIALS 原生候选搜索与排序；Ariadne 中由 DIALS 扩展调用的寻峰及候选证据；重叠积分与全局缩放数值模块。报告中的贡献明确对应这些实现范围。经典 Poisson 求和、条件 Gaussian 与 QR/SVD 是方法基础；本次算法设计在于依据噪声/晶格尺度切换表示、选择解析方向，并将这些结构落实到实际反射处理路径。
+
+关键文件包括 \code{python/src/ariadne/ranking.py}、\code{spots.py}，数值脚本目录中的 \code{profile_geometry.py}、\code{overlap_prepare.py}、\code{overlap_integrator.py}、\code{composite_scaling.py}，以及 \code{patches/dials-3.30.1-ariadne.patch}。
+
+基准程序与固定源码基线分别为：
+\begin{quote}\small
+\code{benchmarks/optimization.py}\\
+\code{benchmarks/baseline-2b9bd04.zip}
+\end{quote}
+在已安装的 Ariadne 开发环境中执行：
+\begin{quote}\small\ttfamily
+ariadne-env python benchmarks/optimization.py --repeats 5
+\end{quote}
+报告可由 XeLaTeX 编译，表格与数值已直接包含在此源文件中。验证摘要与全部原始测量随报告一起交付。
+
+\section{结论}
+衍射数据处理可以统一为从光子计数到几何、离散标签和强度参数的物理概率推断。沿这一结构优化计算，比孤立压缩语句更能形成持久收益：为周期证据选择合适的数学表示，为相关轮廓解析消去最窄方向，为候选群体和 nuisance 子空间复用共同信息。新的实现将候选搜索、像素积分和全局缩放连接在同一套可辨识性与不确定度语义下，并用固定基线、独立积分与实际 DIALS 调用验证收益。最终得到的是计算工作更少、数值路径更直接、算法依据与实现位置可对应的衍射处理代码。
+
+\begin{thebibliography}{9}
+\bibitem{dials} DIALS developers. \emph{DIALS source code, release v3.30.1}. \url{https://github.com/dials/dials/tree/v3.30.1}.
+\bibitem{scipy-distance} SciPy developers. \emph{Spatial distance and KD-tree reference}. \url{https://docs.scipy.org/doc/scipy/reference/spatial.html}.
+\bibitem{scipy-special} SciPy developers. \emph{Special functions: ndtr, roots\_legendre and logsumexp}. \url{https://docs.scipy.org/doc/scipy/reference/special.html}.
+\bibitem{scipy-opt} SciPy developers. \emph{Least-squares optimization reference}. \url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html}.
+\end{thebibliography}
+\end{document}

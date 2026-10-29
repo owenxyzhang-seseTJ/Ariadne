@@ -212,8 +212,16 @@ def fit_global(blocks, *, max_iterations=100, tolerance=1e-8, rcond=1e-10,
         yw = np.concatenate([solve_triangular(b[1], b[0], lower=True, check_finite=False)
                              for b in prepared])
 
+        cached_parameters = cached_model = None
+
         def model(intensity, beta):
+            nonlocal cached_parameters, cached_model
             check_time()
+            # 残差与雅可比共享最近一次精确参数结果；副本防止求解器原地修改参数。
+            if (cached_parameters is not None
+                    and np.array_equal(intensity, cached_parameters[0])
+                    and np.array_equal(beta, cached_parameters[1])):
+                return cached_model
             raw_a, raw_b, gains = [], [], []
             with np.errstate(over='raise', invalid='raise', divide='raise', under='ignore'):
                 for _, lower, design, x, known, indices in prepared:
@@ -237,7 +245,9 @@ def fit_global(blocks, *, max_iterations=100, tolerance=1e-8, rcond=1e-10,
             if not np.all(np.isfinite(jw)) or not np.all(np.isfinite(residual)):
                 raise _StopFit('nonfinite_model')
             check_time()
-            return residual, jw, raw_j, gains
+            cached_parameters = intensity.copy(), beta.copy()
+            cached_model = residual, jw, raw_j, gains
+            return cached_model
 
         intensity = np.zeros(n)
         beta = np.zeros(p)

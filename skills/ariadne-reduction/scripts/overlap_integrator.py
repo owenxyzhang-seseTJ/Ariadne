@@ -35,8 +35,15 @@ def solve_joint(data, variance, profiles, valid, background, rcond):
         raise ValueError('Too few valid pixels for joint signal/background fit')
     weight = 1 / np.sqrt(v)
     Pw, Bw, yw = P * weight[:, None], B * weight[:, None], y * weight
-    # QR removes the nuisance background without constructing an Npixel-square projector.
+    # QR 消去背景，避免构造像素数平方大小的投影矩阵。
     Q, R = qr(Bw, mode='economic')
+    return _solve_joint_from_qr(y, v, Pw, yw, profiles, valid, background, rcond, Q, R)
+
+
+def _solve_joint_from_qr(y, v, Pw, yw, profiles, valid, background, rcond, Q, R):
+    """复用已加权数组与背景 QR，完成投影、信号 SVD 与背景回代。"""
+    if len(y) <= Pw.shape[1] + background.shape[1] + 2:
+        raise ValueError('Too few valid pixels for joint signal/background fit')
     if np.min(np.abs(np.diag(R))) <= np.max(np.abs(np.diag(R))) * 1e-12:
         raise ValueError('Background basis is rank deficient')
     design = Pw - Q @ (Q.T @ Pw)
@@ -55,7 +62,7 @@ def solve_joint(data, variance, profiles, valid, background, rcond):
     beta = solve_triangular(R, Q.T @ (yw - Pw @ intensities))
     fitted = profiles @ intensities + background @ beta
     chi2 = float(np.sum((y - fitted[valid]) ** 2 / v))
-    dof = len(y) - rank - B.shape[1]
+    dof = len(y) - rank - background.shape[1]
     return {'intensities_internal': intensities, 'covariance_identifiable_subspace': covariance,
             'nullspace': Vh[rank:], 'column_scales': scales, 'rank': rank,
             'singular_values': singular, 'background_coefficients': beta, 'fitted': fitted,
@@ -65,8 +72,9 @@ def solve_joint(data, variance, profiles, valid, background, rcond):
 def solve_position_joint(data, variance, profiles, valid, background, derivatives, rcond, tolerance, max_shift):
     """消去位置导数与背景，保留强度的完整边缘协方差。"""
     count = profiles.shape[1]
+    y, v = data[valid], variance[valid]
     nuisance = np.column_stack((background, derivatives))
-    weights = 1 / np.sqrt(variance[valid])
+    weights = 1 / np.sqrt(v)
     weighted = nuisance[valid] * weights[:, None]
     norms = np.linalg.norm(weighted, axis=0)
     nonzero = np.flatnonzero(norms > 1e-15)
@@ -76,7 +84,9 @@ def solve_position_joint(data, variance, profiles, valid, background, derivative
     selected = nonzero[pivots[:nuisance_rank]]
     basis = nuisance[:, selected] / norms[selected]
     # 单独消去所有 nuisance 方向，避免不可辨识的位置参数制造强度信息。
-    result = solve_joint(data, variance, profiles, valid, basis, rcond)
+    result = _solve_joint_from_qr(y, v, profiles[valid] * weights[:, None], y * weights,
+                                  profiles, valid, basis, rcond,
+                                  Q[:, :nuisance_rank], R[:nuisance_rank, :nuisance_rank])
     coefficients = np.zeros(nuisance.shape[1])
     coefficients[selected] = result['background_coefficients'] / norms[selected]
     # 用完整设计检验每个 I*delta 是否可辨识，不发布任意零空间分解。

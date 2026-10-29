@@ -44,19 +44,19 @@ def connected_boxes(boxes):
 
 
 def template_values(entry, load_template, centre, bounds):
+    if not entry.get('template'):
+        covariance = np.asarray(entry['covariance_px_xyz'], dtype=float).reshape(3, 3)
+        return gaussian_voxels(covariance, centre, bounds)
     x0, x1, y0, y1, z0, z1 = bounds
     z, y, x = np.mgrid[z0:z1, y0:y1, x0:x1]
     offsets = np.stack((x + .5 - centre[0], y + .5 - centre[1], z + .5 - centre[2]), axis=-1)
-    if entry.get('template'):
-        values = np.zeros(z.shape)
-        for item in entry.get('template_mixture', [{'template': entry['template'], 'weight': 1.}]):
-            template = load_template(item['template'])
-            origin = (np.asarray(template.shape) - 1) / 2
-            xyz = offsets[..., ::-1] + origin
-            values += item['weight'] * map_coordinates(template, xyz.reshape(-1, 3).T, order=1, mode='constant', cval=0).reshape(z.shape)
-        return values
-    covariance = np.asarray(entry['covariance_px_xyz'], dtype=float).reshape(3, 3)
-    return gaussian_voxels(covariance, centre, bounds)
+    values = np.zeros(z.shape)
+    for item in entry.get('template_mixture', [{'template': entry['template'], 'weight': 1.}]):
+        template = load_template(item['template'])
+        origin = (np.asarray(template.shape) - 1) / 2
+        xyz = offsets[..., ::-1] + origin
+        values += item['weight'] * map_coordinates(template, xyz.reshape(-1, 3).T, order=1, mode='constant', cval=0).reshape(z.shape)
+    return values
 
 
 def prepare(args):
