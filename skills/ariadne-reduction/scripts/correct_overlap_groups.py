@@ -94,7 +94,8 @@ def correct(args):
                              'corrected_component_intensities': corrected_components.tolist() if corrected_components is not None else None,
                              'corrected_component_covariance': corrected_covariance.tolist() if corrected_covariance is not None else None,
                              'intensity_definition': record.get('intensity_definition'),
-                             'covariance_scope': record.get('covariance_scope')})
+                             'covariance_scope': ('local joint scale/intensity Gaussian covariance, including same-data cross terms; conditional on geometry, LP and model basis'
+                                                  if corrections.get('global_parameter_covariance') else record.get('covariance_scope'))})
     reject_path = args.output / 'rejected_groups.json'
     reject_path.write_text(json.dumps(rejected, indent=2) + '\n')
     metadata = {'record': 'metadata', 'schema': 'scxrd-observations/1', 'corrected': True,
@@ -108,7 +109,8 @@ def correct(args):
                 'overlap_model': 'joint fixed empirical profiles; nuisance background eliminated; identifiability-aware covariance',
                 'source_integrated_groups': str(args.integrated.resolve()),
                 'export_loss': 'HKLF5 does not encode full component/cross-observation covariance; preserve this master JSONL and original integrated groups',
-                'cross_group_covariance': 'retain correction model separately; HKLF5 does not encode it'}
+                'global_parameter_covariance': corrections.get('global_parameter_covariance'),
+                'cross_group_covariance': 'retain joint parameter covariance and same-data sensitivities in global scaling master record; HKLF5 does not encode it' if corrections.get('global_parameter_covariance') else 'retain correction model separately; HKLF5 does not encode it'}
     with (args.output / 'corrected_observations.jsonl').open('x') as handle:
         handle.write(json.dumps(metadata) + '\n')
         for observation in observations:

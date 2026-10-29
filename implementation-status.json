@@ -14,7 +14,13 @@
     "full-profile/observed-amplitude semantics and double-partiality correction guard",
     "corrected component covariance transport",
     "same-phase HKLF5 gate, export loss and observation-line mapping",
-    "nine MCP tools with scientific adapter registry and native prediction"
+    "nine MCP tools with scientific adapter registry and native prediction",
+    "first-order XYZ pixel-position nuisance with marginalized intensity covariance",
+    "analytic diagonal-Gaussian voxel probabilities",
+    "conditional profile-likelihood nonnegative component/total intervals",
+    "bounded full Poisson-Gaussian convolution with truncation diagnostics",
+    "exclusive single-source centroid EM with native DIALS U/B prediction and full-covariance whitening",
+    "common scan-block predictive log-density comparisons across predeclared lattice hypotheses"
   ],
   "retained": [
     "multiscale calibrated spot proposals",
@@ -24,18 +30,16 @@
     "signed-WLS QR/SVD pixel integrator",
     "solve-single-crystal handoff"
   ],
-  "tests": "not_run_as_requested",
+  "tests": "targeted numerical regression and native DIALS synthetic adapter checks; see references/algorithm-upgrades.md",
   "mcp_connection": "not_tested",
   "benchmarks": "not_run",
   "not_implemented": [
     "full multi-source-centroid likelihood joint refinement",
     "formal Bayesian K selection",
-    "global composite-aware scale/absorption estimator",
-    "nonnegative-boundary confidence intervals",
-    "full Poisson-Gaussian convolution likelihood",
-    "geometry/profile error propagation",
-    "SyntheticTwinBench"
+    "SyntheticTwinBench",
+    "nonlinear profile-shape and independent instrument-calibration uncertainty propagation",
+    "full real-data comparative benchmark and exact boundary-interval coverage calibration"
   ],
-  "inspection": "source and API reading; software installation metadata; plugin registration only",
+  "inspection": "source/API review and targeted known-truth numerical verification; no general real-data performance claim",
   "compiled_extensions": "unmodified installed DIALS/cctbx/dxtbx binaries; no C++ rebuild"
 }

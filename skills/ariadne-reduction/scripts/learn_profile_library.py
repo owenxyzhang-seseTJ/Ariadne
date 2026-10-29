@@ -18,7 +18,7 @@ def learn(args):
     config = json.loads(args.calibration.read_text())
     if config.get('schema') != 'scxrd-profile-calibration/1':
         raise ValueError('Unsupported calibration schema')
-    for key in ('isolation_provenance', 'background_provenance', 'noise_model', 'basis',
+    for key in ('isolation_provenance', 'isolated_source_rows', 'background_provenance', 'noise_model', 'basis',
                 'experiment_to_domain', 'complete_prediction_provenance'):
         if not config.get(key):
             raise ValueError('Missing calibration evidence: ' + key)
@@ -54,6 +54,7 @@ def learn(args):
         foreground = (flags & int(MaskCode.Foreground)) != 0
         signal = np.where(valid & foreground, np.maximum(data - background, 0), 0)
         if not np.all(np.isfinite(signal)) or signal.sum() <= 0:
+            rejected.append({'source_row': int(source[i]), 'reason': 'no_positive_foreground_signal'})
             continue
         normalized = signal / signal.sum()
         grid = np.asarray(np.meshgrid(*[np.arange(n) + .5 for n in signal.shape], indexing='ij'))

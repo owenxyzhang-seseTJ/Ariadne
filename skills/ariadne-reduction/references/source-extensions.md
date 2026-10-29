@@ -1,6 +1,6 @@
 # Ariadne 0.5.0 源码扩展与 agent 接口
 
-本版是实验实现，未运行科学数据、单元测试、冒烟测试或基准。以下记录实现与依据，不提供性能结论。
+本版是实验实现。2026年10月26日新增方法已运行针对性数值与 DIALS 合成接口验证，见 [algorithm-upgrades.md](algorithm-upgrades.md)；实测数据完整基准仍未执行。以下记录实现与依据，不提供普遍性能结论。
 
 ## 修改范围与部署
 
@@ -10,7 +10,7 @@
 - `src/dials/algorithms/indexing/model_evaluation.py`：显式选择新评分器时划分 refinement training/holdout，固定共同仪器几何，返回精修晶胞和结构化评分。
 - `src/dials/extensions/ariadne_spotfinder_threshold_ext.py`：加入可配置的候选像素检测插件。
 
-核心补丁位于 plugin 根目录 `patches/dials-3.30.1-ariadne.patch`；DIALS 原许可保留在 `patches/DIALS-LICENSE`。新 companion 模块和工作流为 MIT。启动器通过显式 PYTHONPATH 加载匹配源码和 companion metadata，复用已安装的 DIALS/cctbx/dxtbx 编译扩展；没有修改或重新编译 C++。这不是经过完整编译验证的独立 DIALS 发行版。
+核心补丁位于 plugin 根目录 `patches/dials-3.30.1-ariadne.patch`；DIALS 原许可保留在 `patches/DIALS-LICENSE`。新 companion 模块和工作流随本仓库采用商业许可（见根目录 LICENSE），DIALS 派生部分保留 BSD。启动器通过显式 PYTHONPATH 加载匹配源码和 companion metadata，复用已安装的 DIALS/cctbx/dxtbx 编译扩展；没有修改或重新编译 C++。这不是经过完整编译验证的独立 DIALS 发行版。
 
 ## 寻峰：多尺度统计提议
 
@@ -64,11 +64,11 @@ ariadne-env python scripts/learn_profile_library.py REFERENCES.refl calibration.
 
 ## Agent 原生接口
 
-MCP stdio server 使用官方 Python SDK 1.30.0，配置在 plugin 根目录 `.mcp.json`。工具：`capabilities`、`create_job`、`start_operation`、`inspect_job`、`read_artifact`、`record_acceptance`、`make_handoff`。提供结构化输入/输出；长计算立即返回 operation id，后台 worker 保存状态、argv 与日志。只允许固定 DIALS 操作和 typed 参数；输出固定为当前新 attempt 内文件，不接受 shell command。单任务文件锁避免 MCP 并发修改同一个科学状态，超时终止该计算进程组。
+MCP stdio server 使用官方 Python SDK 1.30.0，配置在 plugin 根目录 `.mcp.json`。工具：`capabilities`、`create_job`、`start_operation`、`start_analysis`、`inspect_job`、`read_artifact`、`cancel_operation`、`record_acceptance`、`make_handoff`、`propose_hypothesis`。每个工具声明输入模型与 `outputSchema`；`capabilities().analyses` 给出各分析的脚本、输入角色、期望输出和适用选项，`start_analysis` 用同一张声明表校验，避免契约与实现各写一份。长计算立即返回 operation id，后台 worker 保存状态、argv 与日志；`inspect_job` 报告 worker/子进程存活、已运行时间与日志尾行，`cancel_operation` 终止两层进程并标记 cancelled。报错带 `E_*` 前缀码，便于调用方区分重试、等待与需人工判断的情形。只允许固定 DIALS 操作和 typed 参数；输出固定为当前新 attempt 内文件，不接受 shell command。单任务文件锁避免 MCP 并发修改同一个科学状态，超时终止该计算进程组。
 
 Ariadne 0.5.0 另加入 `start_analysis`、`propose_hypothesis` 和事件/假设记录，当前总计 9 个 MCP tools；新的 NNLS/Poisson、软匹配、native joint refinement 和固定留出比较契约见 [probabilistic-multilattice.md](probabilistic-multilattice.md)。
 
-科学接受始终需读取真实 evidence；结果存在、退出码 0、文件格式正确都不足以代替科学判断。MCP native scale/export 对适用的单相路线有效。复合观测的全局尺度/吸收估计尚未实现；已有 correction 脚本只能传播真实外部因子与协方差，不能冒充 TWINABS。
+科学接受始终需读取真实 evidence；结果存在、退出码 0、文件格式正确都不足以代替科学判断。MCP native scale/export 对适用的单相路线有效。复合观测的共享全局尺度/吸收由 `global_scale.py` 估计，须先建几何侧表并检查 fit status；不能冒充 TWINABS。
 
 重启后的 active operation 若没有 result，先查 worker.log 与进程状态；不自动重放科学计算。下游 ready 后调用可用 `solve-single-crystal` skill，保留 HKLF4 解结构/HKLF5 精修的区别。
 

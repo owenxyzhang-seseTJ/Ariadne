@@ -2,7 +2,7 @@
 
 **面向单晶衍射数据还原、多晶格分析与反射强度联合估计的 Agent 原生计算框架。**
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [MIT 开源许可](LICENSE)
+[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [商业许可](LICENSE)
 
 Ariadne 将旋转衍射图像接入保留科学证据的晶体学工作流，覆盖仪器几何、寻峰、晶格假设、联合精修、全反射预测、重叠积分、校正及结构解析交接。应用对象包括小分子、配位化合物和材料晶体，重点关注大晶胞、多取向畴及多个独立晶体共同受照的情形。
 
@@ -230,11 +230,13 @@ $$
 \qquad \lambda_j=b_j+\sum_a I_aP_{ja},\quad I_a\geq0.
 $$
 
-该分支需要已标定增益、已去除偏置、零读出方差，以及有效像素上的非负整数光子计数。结果和协方差换回 calibrated-ADU 约定，以与后续校正相容。存在明显读出噪声的积分型探测器应使用适当的加权近似，不采用理想计数 Poisson 分支。
+该分支需要已标定增益、已去除偏置、零读出方差，以及有效像素上的非负整数光子计数。结果和协方差换回 calibrated-ADU 约定，以与后续校正相容。存在读出噪声时可显式选择 `poisson-gaussian`，使用完整有界卷积并支持负 ADU；超出求和预算明确失败。
 
-有符号 WLS 的条件协方差包含 nuisance background 的不确定性，条件为给定轮廓、几何与噪声模型。冻结背景的非负分支不传播背景估计误差，其高斯/Fisher 近似也不是边界置信区间；位于非负边界的可辨识强度带质量标记。目前不提供 profile-likelihood 或 bootstrap 边界区间。
+有符号 WLS 的条件协方差包含 nuisance background 的不确定性，条件为给定轮廓、几何与噪声模型。冻结背景的非负分支不传播背景估计误差，其高斯/Fisher 近似也不是边界置信区间；位于非负边界的可辨识强度带质量标记。现在为可辨识分量与总量提供条件 profile-likelihood 区间，使用 chi-square(1) 渐近阈值；不宣称低计数边界的精确覆盖率。
 
 实现：[`overlap_prepare.py`](skills/ariadne-reduction/scripts/overlap_prepare.py)、[`overlap_integrator.py`](skills/ariadne-reduction/scripts/overlap_integrator.py) 和 [`constrained_pixels.py`](skills/ariadne-reduction/scripts/constrained_pixels.py)。
+
+位置 nuisance、Poisson–Gaussian、非负区间及单源多晶格 EM 的启用方式与限制见 [新增算法说明](skills/ariadne-reduction/references/algorithm-upgrades.md)。
 
 ## 6. 强度定义、校正与导出
 
@@ -246,9 +248,9 @@ $$
 C_z=FC_IF+JC_fJ+FC_{If}J+JC_{If}^{\mathsf T}F.
 $$
 
-组总强度的方差为 $\mathbf1^{\mathsf T}C_z\mathbf1$。存在校正因子不确定性或强度–因子交叉协方差时，须提供对应信息。若只能辨识原始总强度，当前校正适配器要求共同校正因子；不同分量因子需要全局观测模型。
+组总强度的方差为 $\mathbf1^{\mathsf T}C_z\mathbf1$。存在校正因子不确定性或强度–因子交叉协方差时，须提供对应信息。若只能辨识原始总强度，校正适配器要求共同校正因子；各分量因子不同时，`global_scale.py` 仍把这些组放进跨等效反射的联合估计，但不拆出分量强度导出。
 
-校正适配器应用有来源的 Lorentz/偏振、尺度与吸收因子，不估计完整的全局孪晶感知吸收/缩放模型，也不通过将各晶畴强度等均值化来消除真实相对贡献。
+校正适配器应用有来源的 Lorentz/偏振、尺度与吸收因子。`global_scale.py` 在各晶畴共享一组扫描尺度与二阶方向吸收参数，等效反射在畴内共享强度、畴间不强制相等，因而不通过等均值化消除真实相对贡献。该吸收是经验相对传输，不估计绝对 $\mu$ 或晶体外形，见 [全局缩放规范](skills/ariadne-reduction/references/global-scaling.md)。
 
 内部 JSON/JSONL 保留贡献者映射、协方差、来源和假设关系。HKLF 5 是真实、已校正、同相组合观测的下游视图，并附观察组到导出行的映射；它无法编码全部分量或跨观测协方差。HKLF 4 解析输入与 HKLF 5 孪晶精修输入保持独立，不将无关晶相导出为一个孪晶结构。
 
@@ -256,16 +258,21 @@ $$
 
 本地 MCP server 提供有时间预算的类型化操作、不可覆盖的假设记录和追加式事件日志。科学接受与进程成功退出是独立决策。
 
+每个工具都发布 `outputSchema`，客户端可据此校验返回结构而无需读源码；未在模型中逐一列出的字段仍然保留。`capabilities().analyses` 以机器可读形式给出每个分析阶段的脚本、按序输入角色、可选输入、期望输出和适用选项，`start_analysis` 直接执行同一份声明，因此文档与行为不会分叉。
+
+`inspect_job` 附带 `progress`：worker 与阶段子进程是否存活、已运行时间、最近活动时间、日志尾行以及可否取消。阶段脚本在独立 session 中启动 DIALS，所以 `cancel_operation` 同时终止 worker 与其子进程，并写入取消标记；被取消的阶段即使子进程返回 0 也只记为 `cancelled`，不会被当作可用结果。错误消息带固定前缀码（`E_INPUT`、`E_NOT_FOUND`、`E_BUSY`、`E_NEEDS_EVIDENCE`、`E_IMMUTABLE`、`E_BUDGET`、`E_UPSTREAM`、`E_CANCELLED`），调用方据此区分改参数重试、等待、还是需要人工科学判断。
+
 | 工具 | 职责 |
 |---|---|
-| `capabilities` | 读取软件配置与支持的操作。 |
+| `capabilities` | 读取软件配置、原生操作与结构化分析契约。 |
 | `create_job` | 创建独立工作数据集，保留原始输入。 |
 | `start_operation` | 异步提交固定的 DIALS 原生操作。 |
-| `start_analysis` | 提交已注册的 Ariadne 科学适配器。 |
-| `inspect_job` | 读取阶段、假设和计算状态。 |
+| `start_analysis` | 按 `capabilities().analyses` 声明校验输入后提交科学适配器。 |
+| `inspect_job` | 读取阶段、假设、计算状态与运行进度。 |
 | `read_artifact` | 读取有长度限制的文本证据和日志。 |
 | `propose_hypothesis` | 保存候选、证据引用及 parent 关系。 |
 | `record_acceptance` | 记录有证据支持的科学判断。 |
+| `cancel_operation` | 终止 worker 与阶段子进程，标记为已取消。 |
 | `make_handoff` | 为 `solve-single-crystal` 打包已接受的 INS/HKL。 |
 
 科学适配器涵盖软匹配、联合几何精修、轮廓学习、重叠构建、强度联合拟合、假设比较和 HKLF 5 导出。命令通过参数列表调用，不提供任意 shell 执行入口。Agent 不直接修改用于强度估计的数值数组。
@@ -298,17 +305,17 @@ ariadne-env dials.index imported.expt strong.refl \
   indexing.basis_vector_combinations.ariadne.evidence_directory=candidate_evidence
 ```
 
-通过 Agent 执行还原时调用 `$ariadne-reduction`。[技能入口](skills/ariadne-reduction/SKILL.md) 定义数据层级路由和证据要求。详细适配器契约见 [多晶格方法说明](skills/ariadne-reduction/references/probabilistic-multilattice.md)、[源码扩展规范](skills/ariadne-reduction/references/source-extensions.md) 和 [重叠积分规范](skills/ariadne-reduction/references/overlap-integration.md)。
+通过 Agent 执行还原时调用 `$ariadne-reduction`。[技能入口](skills/ariadne-reduction/SKILL.md) 定义数据层级路由和证据要求。详细适配器契约见 [多晶格方法说明](skills/ariadne-reduction/references/probabilistic-multilattice.md)、[源码扩展规范](skills/ariadne-reduction/references/source-extensions.md) 和 [重叠积分规范](skills/ariadne-reduction/references/overlap-integration.md)、[全局缩放规范](skills/ariadne-reduction/references/global-scaling.md)。
 
 ## 9. 科学适用性
 
 提供的算法属于尚无公开基准验证的实验性实现。数值阈值与不确定性假设需结合具体数据评价；本仓库不提出量化准确率或吞吐量结论。
 
-当前几何适配器采用静态旋转模型。完整多源质心似然优化、正式的贝叶斯晶格数选择、全局组合观测吸收/缩放及轮廓/几何估计误差传播，均不属于已实现数值模型。动态结构解释需要独立标定和可辨识的仪器–样品模型。
+当前几何适配器采用静态旋转模型。完整多源质心似然优化、正式的贝叶斯晶格数选择及轮廓/几何估计误差传播，均不属于已实现数值模型。全局缩放吸收要求几何、LP 与方向有可追溯来源，且只覆盖可辨识的共享低阶项。动态结构解释需要独立标定和可辨识的仪器–样品模型。
 
-## 10. 开源许可与参考资料
+## 10. 许可与参考资料
 
-Ariadne 独立编写的软件和文档采用 [MIT License](LICENSE) 开源。DIALS 派生源码保留其上游 BSD 条款，见 [`patches/DIALS-LICENSE`](patches/DIALS-LICENSE)。第三方依赖保留各自许可。本仓库不分发官方 DAFi 二进制或专有采集/还原程序。
+Ariadne 独立编写的软件和文档为专有软件，商业使用需依据 [LICENSE](LICENSE) 与 [LICENSING.md](LICENSING.md) 取得书面许可；截至提交 407d193 的版本仍可按 [MIT License](LICENSE-MIT) 使用。DIALS 派生源码保留其上游 BSD 条款，见 [`patches/DIALS-LICENSE`](patches/DIALS-LICENSE)。第三方依赖保留各自许可。本仓库不分发官方 DAFi 二进制或专有采集/还原程序。
 
 - Winter 等：**DIALS: implementation and evaluation of a new integration package.** *Acta Crystallographica D* 74, 85–97。[DOI: 10.1107/S2059798317017235](https://doi.org/10.1107/S2059798317017235)。
 - Sevvana 等：**Non-merohedral twinning: from minerals to proteins.** *Acta Crystallographica D*。[DOI: 10.1107/S2059798319010179](https://doi.org/10.1107/S2059798319010179)。

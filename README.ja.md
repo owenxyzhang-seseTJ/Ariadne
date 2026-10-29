@@ -2,7 +2,7 @@
 
 **単結晶回折データの処理、複数格子解析、および反射強度の同時推定を行う エージェントネイティブ計算フレームワーク。**
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [MIT ライセンス](LICENSE)
+[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [商用ライセンス](LICENSE)
 
 Ariadne は、回転法による回折画像を、科学的根拠を保持する結晶学ワークフローに接続する。装置幾何、スポット検出、格子仮説、同時精密化、全反射予測、重なり反射の積分、補正、構造解析への引き渡しを対象とする。低分子、配位化合物、材料結晶を想定し、大きな単位格子、複数の方位ドメイン、または同時に照射される独立結晶を扱う。
 
@@ -328,7 +328,7 @@ ariadne-env dials.index imported.expt strong.refl \
 
 ## 10. ライセンスと参考資料
 
-Ariadne の独自に作成したソフトウェアと文書は [MIT License](LICENSE) に基づくオープンソースである。DIALS 由来のソース部分には上流の BSD 条件を保持し、[`patches/DIALS-LICENSE`](patches/DIALS-LICENSE) に収録する。第三者依存関係はそれぞれのライセンスに従う。公式 DAFi バイナリーや専有の測定・データ処理プログラムは、本リポジトリーに含まれない。
+Ariadne の独自に作成したソフトウェアと文書は専有であり、商用利用には [LICENSE](LICENSE) と [LICENSING.md](LICENSING.md) に基づく書面ライセンスが必要である。コミット 407d193 までのリリースは [MIT License](LICENSE-MIT) で利用できる。DIALS 由来のソース部分には上流の BSD 条件を保持し、[`patches/DIALS-LICENSE`](patches/DIALS-LICENSE) に収録する。第三者依存関係はそれぞれのライセンスに従う。公式 DAFi バイナリーや専有の測定・データ処理プログラムは、本リポジトリーに含まれない。
 
 - Winter ほか：**DIALS: implementation and evaluation of a new integration package.** *Acta Crystallographica D* 74, 85–97。[DOI: 10.1107/S2059798317017235](https://doi.org/10.1107/S2059798317017235)。
 - Sevvana ほか：**Non-merohedral twinning: from minerals to proteins.** *Acta Crystallographica D*。[DOI: 10.1107/S2059798319010179](https://doi.org/10.1107/S2059798319010179)。

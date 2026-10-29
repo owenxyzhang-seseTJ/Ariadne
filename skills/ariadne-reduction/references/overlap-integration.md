@@ -1,6 +1,6 @@
 # 重叠积分：原理、实现与接入 · Ariadne 0.5.0
 
-本版已编写**读取原始像素 → 同曝光重叠分组 → 联合轮廓积分 → 完整协方差 → 校正后观测组 → HKLF 5**的开源实现。按用户要求未运行算法或真实数据测试，不能将实现状态写成验证通过。
+本版实现**读取原始像素 → 同曝光重叠分组 → 联合轮廓积分 → 完整协方差 → 校正后观测组 → HKLF 5**。2026年10月26日已运行新增方法的针对性数值验证；真实衍射数据完整流程仍未验证。位置扰动、解析Gaussian体素积分、完整Poisson–Gaussian及边界区间见 [algorithm-upgrades.md](algorithm-upgrades.md)。
 
 ## 原理与选择
 
@@ -89,7 +89,7 @@ patch/component 预算超限的预测记录保存在 manifest，不能无声丢�
 
 每组 correction 的 `factors` 与贡献者顺序一致，可带完整 `factor_covariance`；未提供时明确 `factor_uncertainty=treated_as_fixed`。若校正来自同一批强度，提供强度—校正交叉协方差。采用一阶误差传播；跨观测的尺度相关性另存原校正模型，HKLF 5 无法编码全部相关性。
 
-全部分量可辨识时，可以分别校正后求总和，并传播完整 C_I。只有原始总强度可辨识时，仅允许相同的共同校正因子；不同因子不能通过强拆分或平均补救，需跨等效反射的全局联合缩放模型或适用已有后端。本版应用校正因子，不估计新的等价 TWINABS 模型。
+全部分量可辨识时，可以分别校正后求总和，并传播完整 C_I。只有原始总强度可辨识时，校正器仅允许相同的共同校正因子；不同因子不能通过强拆分或平均补救，应交由 `global_scale.py` 的跨等效联合估计，或使用适用后端。那里这些组参与拟合但标记为 fit-only，不出导分量强度。
 
 有 profile/background misfit、未收敛、未知校正或无法表达的总量时，保存原观测并写拒绝原因，不生成虚假的 corrected records。最终 HKLF 5 每组只对应一次真实总观测，不重复导出同一组的各个分量作为独立测量。
 
@@ -99,7 +99,7 @@ patch/component 预算超限的预测记录保存在 manifest，不能无声丢�
 2. 积分：扩大 profile 支持范围/背景 halo/patch budget；有据替换局部 empirical template，增加 IRLS 迭代。每次保留独立输出，选择依据是残差、覆盖、协方差和等效点一致性。
 3. 完全重合的不可辨识分量不靠加算力伪造，保留可测总量进入 composite refinement；若校正模型仍不足，尝试等效反射联合模型或用户已有的其他后端。
 
-当前 brute-force 分域调度器已实现；积分扩窗配置与 kernel 已实现，但未做自动 profile/geometry 模型选择，也未实现完整全局孪晶吸收缩放器。
+当前 brute-force 分域调度器已实现；积分扩窗配置与 kernel 已实现，但未做自动 profile/geometry 模型选择。全局缩放吸收见 [global scaling](global-scaling.md)，为共享经验低阶模型，不是完整 TWINABS 等价实现。
 
 ## 主要依据
 

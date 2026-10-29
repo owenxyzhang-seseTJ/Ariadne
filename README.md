@@ -2,7 +2,7 @@
 
 **An agent-native framework for single-crystal diffraction reduction, multi-lattice analysis, and joint reflection-intensity estimation.**
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [MIT License](LICENSE)
+[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [Commercial License](LICENSE)
 
 Ariadne connects rotation diffraction images to an evidence-preserving crystallographic workflow: instrument geometry, spot detection, lattice hypotheses, joint refinement, complete reflection prediction, overlap integration, correction, and structure-solution handoff. It targets small-molecule, coordination, and materials crystallography, including large unit cells and specimens containing multiple orientation domains or independent crystals.
 
@@ -306,7 +306,7 @@ The current geometric adapters assume static rotation models. Full multi-source-
 
 ## 10. License and references
 
-Ariadne's independently authored software and documentation are open source under the [MIT License](LICENSE). DIALS-derived source portions retain their upstream BSD conditions, reproduced in [`patches/DIALS-LICENSE`](patches/DIALS-LICENSE). Third-party dependencies retain their respective licenses. Official DAFi binaries and proprietary acquisition/reduction programs are not distributed in this repository.
+Ariadne's independently authored software and documentation are proprietary. Commercial use requires a written license; see [LICENSE](LICENSE) and [LICENSING.md](LICENSING.md). Releases up to commit 407d193 remain available under the [MIT License](LICENSE-MIT). DIALS-derived source portions retain their upstream BSD conditions, reproduced in [`patches/DIALS-LICENSE`](patches/DIALS-LICENSE). Third-party dependencies retain their respective licenses. Official DAFi binaries and proprietary acquisition/reduction programs are not distributed in this repository.
 
 - Winter et al. **DIALS: implementation and evaluation of a new integration package.** *Acta Crystallographica D* 74, 85–97. [DOI: 10.1107/S2059798317017235](https://doi.org/10.1107/S2059798317017235).
 - Sevvana et al. **Non-merohedral twinning: from minerals to proteins.** *Acta Crystallographica D*. [DOI: 10.1107/S2059798319010179](https://doi.org/10.1107/S2059798319010179).

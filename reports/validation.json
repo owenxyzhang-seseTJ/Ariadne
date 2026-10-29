@@ -1,0 +1,21 @@
+{
+  "tests_run": 75,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "successful": true,
+  "modules": [
+    "test_constrained_pixels",
+    "test_centroid_em",
+    "test_composite_scaling",
+    "test_global_scale",
+    "test_profile_positions",
+    "test_numeric_optimization",
+    "test_conditional_gaussian",
+    "test_indexing_optimization"
+  ],
+  "dials_patch": {
+    "applies_cleanly": true,
+    "overlay_files_exact": 3
+  }
+}

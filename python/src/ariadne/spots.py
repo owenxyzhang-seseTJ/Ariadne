@@ -44,7 +44,8 @@ def propose(image, mask, *, gain, offset, readout_variance, noise_model,
     def background(selection):
         weights = selection.astype(float)
         counts = box_sum(weights, background_width) - box_sum(weights, exclusion_width)
-        sums = box_sum(np.where(selection, data, 0.), background_width) - box_sum(np.where(selection, data, 0.), exclusion_width)
+        selected_data = np.where(selection, data, 0.)
+        sums = box_sum(selected_data, background_width) - box_sum(selected_data, exclusion_width)
         usable = counts >= min_valid_fraction * annulus_area
         mean = np.maximum(np.divide(sums, counts, out=np.zeros_like(sums), where=counts > 0), 0.)
         return mean, counts, usable
@@ -55,11 +56,20 @@ def propose(image, mask, *, gain, offset, readout_variance, noise_model,
         clipping_variance = mean + readout + (mean + readout) / np.maximum(count, 1.)
         retained &= ~(usable & (data > mean + 4. * np.sqrt(clipping_variance)))
     mean, count, usable = background(retained)
+    support = data > mean + support_sigma * np.sqrt(mean + readout)
+    if noise_model == "poisson_gaussian":
+        background_variance = (mean + readout) / np.maximum(count, 1.)
+        np.copyto(background_variance, 0., where=~valid)
+    del count, retained
+    # data 与 mean 为本次调用拥有的数组，完成原值计算后直接掩膜。
+    np.copyto(data, 0., where=~valid)
+    np.copyto(mean, 0., where=~valid)
     best = np.zeros_like(data)
+    valid_weights = valid.astype(float)
     for width in scales:
-        n_valid = box_sum(valid.astype(float), width)
-        observed = box_sum(np.where(valid, data, 0.), width)
-        expected = box_sum(np.where(valid, mean, 0.), width)
+        n_valid = box_sum(valid_weights, width)
+        observed = box_sum(data, width)
+        expected = box_sum(mean, width)
         enough = n_valid >= width**2 * min_valid_fraction
         if noise_model == "poisson":
             # A finite expected-count floor avoids infinity for zero sampled background.
@@ -70,8 +80,7 @@ def propose(image, mask, *, gain, offset, readout_variance, noise_model,
         else:
             # Quasi-Gaussian excess with annulus background-estimation uncertainty.
             variance = expected + readout * n_valid
-            variance += box_sum(np.where(valid, (mean + readout) / np.maximum(count, 1.), 0.), width) * width**2
+            variance += box_sum(background_variance, width) * width**2
             statistic = np.maximum(observed - expected, 0.) / np.sqrt(np.maximum(variance, .5))
-        best = np.maximum(best, np.where(enough & usable, statistic, 0.))
-    support = data > mean + support_sigma * np.sqrt(mean + readout)
+        np.maximum(best, statistic, out=best, where=enough & usable)
     return valid & usable & support & (best >= score_threshold)

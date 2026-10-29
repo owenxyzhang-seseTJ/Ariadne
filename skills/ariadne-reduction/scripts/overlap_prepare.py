@@ -13,9 +13,8 @@ from pathlib import Path
 import sys
 import numpy as np
 from scipy.ndimage import map_coordinates
-from dials.array_family import flex
-from dxtbx.model.experiment_list import ExperimentListFactory
 from local_profiles import select_profile
+from profile_geometry import gaussian_voxels
 
 
 def connected_boxes(boxes):
@@ -43,33 +42,25 @@ def connected_boxes(boxes):
 
 
 def template_values(entry, load_template, centre, bounds):
+    if not entry.get('template'):
+        covariance = np.asarray(entry['covariance_px_xyz'], dtype=float).reshape(3, 3)
+        return gaussian_voxels(covariance, centre, bounds)
     x0, x1, y0, y1, z0, z1 = bounds
     z, y, x = np.mgrid[z0:z1, y0:y1, x0:x1]
     offsets = np.stack((x + .5 - centre[0], y + .5 - centre[1], z + .5 - centre[2]), axis=-1)
-    if entry.get('template'):
-        values = np.zeros(z.shape)
-        for item in entry.get('template_mixture', [{'template': entry['template'], 'weight': 1.}]):
-            template = load_template(item['template'])
-            origin = (np.asarray(template.shape) - 1) / 2
-            xyz = offsets[..., ::-1] + origin
-            values += item['weight'] * map_coordinates(template, xyz.reshape(-1, 3).T, order=1, mode='constant', cval=0).reshape(z.shape)
-        return values
-    covariance = np.asarray(entry['covariance_px_xyz'], dtype=float).reshape(3, 3)
-    if np.any(np.linalg.eigvalsh(covariance) <= 0):
-        raise ValueError('Profile covariance must be positive definite')
-    inverse = np.linalg.inv(covariance)
-    norm = np.sqrt((2 * np.pi) ** 3 * np.linalg.det(covariance))
-    # Subvoxel quadrature approximates integrated voxel probabilities, not peak-height samples.
     values = np.zeros(z.shape)
-    for dz in (-.25, .25):
-        for dy in (-.25, .25):
-            for dx in (-.25, .25):
-                delta = offsets + (dx, dy, dz)
-                values += np.exp(-.5 * np.einsum('...i,ij,...j->...', delta, inverse, delta)) / (8 * norm)
+    for item in entry.get('template_mixture', [{'template': entry['template'], 'weight': 1.}]):
+        template = load_template(item['template'])
+        origin = (np.asarray(template.shape) - 1) / 2
+        xyz = offsets[..., ::-1] + origin
+        values += item['weight'] * map_coordinates(template, xyz.reshape(-1, 3).T, order=1, mode='constant', cval=0).reshape(z.shape)
     return values
 
 
 def prepare(args):
+    from dials.array_family import flex
+    from dxtbx.model.experiment_list import ExperimentListFactory
+
     expts = ExperimentListFactory.from_json_file(str(args.expt), check_format=True)
     predictions = flex.reflection_table.from_file(str(args.predictions))
     library = json.loads(args.library.read_text())
@@ -190,7 +181,20 @@ def prepare(args):
             profiles = np.asarray([template_values(r['entry'], load_template, r['centre'], bounds) for r in chosen])
             group_id = f'pixel-group-{len(groups) + 1:06d}'
             patch_name = group_id + '.npz'
-            np.savez_compressed(args.output / patch_name, data=data, variance=variance, valid=valid, profiles=profiles)
+            arrays = {'data': data, 'variance': variance, 'valid': valid, 'profiles': profiles}
+            if args.position_derivatives:
+                step = .001
+                derivatives = []
+                for r in chosen:
+                    axes = []
+                    for axis in range(3):
+                        delta = np.eye(3)[axis] * step
+                        plus = template_values(r['entry'], load_template, r['centre'] + delta, bounds)
+                        minus = template_values(r['entry'], load_template, r['centre'] - delta, bounds)
+                        axes.append((plus - minus) / (2 * step))
+                    derivatives.append(axes)
+                arrays['position_derivatives_xyz'] = np.asarray(derivatives)
+            np.savez_compressed(args.output / patch_name, **arrays)
             contributors = []
             for r in chosen:
                 mapping = library.get('experiment_to_domain', {}).get(str(r['experiment_id']))
@@ -201,6 +205,8 @@ def prepare(args):
                                      'phase_id': library.get('experiment_to_phase', {}).get(str(r['experiment_id']), 'unknown')})
             groups.append({'observation_id': group_id, 'patch': patch_name, 'contributors': contributors,
                            'basis': library['basis'], 'bounds_xyz': list(bounds), 'noise_model': noise,
+                           'position_derivatives': {'available': args.position_derivatives, 'units': 'per_pixel_xyz',
+                                                    'finite_difference_step_px': .001 if args.position_derivatives else None},
                            'provenance': {'raw_first_path': key[0][0], 'raw_last_path': key[0][-1],
                                           'expt': str(args.expt.resolve()), 'predictions': str(args.predictions.resolve()),
                                           'library': str(args.library.resolve()), 'panel': key[2],
@@ -226,6 +232,7 @@ def main():
     p.add_argument('--max-components', type=int, default=32)
     p.add_argument('--frame-cache', type=int, default=8)
     p.add_argument('--template-cache', type=int, default=32)
+    p.add_argument('--position-derivatives', action='store_true', help='Store XYZ profile derivatives for signed-WLS position nuisance fitting')
     args = p.parse_args()
     try:
         prepare(args)
