@@ -13,8 +13,6 @@ from pathlib import Path
 import sys
 import numpy as np
 from scipy.ndimage import map_coordinates
-from dials.array_family import flex
-from dxtbx.model.experiment_list import ExperimentListFactory
 from local_profiles import select_profile
 from profile_geometry import gaussian_voxels
 
@@ -60,6 +58,9 @@ def template_values(entry, load_template, centre, bounds):
 
 
 def prepare(args):
+    from dials.array_family import flex
+    from dxtbx.model.experiment_list import ExperimentListFactory
+
     expts = ExperimentListFactory.from_json_file(str(args.expt), check_format=True)
     predictions = flex.reflection_table.from_file(str(args.predictions))
     library = json.loads(args.library.read_text())
