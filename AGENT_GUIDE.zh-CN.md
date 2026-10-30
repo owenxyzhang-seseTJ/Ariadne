@@ -159,7 +159,7 @@ python -m ariadne.agent.cli resume sessions/example
 python -m ariadne.agent.cli run sessions/example
 ```
 
-`resume` 清除取消标记，实际执行仍由 `run` 完成。已成功的节点不会重复计算。每次尝试使用独立目录；输入和产物摘要在恢复前复核。
+`resume` 清除取消标记，实际执行仍由 `run` 完成。已成功的节点不会重复计算。每次尝试使用独立目录；输入和产物在恢复前复核。
 
 系统崩溃可能留下仍在运行的外部进程。程序不会自行宣称恰好执行一次；先检查进程与日志，确认停止后再恢复该节点：
 
@@ -211,6 +211,6 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
 
 GitHub 推送前的完整审查为 323 项通过、11 项跳过、0 项失败或错误，另有 136 个子测试通过。跳过项需要原生 DIALS/dxtbx 或 cctbx；Gemmi 和 MCP 已实际运行。当前检查见 `reports/github_review_validation.json`，可用 `python scripts/run_review_validation.py` 重现。
 
-本轮修正见 `CODE_REVIEW.zh-CN.md`。原始帧快照保留共同目录和相对路径，反馈校准保留 R2 的晶畴编号，HKLF5 导出同时保存观测映射旁侧文件。最终测试登记使用原始观测身份摘要，修改说明文字不会产生新的测试独立性。外部进程受超时控制；进程内数值计算在调用前后检查预算，正在执行的 BLAS 运算不能立即抢占。
+本轮修正见 `CODE_REVIEW.zh-CN.md`。原始帧快照保留共同目录和相对路径，反馈校准保留 R2 的晶畴编号，HKLF5 导出同时保存观测映射旁侧文件。最终测试登记使用原始观测身份，修改说明文字不会产生新的测试独立性。外部进程受超时控制；进程内数值计算在调用前后检查预算，正在执行的 BLAS 运算不能立即抢占。
 
 旧报告和旧基准作为历史文件保留，不代表本次重新执行。当前完整技术报告为 `reports/Ariadne_0_7_0_Technical_Report.pdf`。文件校验清单只说明交付文件是否改变，不能替代科学验证。

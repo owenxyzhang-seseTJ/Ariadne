@@ -106,7 +106,7 @@ def test_review_cannot_accept_a_model_written_success_claim():
 
 def test_literal_artifact_claim_cannot_bypass_dependencies():
     with pytest.raises(ValueError,match='literal'):
-        validate_node(engine.node('x','crystal.audit',{'cif':{'path':'a','sha256':'fake'}}))
+        validate_node(engine.node('x','crystal.audit',{'cif':{'path':'a','size_bytes':1}}))
 
 
 def test_dependency_cycle_rejected(tmp_path):

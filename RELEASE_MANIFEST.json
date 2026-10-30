@@ -1,7 +1,7 @@
 {
   "schema": "ariadne-release-manifest/2",
   "build": "0.7.0-rebuild-20261030",
-  "generated_utc": "2026-10-30T06:02:26.067747+00:00",
+  "generated_utc": "2026-10-30T06:14:00.484044+00:00",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -25,11 +25,11 @@
     },
     {
       "path": "AGENT_GUIDE.zh-CN.md",
-      "bytes": 11251
+      "bytes": 11239
     },
     {
       "path": "CODE_REVIEW.zh-CN.md",
-      "bytes": 5211
+      "bytes": 5196
     },
     {
       "path": "DELIVERY.json",
@@ -161,7 +161,7 @@
     },
     {
       "path": "examples/agent/create_demo.py",
-      "bytes": 5892
+      "bytes": 5879
     },
     {
       "path": "examples/agent/refine_request.example.json",
@@ -245,11 +245,11 @@
     },
     {
       "path": "python/src/ariadne/agent/actions.py",
-      "bytes": 6641
+      "bytes": 6619
     },
     {
       "path": "python/src/ariadne/agent/backends.py",
-      "bytes": 13902
+      "bytes": 13847
     },
     {
       "path": "python/src/ariadne/agent/bundles.py",
@@ -261,11 +261,11 @@
     },
     {
       "path": "python/src/ariadne/agent/engine.py",
-      "bytes": 24112
+      "bytes": 23980
     },
     {
       "path": "python/src/ariadne/agent/loop.py",
-      "bytes": 9140
+      "bytes": 8597
     },
     {
       "path": "python/src/ariadne/agent/mcp_tools.py",
@@ -281,19 +281,19 @@
     },
     {
       "path": "python/src/ariadne/agent/process.py",
-      "bytes": 3379
+      "bytes": 3549
     },
     {
       "path": "python/src/ariadne/agent/spec.py",
-      "bytes": 9793
+      "bytes": 9797
     },
     {
       "path": "python/src/ariadne/agent/store.py",
-      "bytes": 10746
+      "bytes": 11153
     },
     {
       "path": "python/src/ariadne/agent/util.py",
-      "bytes": 3917
+      "bytes": 3589
     },
     {
       "path": "python/src/ariadne/contracts.py",
@@ -313,7 +313,7 @@
     },
     {
       "path": "python/src/ariadne/feedback.py",
-      "bytes": 16795
+      "bytes": 16692
     },
     {
       "path": "python/src/ariadne/feedback_bridge.py",
@@ -341,11 +341,11 @@
     },
     {
       "path": "reports/Ariadne_0_7_0_Technical_Report.pdf",
-      "bytes": 491928
+      "bytes": 491594
     },
     {
       "path": "reports/Ariadne_0_7_0_Technical_Report.tex",
-      "bytes": 38996
+      "bytes": 38997
     },
     {
       "path": "reports/README.md",
@@ -821,7 +821,7 @@
     },
     {
       "path": "tests_rebuild/test_agent.py",
-      "bytes": 7626
+      "bytes": 7625
     },
     {
       "path": "tests_rebuild/test_bridge.py",

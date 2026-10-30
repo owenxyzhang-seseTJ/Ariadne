@@ -46,7 +46,7 @@ def compare(candidates: list[dict]) -> dict:
             failures.append(dict(index=i, reason=candidate.get('error') or candidate.get('audit', {}).get('errors', [])))
             continue
         valid.append(dict(index=i, cif=candidate['cif'], res=candidate['res'], hkl=candidate['hkl'],
-                          metrics=candidate.get('metrics', {}), input_hkl_sha256=candidate.get('input_hkl_sha256')))
+                          metrics=candidate.get('metrics', {}), source_hkl=candidate.get('source_hkl')))
     with_r = [v for v in valid if isinstance(v['metrics'].get('R1'), (int, float))]
     preference = min(with_r, key=lambda x: x['metrics']['R1'])['index'] if with_r else None
     return dict(eligible_candidates=valid, failures=failures, descriptive_lowest_R1=preference,
@@ -56,7 +56,7 @@ def compare(candidates: list[dict]) -> dict:
 
 def collect_artifacts(value: Any):
     if isinstance(value, dict):
-        if {'path', 'sha256', 'size_bytes', 'role'} <= value.keys():
+        if {'path', 'size_bytes', 'role'} <= value.keys():
             yield value
         else:
             for item in value.values():

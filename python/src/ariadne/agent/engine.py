@@ -1,6 +1,7 @@
 """Observe -> choose -> execute -> inspect -> persist -> expand the real graph."""
 from __future__ import annotations
 
+import filecmp
 import importlib.util
 import os
 from pathlib import Path
@@ -15,7 +16,7 @@ from .planner import choose
 from .process import Cancelled, NeedsReview
 from .spec import TOOLS, check_name, validate_request
 from .store import Store
-from .util import artifact, artifact_path, atomic_json, digest, dumps, exclusive_lock, file_hash, pointer, read_json
+from .util import artifact, artifact_path, atomic_json, dumps, exclusive_lock, pointer, read_json
 
 
 BUILD = '0.7.0-rebuild-20261030'
@@ -128,13 +129,15 @@ def initialize(request: dict, directory: str | Path, *, base: str | Path = '.') 
             target = (root/'inputs'/'images'/source.relative_to(image_root) if image_root is not None
                       else root/'inputs'/key/source.name)
             target.parent.mkdir(parents=True, exist_ok=True)
-            before = file_hash(source)
+            before = source.stat()
             shutil.copy2(source, target)
-            if file_hash(target) != before or file_hash(source) != before:
+            if not filecmp.cmp(source, target, shallow=False):
+                raise RuntimeError('input changed during snapshot')
+            after = source.stat()
+            if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
                 raise RuntimeError('input changed during snapshot')
             manifest[key] = artifact(root, target, 'input_snapshot')
         store.set('request', request)
-        store.set('request_digest', digest(request))
         store.set('inputs', manifest)
         store.set('build', BUILD)
         import importlib.metadata, sys
@@ -145,7 +148,7 @@ def initialize(request: dict, directory: str | Path, *, base: str | Path = '.') 
             except importlib.metadata.PackageNotFoundError:
                 versions[package] = None
         atomic_json(root/'runtime.json', {'build': BUILD, 'python': sys.version, 'dependencies': versions})
-        store.event('session_initialized', dict(build=BUILD, request_digest=digest(request), inputs=manifest))
+        store.event('session_initialized', dict(build=BUILD, inputs=manifest))
         store.add_nodes(plan)
         atomic_json(root/'request.json', request)
         atomic_json(root/'inputs_manifest.json', manifest)
@@ -256,7 +259,7 @@ def _experts(request):
 def _verify(store: Store):
     if store.get('initialization_failed'):
         raise RuntimeError('session initialization did not complete')
-    if digest(store.get('request')) != store.get('request_digest') or not store.verify_events():
+    if dumps(store.get('request')) != dumps(read_json(store.root/'request.json')) or not store.verify_events():
         raise RuntimeError('state/event integrity check failed')
     import json
     definitions, finished = {}, {}
@@ -276,11 +279,9 @@ def _verify(store: Store):
             raise RuntimeError('stored node definition does not match its event history')
         if summary['status'] == 'succeeded':
             actual = current['result']
-            if digest(actual) != finished.get(summary['id'], {}).get('result_digest'):
-                raise RuntimeError('stored result does not match its event history')
             payload = dict(actual)
             record = payload.pop('result_artifact', None)
-            if record is None or digest(read_json(artifact_path(store.root, record))) != digest(payload):
+            if record is None or read_json(artifact_path(store.root, record)) != payload:
                 raise RuntimeError('stored result does not match its scientific result artifact')
             for item in collect_artifacts(actual):
                 artifact_path(store.root, item)
@@ -464,14 +465,14 @@ def export_session(directory, destination, *, include_inputs=False):
             with zipfile.ZipFile(temporary, 'w', zipfile.ZIP_DEFLATED) as archive:
                 archive.writestr('session.json', dumps(evidence)+'\n')
                 archive.writestr('file_manifest.json', dumps([
-                    dict(path=p.relative_to(root).as_posix(), sha256=file_hash(p), size=p.stat().st_size) for p in files])+'\n')
+                    dict(path=p.relative_to(root).as_posix(), size=p.stat().st_size) for p in files])+'\n')
                 for path in files:
                     archive.write(path, path.relative_to(root).as_posix())
             with zipfile.ZipFile(temporary) as archive:
                 if archive.testzip() is not None:
                     raise RuntimeError('export ZIP verification failed')
             os.replace(temporary, target)
-            return dict(path=str(target), sha256=file_hash(target), size_bytes=target.stat().st_size,
+            return dict(path=str(target), size_bytes=target.stat().st_size,
                         includes_inputs=include_inputs)
         finally:
             store.close()

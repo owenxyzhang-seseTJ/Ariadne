@@ -9,7 +9,7 @@ import subprocess
 import time
 from typing import Callable
 
-from .util import atomic_json, now, file_hash
+from .util import atomic_json, now
 
 
 class Cancelled(RuntimeError):
@@ -37,7 +37,10 @@ def run_process(argv: list[str], directory: Path, timeout: float, cancelled: Cal
         raise TimeoutError('time budget exhausted')
     if cancelled():
         raise Cancelled('cancellation requested before process launch')
-    atomic_json(directory/(label+'.command.json'), {'argv': argv, 'started': now(), 'timeout': timeout, 'executable_sha256': file_hash(Path(argv[0]).resolve())})
+    executable_path = Path(argv[0]).resolve()
+    atomic_json(directory/(label+'.command.json'), {'argv': argv, 'started': now(), 'timeout': timeout,
+                                                    'executable': str(executable_path),
+                                                    'executable_bytes': executable_path.stat().st_size})
     stdout = directory/(label+'.stdout.log')
     stderr = directory/(label+'.stderr.log')
     started = time.monotonic()

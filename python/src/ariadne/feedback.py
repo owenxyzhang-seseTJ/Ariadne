@@ -8,8 +8,8 @@ This module does not alter raw measurements or export posterior means as HKLF4.
 from __future__ import annotations
 
 from dataclasses import dataclass
-import hashlib
 import json
+import random
 from typing import Any
 
 import numpy as np
@@ -128,8 +128,8 @@ def closed_split(items: list[dict[str, Any]], n: int, seed: str = '0',
         groups.setdefault(uf.find(i), []).append(b.key)
     if len(groups) < 3:
         raise ValueError('fewer than three independent closed groups: train/validation/test unavailable')
-    ordered = sorted(groups.values(), key=lambda g: hashlib.sha256(
-        (str(seed) + '\0' + '\0'.join(sorted(g))).encode()).hexdigest())
+    ordered = sorted(groups.values(), key=lambda g: '\0'.join(sorted(g)))
+    random.Random(seed).shuffle(ordered)
     nv = max(1, int(round(len(ordered) * fractions[1])))
     nt = max(1, int(round(len(ordered) * fractions[2])))
     while nv + nt >= len(ordered):
@@ -349,6 +349,5 @@ def calibrate(prior: dict[str, Any], domains: list[int], train: list[dict[str, A
                 cross_covariance_structure_calibration='not_estimated')
 
 
-def canonical_digest(value: Any) -> str:
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'),
-                                    allow_nan=False).encode()).hexdigest()
+def canonical_key(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False)

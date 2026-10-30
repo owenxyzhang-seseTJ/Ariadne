@@ -7,7 +7,7 @@ import shutil
 import sys
 
 from .process import NeedsReview, executable, run_process
-from .util import artifact, artifact_path, atomic_json, file_hash, read_json
+from .util import artifact, artifact_path, atomic_json, read_json
 from ..crystal import audit_cif
 
 
@@ -228,11 +228,11 @@ def solve(ctx, args: dict) -> dict:
         candidates.append(dict(name=res.stem, res=artifact(ctx.root, res, 'model'),
                                hkl=artifact(ctx.root, partner, 'observed_intensities') if paired else None,
                                eligible_for_refinement=paired,
-                               source_hkl_sha256=args['hkl']['sha256'],
+                               source_hkl=args['hkl'],
                                reason=None if paired else 'candidate-specific HKL missing; no fallback to source data'))
     if not candidates:
         raise RuntimeError('SHELXT completed without a candidate RES')
-    return dict(candidates=candidates, source_hkl_sha256=args['hkl']['sha256'],
+    return dict(candidates=candidates, source_hkl=args['hkl'],
                 scientific_acceptance='not_established')
 
 
@@ -245,7 +245,7 @@ def refine(ctx, args: dict) -> dict:
     produced_res, cif = ctx.directory/'job.res', ctx.directory/'job.cif'
     result = dict(res=artifact(ctx.root, produced_res, 'refined_model'),
                   hkl=artifact(ctx.root, ctx.directory/'job.hkl', 'observed_intensities'),
-                  input_hkl_sha256=file_hash(hkl), scientific_acceptance='not_established')
+                  input_hkl=args['hkl'], scientific_acceptance='not_established')
     if not cif.is_file():
         raise RuntimeError('SHELXL did not produce the requested CIF')
     result['cif'] = artifact(ctx.root, cif, 'refined_cif')

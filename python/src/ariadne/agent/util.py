@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from datetime import datetime, timezone
-import hashlib
 import json
 import os
 from pathlib import Path
 import tempfile
 from typing import Any
+import uuid
 
 
 def now() -> str:
@@ -18,16 +18,8 @@ def dumps(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, allow_nan=False, separators=(',', ':'))
 
 
-def digest(value: Any) -> str:
-    return hashlib.sha256(dumps(value).encode()).hexdigest()
-
-
-def file_hash(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open('rb') as stream:
-        for part in iter(lambda: stream.read(1024*1024), b''):
-            h.update(part)
-    return h.hexdigest()
+def new_id() -> str:
+    return uuid.uuid4().hex
 
 
 def atomic_json(path: Path, value: Any) -> None:
@@ -63,16 +55,16 @@ def artifact(root: Path, path: Path, role: str) -> dict[str, Any]:
     path = path.resolve()
     if not path.is_relative_to(root.resolve()) or not path.is_file():
         raise ValueError('artifact must be a real file inside the session')
-    return dict(path=path.relative_to(root).as_posix(), sha256=file_hash(path),
+    return dict(path=path.relative_to(root).as_posix(),
                 size_bytes=path.stat().st_size, role=role)
 
 
 def artifact_path(root: Path, value: dict[str, Any]) -> Path:
-    if not isinstance(value, dict) or not {'path', 'sha256', 'size_bytes', 'role'} <= value.keys():
+    if not isinstance(value, dict) or not {'path', 'size_bytes', 'role'} <= value.keys():
         raise ValueError('expected a verified artifact reference')
     path = contained(root, value['path'])
-    if not path.is_file() or path.stat().st_size != value['size_bytes'] or file_hash(path) != value['sha256']:
-        raise ValueError('artifact content changed or is missing')
+    if not path.is_file() or path.stat().st_size != value['size_bytes']:
+        raise ValueError('artifact size changed or file is missing')
     return path
 
 

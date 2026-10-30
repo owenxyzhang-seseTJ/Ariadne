@@ -14,7 +14,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT/'python/src'))
 from ariadne.agent import engine
-from ariadne.agent.util import atomic_json, file_hash
+from ariadne.agent.util import atomic_json
 from ariadne.crystal import predict
 
 
@@ -84,14 +84,14 @@ def create(directory: Path, seed=20261030, groups=24, run=True):
                    negative_observations=sum(x < 0 for b in blocks for x in b['values']),
                    data_scope='synthetic CIFs and Gaussian measurements; real Gemmi structure factors')
     if run:
-        original_hash = file_hash(directory/'observations.json')
+        original = (directory/'observations.json').read_bytes()
         engine.initialize(request, directory/'session', base=directory)
         paused=engine.run(directory/'session',max_steps=2)
         finished=engine.run(directory/'session')
         resumed=engine.run(directory/'session')
         assert paused['actions_used']==2 and finished['actions_used']==5
         assert resumed['actions_used']==finished['actions_used']
-        assert original_hash==file_hash(directory/'observations.json')
+        assert original==(directory/'observations.json').read_bytes()
         from ariadne.agent.store import Store
         store=Store(directory/'session')
         result=store.node('feedback')['result'];assert store.verify_events();store.close()

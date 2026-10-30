@@ -8,8 +8,8 @@ from typing import Any
 import numpy as np
 
 from ..crystal import predict
-from ..feedback import calibrate, canonical_digest, closed_split, condition, ensemble_prior
-from .util import artifact, artifact_path, atomic_json, now, read_json
+from ..feedback import calibrate, canonical_key, closed_split, condition, ensemble_prior
+from .util import artifact, artifact_path, atomic_json, new_id, now, read_json
 
 
 class ExposureLedger:
@@ -33,9 +33,9 @@ class ExposureLedger:
         except sqlite3.IntegrityError as exc:
             raise RuntimeError('final test for this dataset has already been exposed in the project registry') from exc
 
-    def complete(self, dataset: str, result_digest: str):
+    def complete(self, dataset: str, result_id: str):
         with self.db:
-            self.db.execute('UPDATE exposures SET result=? WHERE dataset=?', (result_digest, dataset))
+            self.db.execute('UPDATE exposures SET result=? WHERE dataset=?', (result_id, dataset))
 
     def close(self):
         self.db.close()
@@ -53,8 +53,8 @@ def measurement_identity(dataset: dict) -> str:
         raw_ids = block.get('raw_ids')
         if not isinstance(raw_ids, list) or not raw_ids or any(not isinstance(x, str) or not x for x in raw_ids):
             raise ValueError('feedback requires nonempty declared raw pixel identities for every block')
-        groups.append(dict(raw_ids=sorted(raw_ids), values=block['values'], covariance=block['covariance']))
-    return canonical_digest(sorted(groups, key=lambda x: tuple(x['raw_ids'])))
+        groups.append(sorted(raw_ids))
+    return canonical_key(sorted(groups))
 
 
 def run_loop(ctx, args: dict[str, Any]) -> dict[str, Any]:
@@ -67,7 +67,7 @@ def run_loop(ctx, args: dict[str, Any]) -> dict[str, Any]:
     if len(set(ids)) != n or not n:
         raise ValueError('unique nonempty reflection IDs are required')
     split = closed_split(blocks, n, str(args.get('seed', 20261030)))
-    measurement_digest = measurement_identity(dataset)
+    measurement_id = measurement_identity(dataset)
     folds = {name: [b for b in blocks if split[b['id']] == name] for name in ('train', 'validation', 'test')}
     train_ids = {b['id'] for b in folds['train']}
     pre = dataset.get('preprocessing', {})
@@ -107,20 +107,17 @@ def run_loop(ctx, args: dict[str, Any]) -> dict[str, Any]:
     selected = min(range(len(validations)), key=lambda i: (validations[i]['predictive_nll'], i))
     frozen = dict(schema='ariadne-frozen-structure-candidate/1', candidate=models[selected]['name'],
                   prior=calibrated[selected], split=split, reflections=reflections,
-                  data_digest=canonical_digest(dataset), candidate_artifacts=models[selected]['cifs'],
-                  measurement_digest=measurement_digest,
+                  data_identity=measurement_id, candidate_artifacts=models[selected]['cifs'],
+                  measurement_identity=measurement_id,
                   scoring='joint Gaussian predictive NLL including log determinant',
                   conditioning_scope='fixed profiles, geometry and calibration approximation')
     atomic_json(ctx.directory/'frozen.json', frozen)
     ledger = ExposureLedger(ctx.root.parent/'.ariadne-feedback-ledger.sqlite')
     try:
         # Commit exposure before accessing the test measurements in a likelihood.
-        # Check the earlier full-document identity too, so existing registries
-        # created before measurement identities still reject an unchanged input.
-        if ledger.db.execute('SELECT 1 FROM exposures WHERE dataset=?', (frozen['data_digest'],)).fetchone():
-            raise RuntimeError('final test for this dataset has already been exposed in the project registry')
-        ledger.claim(measurement_digest, canonical_digest(frozen), str(ctx.root))
-        ctx.store.event('final_test_exposed', dict(dataset=measurement_digest, frozen=canonical_digest(frozen)))
+        frozen_id = new_id()
+        ledger.claim(measurement_id, frozen_id, str(ctx.root))
+        ctx.store.event('final_test_exposed', dict(dataset=measurement_id, frozen=frozen_id))
         prior = calibrated[selected]
         test = condition(prior['mean'], prior['independent_variance'], prior['factors'], folds['test'])
         atomic_json(ctx.directory/'test_posterior.json', test)
@@ -131,15 +128,15 @@ def run_loop(ctx, args: dict[str, Any]) -> dict[str, Any]:
                       fold_counts={k: len(v) for k, v in folds.items()}, split=split,
                       frozen=artifact(ctx.root, ctx.directory/'frozen.json', 'frozen_candidate'),
                       posterior=artifact(ctx.root, ctx.directory/'test_posterior.json', 'model_assisted_posterior'),
-                      data_digest=frozen['data_digest'],
-                      measurement_digest=measurement_digest,
+                      data_identity=measurement_id,
+                      measurement_identity=measurement_id,
                       scientific_acceptance='not_established',
                       caveats=['Final-test posterior is not a new experimental observation.',
                                'CIF provenance is declared, not externally attested.',
                                'Calibration/structural cross-covariance is not estimated.',
                                'Prediction uses real IT92 X-ray scattering, without anomalous/solvent terms.'])
         atomic_json(ctx.directory/'feedback_result.json', result)
-        ledger.complete(measurement_digest, canonical_digest(result))
+        ledger.complete(measurement_id, new_id())
         return result
     finally:
         ledger.close()

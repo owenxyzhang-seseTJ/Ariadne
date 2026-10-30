@@ -7,7 +7,7 @@ import sqlite3
 from typing import Any
 
 from .spec import validate_node
-from .util import digest, dumps, now
+from .util import dumps, new_id, now
 
 
 class Store:
@@ -29,16 +29,16 @@ class Store:
                 attempts INTEGER NOT NULL DEFAULT 0, result TEXT, error TEXT, elapsed REAL NOT NULL DEFAULT 0,
                 expanded INTEGER NOT NULL DEFAULT 0, summary TEXT NOT NULL DEFAULT '{}', created TEXT NOT NULL, updated TEXT NOT NULL);
             CREATE TABLE events(seq INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL,
-                kind TEXT NOT NULL, payload TEXT NOT NULL, previous TEXT NOT NULL, hash TEXT NOT NULL);
+                kind TEXT NOT NULL, payload TEXT NOT NULL, previous_seq INTEGER NOT NULL, event_id TEXT NOT NULL);
             CREATE TABLE attempts(node TEXT NOT NULL, number INTEGER NOT NULL, started TEXT NOT NULL,
                 finished TEXT, status TEXT NOT NULL, directory TEXT NOT NULL, pid INTEGER,
                 PRIMARY KEY(node,number), FOREIGN KEY(node) REFERENCES nodes(id));
             ''')
-            self.set('schema', 'ariadne-agent-state/1')
+            self.set('schema', 'ariadne-agent-state/2')
             self.set('cancel_requested', False)
             self.set('actions_used', 0)
             self.set('decisions_used', 0)
-        if self.get('schema') != 'ariadne-agent-state/1':
+        if self.get('schema') != 'ariadne-agent-state/2':
             raise ValueError('unsupported state schema')
 
     def close(self):
@@ -57,12 +57,11 @@ class Store:
         if owned:
             self.db.execute('BEGIN IMMEDIATE')
         try:
-            previous = self.db.execute('SELECT hash FROM events ORDER BY seq DESC LIMIT 1').fetchone()
-            previous = previous[0] if previous else '0'*64
+            previous = self.db.execute('SELECT seq FROM events ORDER BY seq DESC LIMIT 1').fetchone()
+            previous_seq = previous[0] if previous else 0
             at = now()
-            h = digest(dict(at=at, kind=kind, payload=payload, previous=previous))
-            self.db.execute('INSERT INTO events(at,kind,payload,previous,hash) VALUES(?,?,?,?,?)',
-                            (at, kind, dumps(payload), previous, h))
+            self.db.execute('INSERT INTO events(at,kind,payload,previous_seq,event_id) VALUES(?,?,?,?,?)',
+                            (at, kind, dumps(payload), previous_seq, new_id()))
             if owned:
                 self.db.execute('COMMIT')
         except BaseException:
@@ -71,13 +70,24 @@ class Store:
             raise
 
     def verify_events(self) -> bool:
-        previous = '0'*64
+        required = {
+            'session_initialized': {'build', 'inputs'},
+            'node_added': {'id', 'tool', 'args', 'depends_on', 'allow_failed_dependencies'},
+            'attempt_started': {'node', 'attempt', 'directory'},
+            'attempt_finished': {'node', 'status', 'elapsed', 'error'},
+            'final_test_exposed': {'dataset', 'frozen'},
+        }
+        previous_seq = 0
+        seen = set()
         for row in self.db.execute('SELECT * FROM events ORDER BY seq'):
             payload = json.loads(row['payload'])
-            h = digest(dict(at=row['at'], kind=row['kind'], payload=payload, previous=previous))
-            if row['previous'] != previous or row['hash'] != h:
+            if not isinstance(payload, dict) or not required.get(row['kind'], set()) <= payload.keys():
                 return False
-            previous = h
+            if (row['seq'] <= previous_seq or row['previous_seq'] != previous_seq
+                    or not row['event_id'] or row['event_id'] in seen):
+                return False
+            seen.add(row['event_id'])
+            previous_seq = row['seq']
         return True
 
     def add_nodes(self, nodes: list[dict[str, Any]]):
@@ -175,8 +185,7 @@ class Store:
                             (status, dumps(result) if result is not None else None, error, elapsed, now(), dumps(scientific_summary(result)), key))
             self.db.execute('UPDATE attempts SET status=?,finished=? WHERE node=? AND number=?',
                             (status, now(), key, node['attempts']))
-            self.event('attempt_finished', dict(node=key, status=status, elapsed=elapsed,
-                                               result_digest=digest(result) if result is not None else None, error=error))
+            self.event('attempt_finished', dict(node=key, status=status, elapsed=elapsed, error=error))
             self.db.execute('COMMIT')
         except BaseException:
             self.db.execute('ROLLBACK')

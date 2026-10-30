@@ -42,7 +42,7 @@ def check_name(value: Any) -> str:
 
 def references(value: Any) -> set[str]:
     if isinstance(value, dict):
-        if {'path', 'sha256'} <= value.keys():
+        if {'path', 'size_bytes'} <= value.keys():
             raise ValueError('literal artifact claims are forbidden; use $input or $ref')
         if '$ref' in value:
             if set(value) != {'$ref'} or not isinstance(value['$ref'], dict):
