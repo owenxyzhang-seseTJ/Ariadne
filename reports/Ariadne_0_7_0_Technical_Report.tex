@@ -536,7 +536,7 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
   python benchmarks/feedback_rebuild.py
 \end{lstlisting}
-\code{RELEASE_MANIFEST.json} 记录交付文件的大小和 SHA-256。它用于确认文件是否完整或被改动，不替代科学正确性测试。重跑测试会更新日志和验证结果，之后这些文件自然可能与原始交付清单不同。
+\code{RELEASE_MANIFEST.json} 记录交付文件的路径和字节数。它用于确认文件集合与大小，不替代科学正确性测试。重跑测试会更新日志和验证结果，之后这些文件自然可能与原始交付清单不同。
 
 详细请求字段、MCP 接入、模型服务配置及故障处理见 \path{AGENT_GUIDE.zh-CN.md}。源包中的旧验证 JSON 和旧 PDF 均是历史记录；本轮结果以带 \code{rebuild} 的记录和本报告为准。
 

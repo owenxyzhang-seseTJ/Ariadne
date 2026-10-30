@@ -5,7 +5,6 @@
   "reconstruction": true,
   "lost_archive_restored_bit_identically": false,
   "baseline_archive": "Ariadne_Deep_Optimization_R2_20261029.zip",
-  "baseline_sha256": "458cb5f31503c5f5a869605c0223434a8a6a75f99fdcc944c2584b4d9eec521c",
   "original_upstream_commit": "797ac22ffa9b81da2dd977e013bea8f114b49eb2",
   "inherited_numerical_scripts_modified": "Only unused imports removed during publication review; numerical algorithms unchanged",
   "report": "reports/Ariadne_0_7_0_Technical_Report.pdf",

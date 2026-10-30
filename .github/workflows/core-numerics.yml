@@ -33,7 +33,7 @@ jobs:
           python -m pytest tests tests_rebuild -q --junitxml=test-results.xml
       - name: Build Python distribution
         run: python -m build python --outdir /tmp/ariadne-dist
-      - name: Verify published source checksums
+      - name: Verify release manifest
         run: python scripts/verify_release.py
       - uses: actions/upload-artifact@v4
         if: always()

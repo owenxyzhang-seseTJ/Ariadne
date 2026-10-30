@@ -34,7 +34,7 @@ python examples/agent/create_demo.py /absolute/path/to/NEW-DEMO
 
 ## 文件与许可
 
-`RELEASE_MANIFEST.json` 保存大小和 SHA-256，使用 `python scripts/verify_release.py` 检查。`dist/` 提供 Python wheel；第三方运行库、SHELX 二进制和字体不在包内。原有许可证和依赖说明保留。
+`RELEASE_MANIFEST.json` 保存交付文件的路径和字节数，使用 `python scripts/verify_release.py` 检查文件集合、大小与 ZIP 成员一致性。`dist/` 提供 Python wheel；第三方运行库、SHELX 二进制和字体不在包内。原有许可证和依赖说明保留。
 
 原 R2 指南位于 `docs/R2_README*`，旧报告和基准保留。重现本轮检查可运行 `python -m pip install -e './python[dev]'`，再运行 `python scripts/run_review_validation.py`。
 

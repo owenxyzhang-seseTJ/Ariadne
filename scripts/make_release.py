@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Create a sorted source ZIP and per-file checksum manifest (no runtime binaries)."""
+"""Create a sorted source ZIP and per-file size manifest (no runtime binaries)."""
 from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
-import hashlib
 import json
 from pathlib import Path
 import zipfile
@@ -40,9 +39,8 @@ def make(root: Path, destination: Path):
     files = list(source_files(root))
     records = []
     for path, name in files:
-        data = path.read_bytes()
-        records.append({'path': name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()})
-    manifest = {'schema': 'ariadne-release-manifest/1', 'build': '0.7.0-rebuild-20261030',
+        records.append({'path': name, 'bytes': path.stat().st_size})
+    manifest = {'schema': 'ariadne-release-manifest/2', 'build': '0.7.0-rebuild-20261030',
                 'generated_utc': datetime.now(timezone.utc).isoformat(), 'files': records}
     manifest_path = root/'RELEASE_MANIFEST.json'
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
@@ -56,10 +54,8 @@ def make(root: Path, destination: Path):
     with zipfile.ZipFile(destination) as z:
         if z.testzip():
             raise RuntimeError('ZIP CRC check failed')
-    digest = hashlib.sha256(destination.read_bytes()).hexdigest()
-    destination.with_suffix(destination.suffix+'.sha256').write_text(digest+'  '+destination.name+'\n')
     result = {'archive': str(destination), 'bytes': destination.stat().st_size,
-              'files': len(files)+1, 'sha256': digest}
+              'files': len(files)+1}
     print(json.dumps(result, indent=2))
     return result
 
