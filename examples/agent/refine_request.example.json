@@ -1,0 +1,25 @@
+{
+  "schema": "ariadne-agent/1",
+  "mode": "refine",
+  "inputs": {
+    "res": "/absolute/path/to/candidate.res",
+    "hkl": "/absolute/path/to/candidate.hkl"
+  },
+  "settings": {
+    "cycles": 8
+  },
+  "budget": {
+    "max_actions": 40,
+    "max_attempts": 2,
+    "wall_seconds": 7200,
+    "action_seconds": 600
+  },
+  "planner": {
+    "kind": "deterministic"
+  },
+  "experts": [
+    "crystallography",
+    "mof",
+    "twinning"
+  ]
+}

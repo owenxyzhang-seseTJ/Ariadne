@@ -44,14 +44,14 @@ import shlex
 import sys
 plugin, base, runtime, programs = map(Path, sys.argv[1:])
 record = {
-    'schema': 'ariadne-runtime/1', 'product': 'Ariadne', 'version': '0.5.0',
+    'schema': 'ariadne-runtime/1', 'product': 'Ariadne', 'version': '0.7.0', 'build': '0.7.0-rebuild-20261030',
     'base_prefix': str(base.resolve()), 'source': str((runtime / 'dials-3.30.1').resolve()),
     'compiled_extensions': 'unmodified DIALS 3.30.1/cctbx/dxtbx conda binaries',
     'deployment': 'patched DIALS Python source plus companion package on explicit PYTHONPATH',
     'mcp_sdk': '1.30.0', 'plugin_root': str(plugin.resolve()),
-    'baseline_launcher': str(programs / 'scxrd-env'), 'tests': 'not_run_as_requested',
+    'baseline_launcher': str(programs / 'scxrd-env'), 'tests': 'installer_does_not_run_scientific_tests',
     'algorithm_validation': 'not_run', 'format_compatibility': 'actual Bruker/Rigaku datasets unverified',
-    'global_composite_absorption_estimator': 'not_implemented'
+    'global_composite_absorption_estimator': 'implemented; composite observations and fixed Gaussian information modes; local Gauss-Newton covariance; experimental raw-frame validation pending'
 }
 (runtime / 'runtime.json').write_text(json.dumps(record, indent=2) + '\n')
 # Local desktop clients do not necessarily inherit a login-shell PATH.
@@ -68,7 +68,7 @@ lines = ['#!/bin/sh'] + ['export ' + key + '=' + shlex.quote(value) for key, val
 lines += [
     'export PYTHONNOUSERSITE=1',
     'export PYTHONPATH=' + shlex.quote(str(runtime / 'dials-3.30.1/src') + ':' + str(runtime / 'python')),
-    'export PATH=' + shlex.quote(str(base / 'bin') + ':' + str(programs)) + ':"$PATH"',
+    'export PATH=' + shlex.quote(str(runtime / 'python/bin') + ':' + str(base / 'bin') + ':' + str(programs)) + ':"$PATH"',
     'if [ "$#" -eq 0 ]; then',
     '  printf "%s\\n" "Usage: ariadne-env COMMAND [ARGS...]"',
     '  exit 0',

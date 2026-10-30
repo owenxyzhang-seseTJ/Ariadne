@@ -1,0 +1,857 @@
+% !TeX program = xelatex
+% Self-contained source. Compile twice with XeLaTeX; no external figures needed.
+\documentclass[UTF8,11pt,a4paper,fontset=fandol]{ctexart}
+\usepackage[margin=24mm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,bm,mathtools,booktabs,longtable,tabularx,array}
+\usepackage{graphicx,xcolor,hyperref,enumitem,fancyhdr,listings,tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\definecolor{ink}{HTML}{24232A}
+\definecolor{plum}{HTML}{75516A}
+\definecolor{copper}{HTML}{B87550}
+\definecolor{papergray}{HTML}{F4F2F1}
+\hypersetup{colorlinks=true,linkcolor=plum,urlcolor=plum,citecolor=plum,
+ pdftitle={Ariadne 第二轮：从物理导数到结构化统计求解},
+ pdfauthor={Ariadne technical revision}}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{3em}
+\setlist{itemsep=3pt,topsep=4pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Ariadne\quad 第二轮算法与机制优化}
+\fancyhead[R]{\small 2026-10-29}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible,
+ backgroundcolor=\color{papergray},frame=single,rulecolor=\color{papergray},
+ xleftmargin=4pt,xrightmargin=4pt,showstringspaces=false}
+\newcommand{\R}{\mathbb R}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\T}{^{\mathsf T}}
+\newcommand{\RoundTwoTests}{完整原生回归 201 项全部通过；0 失败、0 错误、0 跳过}
+\newtheorem{proposition}{命题}[section]
+\ctexset{section={format=\Large\bfseries\color{ink}},
+ subsection={format=\large\bfseries\color{ink}}}
+
+\begin{document}
+\begin{titlepage}
+\vspace*{12mm}
+{\sffamily\color{plum}\Large ARIADNE\quad / \quad ROUND 2\par}
+\vspace{12mm}
+{\Huge\bfseries 从物理导数到\\[5pt]结构化统计求解\par}
+\vspace{8mm}
+{\Large 复杂孪晶与弱衍射的第二轮源码重构\par}
+\vspace{12mm}
+\noindent\rule{\textwidth}{.7pt}
+\vspace{4mm}
+\noindent\begin{tabularx}{\textwidth}{@{}lX@{}}
+比较基线 & 2026-10-29 第一轮交付，保存在随附基线代码压缩包中\\
+原始 Git 基线 & \path{797ac22ffa9b81da2dd977e013bea8f114b49eb2}\\
+原生接口目标 & DIALS 3.30.1；dxtbx 3.30.0\\
+源码项目 & \url{https://github.com/owenxyzhang-seseTJ/Ariadne}\\
+交付内容 & 完整源码、两种补丁、原理回归、配套基准及本报告
+\end{tabularx}
+\vspace{10mm}
+\noindent\colorbox{papergray}{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{
+\vspace{3mm}\textbf{本轮的主线}\\[4pt]
+找出前向模型与统计目标中可以\textbf{精确消去、共享计算、降低维数}的结构：
+用隐函数求导减少反射预测；用体素边界通量计算位置导数；
+用小型正交因子承载完整 WLS 目标；
+用充分统计量与对偶方程求解可分计数问题；
+每次试探尺度时先求解有符号强度。
+\vspace{3mm}}}
+\vfill
+\noindent\small
+本报告描述已经接入源码的算法及其条件。速度、内存和数值一致性来自合成问题与
+原生 DIALS 接口回归；尚未获得用户原始实验帧来评价实际结构解析成功率。
+解析几何、QR、充分统计量和变量投影有既有理论基础，本轮贡献是针对 Ariadne
+数据流的结构化重构、稳定数值实现和相应科学验收机制。
+\end{titlepage}
+\begingroup
+\small
+\setlength{\parskip}{0pt}
+\tableofcontents
+\endgroup
+\newpage
+
+\section{问题定位与实现范围}
+
+第一轮建立了从像素可观测模式到全局强度反演的通路。
+第二轮继续处理这条通路中的计算瓶颈和尺度敏感性：
+反射位置对晶体参数的重复有限差分、体素轮廓对中心的重复积分、
+大像素块的全量白化副本、条件似然中无关常数造成的消减误差、
+缩放时线性强度与非线性尺度交替更新的重复工作，以及导出时的整表载入。
+
+这些环节对弱衍射尤为重要。接近零的有符号强度不应被人为截正；
+微小但非零的轮廓贡献不应为省时而被删除；
+完全重合的孪晶分量也不应因求解器返回一个向量就被视为分别测得。
+本轮沿用第一轮的可辨识性、零空间、曲率与驻点验收，再改进计算方式。
+
+\begin{table}[htbp]
+\centering\small
+\caption{本轮改变的实际位置}
+\begin{tabularx}{\textwidth}{@{}p{.20\textwidth}XX@{}}
+\toprule
+环节 & 实现机制 & 主要源码\\
+\midrule
+预测与仪器几何 & 原生分支选择；解析 Ewald 与面板导数 & \path{rotation_geometry.py}, \path{centroid_em.py}\\
+非互斥几何匹配 & 每个观测一次 Cholesky；完整候选集分块 & \path{soft_multi_indexer.py}\\
+体素轮廓 & 共用 CDF 边界；位置导数由面通量给出 & \path{profile_geometry.py}\\
+经验轮廓学习 & 每个参考一次重采样；局部充分累积量 & \path{profile_learning.py}\\
+有符号 WLS & 增广矩阵的流式平方根压缩 & \path{orthogonal_compression.py}\\
+非负计数与区间 & 精确因子分离、Poisson 聚合、稳定似然差 & \path{constrained_pixels.py}\\
+全局缩放 & 精确变量投影；固定支撑图分块求解 & \path{variable_projection.py}\\
+HKLF5 & 两遍流式导出；共同尺度与量化诊断 & \path{hklf5_stream.py}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+除特别标注外，表中脚本位于
+\path{skills/ariadne-reduction/scripts/}。
+DIALS 的原生反射枚举、面板选择、晶体对称参数化及编译扩展继续使用。
+本轮重点重构 Ariadne 调用这些能力的方式，并未另写一套未经验证的仪器模型。
+
+\section{反射预测：对物理约束求导}
+
+\subsection{先确定物理解，再求其局部变化}
+
+采用不含 $2\pi$ 的晶体学倒易空间约定，设 $A=UB$，
+固定转动为 $F$，设置转动为 $S$，扫描轴为单位向量 $\bm e$。
+对 Miller 指数 $\bm h$，
+\begin{equation}
+\bm r=S R_{\bm e}(\varphi)F A\bm h,\qquad
+\bm s_1=\bm s_0+\bm r,\qquad
+\norm{\bm s_1}^2=\norm{\bm s_0}^2 .
+\label{eq:ewald}
+\end{equation}
+这里 $\bm s_0$、$F$、$S$ 和面板几何在本轮局部晶体精修中固定。
+DIALS 的几何模型和参数化见 Waterman 等\cite{waterman2016}。
+
+进入/离开 Ewald 球的分支、实际探测器面板和未折叠扫描圈数，均由原生预测器确定。
+对这一已选定的物理解求导，避免有限差分时反复枚举所有反射。
+当支持集发生离散变化时，不能把局部光滑导数直接用于跨分支推断。
+
+\subsection{Ewald 隐函数导数}
+
+令 $\theta$ 是一个对称约束允许的晶体参数，
+\begin{equation}
+\bm v_\theta=S R_{\bm e}(\varphi)F
+ \frac{\partial A}{\partial\theta}\bm h,\qquad
+\bm t=(S\bm e)\times\bm r .
+\end{equation}
+对式~\eqref{eq:ewald} 微分，得到
+\begin{align}
+0&=\bm s_1\T\left(\bm v_\theta+
+               \bm t\,\frac{\partial\varphi}{\partial\theta}\right),\\
+\frac{\partial\varphi}{\partial\theta}
+ &=-\frac{\bm s_1\T\bm v_\theta}{\bm s_0\T\bm t},\qquad
+\frac{\partial\bm s_1}{\partial\theta}
+ =\bm v_\theta+\bm t\,\frac{\partial\varphi}{\partial\theta}.
+\label{eq:rotationderiv}
+\end{align}
+分母中的 $\bm r\T\bm t=0$ 被精确消去。
+这不是对旋转角的线性物理近似，而是选定分支的局部导数。
+
+在 Ewald 相切位置，$\bm s_0\T\bm t$ 接近零，角度对参数的灵敏度确实发散。
+源码使用相对于浮点舍入尺度的判别并明确拒绝无法解析的导数，
+没有往分母加一个任意 $\varepsilon$ 来制造有限答案。
+$\partial A/\partial\theta$ 直接使用 DIALS 的 $U/B$ 参数化导数，
+保留其物理单位与晶体对称约束。
+
+\subsection{面板透视投影的导数}
+
+令 $D$ 为所选面板基底的逆矩阵，
+$\bm q=D\bm s_1$，则面板毫米坐标为
+\[
+X=q_1/q_3,\qquad Y=q_2/q_3 .
+\]
+商法则给出
+\begin{equation}
+\frac{\partial X}{\partial\theta}
+ =\frac{\partial q_1/\partial\theta-X\,\partial q_3/\partial\theta}{q_3},
+\quad
+\frac{\partial Y}{\partial\theta}
+ =\frac{\partial q_2/\partial\theta-Y\,\partial q_3/\partial\theta}{q_3}.
+\end{equation}
+输出 Jacobian 保持 $(X_{\rm mm},Y_{\rm mm},\varphi_{\rm rad})$ 的原有接口。
+平行于面板的射线同样被识别为几何奇异情形。
+
+实现只在完全相同的参数和模型状态下复用结果。
+仪器状态、晶体参数或预测失败会使缓存失效；返回数组与缓存隔离。
+多个实验共享一个晶体对象时，共享同一参数组，避免重复拟合同一自由度。
+原生双晶体回归中，预测调用由 118 次降至 6 次，
+全部 6240 个预测仍保留；最终对数似然差为 $7.11\times10^{-15}$。
+
+\subsection{完整候选集的内存结构}
+
+对观测 $\bm x_i$ 和预测 $\bm m_j$，几何密度为
+\begin{equation}
+\log f_{ij}=-\frac12\left[
+(\bm x_i-\bm m_j)\T C_i^{-1}(\bm x_i-\bm m_j)
++\log\det C_i+3\log(2\pi)\right].
+\end{equation}
+同一观测的所有候选共享 $C_i$。令 $C_i=L_iL_i\T$，
+每个观测只分解一次，再对全部残差批量三角求解。
+这消除了逐候选重复的分解和行列式计算。
+
+EM 的责任度保留全部候选、先验质量和离群项，
+通过 $\operatorname{logsumexp}$ 归一化。
+临时残差按最多 65536 个观测--候选对分块；
+输出责任度矩阵仍为 $O(NM)$，临时 $N\times M\times3$ 数组被消去。
+没有通过距离门限或责任度门限去掉弱候选。
+扫描块标签也改用整数编码，诊断残差分块计算。
+
+\section{体素积分：共享边界与守恒导数}
+
+\subsection{概率质量与条件 Gaussian 分解}
+
+一个像素/帧体素的轮廓是概率质量，
+\begin{equation}
+p_V(\bm\mu,\Sigma)=
+\int_{a_1}^{b_1}\int_{a_2}^{b_2}\int_{a_3}^{b_3}
+\phi_3(\bm x;\bm\mu,\Sigma)\,d\bm x .
+\label{eq:voxel}
+\end{equation}
+直接用中心密度乘体积会在窄峰和斜相关轮廓中产生偏差。
+本轮保留实际体素积分；有限支持上的概率不重新归一化，
+因此裁剪出盒子的散射质量不会被人为分配给盒内像素。
+
+设 $K=\Sigma^{-1}$，选条件精度最大的轴 $a$ 解析积分。
+给定另两轴位移 $\bm d_b$，
+\[
+X_a\mid\bm X_b
+\sim\mathcal N\left(\mu_a-K_{aa}^{-1}K_{ab}\bm d_b,\ K_{aa}^{-1}\right).
+\]
+两个边界的标准正态 CDF 差给出条件质量；
+其余两轴用 Gauss--Legendre 求积。
+相邻体素共享边界，因此同一边界的 CDF 只计算一次。
+
+尾部计算使用 $\Phi(-|z|)$，同侧边界做稳定尾差，
+跨零及零附近用 $\operatorname{erf}$ 差，
+避免在大正 $z$ 处直接执行 $1-1$。
+对角协方差直接分解成三个一维边界质量的乘积。
+数值轴的求积阶数继续采用
+\[
+n_j=\max\{6,\lceil3\sqrt{K_{jj}}\rceil+2\},\qquad n_j\le64 .
+\]
+这是分辨率规则，\textbf{不是任意协方差下的严格积分误差证书}。
+超过支持阶数时仍明确报错。
+
+\subsection{位置导数等于边界通量}
+
+平移族满足
+$\partial\phi/\partial\mu_j=-\partial\phi/\partial x_j$。
+对式~\eqref{eq:voxel} 应用微积分基本定理，
+\begin{equation}
+\boxed{\quad
+\frac{\partial p_V}{\partial\mu_j}
+=\int_{\partial V_{j,-}}\phi_3\,dS
+ -\int_{\partial V_{j,+}}\phi_3\,dS .\quad}
+\label{eq:flux}
+\end{equation}
+因此无需对三个方向各做两次体积分，也无需选择中心位移步长。
+相关 Gaussian 的每个面通量只保留一条数值积分轴，
+另一轴仍用条件 CDF 积分。
+
+这一结构带来两个直接好处。首先，细峰不再受固定 $0.001$ 像素差分步长限制。
+其次，邻接体素共享的内表面具有同一通量，求和时相互抵消；
+大区域的导数只由外边界给出，符合概率质量守恒。
+对角情形的密度差进一步使用 $\operatorname{expm1}$，保留接近相等的两面密度差。
+
+式~\eqref{eq:flux} 是连续模型的严格恒等式；
+相关情形的面通量仍由有限阶求积计算。
+回归用独立三维密度--score 积分核对其数值精度，
+并覆盖轴置换、内部面抵消、宽峰中心差和极窄峰边界。
+经验模板仍沿用原有分段线性插值及对称局部差分，
+元数据分别记录两种导数方法及经验模板的差分步长。
+
+\subsection{工作内存与经验轮廓学习}
+
+Gaussian 内核按工作预算分块，默认 8 MiB，
+小盒子自动缩小临时块。该预算针对主要求积临时数组，
+不包括调用者输入、最终轮廓、最终三个导数数组和少量轴向向量。
+新增 \path{out} 和 \path{derivative_out} 接口，
+让 patch 准备直接写入预分配数组，避免列表到数组的全量复制。
+经验模板插值也以最多 65536 个体素的坐标块计算，
+保持原有插值值而不创建完整三维坐标网格。
+
+经验轮廓学习中，第 $r$ 个参考对齐并归一化为 $\bm t_r$。
+池化模板及局部节点只需要
+\[
+\bm T=\sum_r\bm t_r,\quad
+\bm T_g=\sum_{r\in g}\bm t_r,\quad n_g .
+\]
+局部收缩结果仍为
+\begin{equation}
+\widehat{\bm t}_g=
+\alpha_g\,\frac{\bm T_g}{n_g}+
+(1-\alpha_g)\,\frac{\bm T}{\sum_v T_v},
+\qquad
+\alpha_g=\frac{n_g}{n_g+\nu}.
+\end{equation}
+线性求和不要求保存全部 $R$ 个参考体积。
+新实现每个参考只重采样一次，按固定网格单元累积，
+局部和暂存磁盘，得到池化均值后逐节点收缩。
+驻留模板数组由 $O(RV)$ 降为 $O(V)$；
+参考元数据仍为 $O(R)$，临时磁盘为 $O(GV)$，
+载入的 DIALS reflection table 也仍占用其原有空间。
+中心和协方差通过边缘及成对求和计算，无需 $3V$ 坐标网格。
+参考对齐本身是纯平移，通常直接调用对角仿射变换的可分离插值路径\cite{scipyaffine}；
+仅在极小工作预算下回到分块坐标插值。
+回归覆盖两条路径、奇偶形状和整/半像素边界，与原插值逐元素一致。
+
+\section{有符号 WLS：完整二次目标的平方根压缩}
+
+\subsection{为何压缩增广矩阵}
+
+设 $\bm y$ 是有效像素数据，$B$ 为背景基函数，$P$ 为 $K$ 个反射轮廓，
+$W=\diag(1/v_i)$。有符号积分求解
+\begin{equation}
+\min_{\bm b,\bm I\in\R^K}
+\norm{W^{1/2}(\bm y-B\bm b-P\bm I)}^2 .
+\label{eq:wls}
+\end{equation}
+构造增广矩阵
+\[
+C=W^{1/2}[\,B\ P\ \bm y\,] .
+\]
+对任意参数，令 $\bm z=(-\bm b\T,-\bm I\T,1)\T$，
+则式~\eqref{eq:wls} 的目标为 $\norm{C\bm z}^2$。
+
+\begin{proposition}
+若 $C=QR$，且 $Q\T Q=I$，则对全部参数，
+$\norm{C\bm z}^2=\norm{R\bm z}^2$。
+按行块递推地把 $[R_{\rm old};C_{\rm next}]$ 再做 QR，
+最终小型 $R$ 保留相同二次目标。
+\end{proposition}
+
+证明直接来自正交变换保持二范数。
+把数据列也纳入压缩，可以同时保留参数相关残差和无法拟合的常数残差；
+仅压缩设计矩阵而遗漏后者会破坏 $\chi^2$ 诊断。
+这种平方根压缩属于既有顺序/分块 QR 思想\cite{demmel2008}。
+本轮把它接入背景消去、弱模态保存、协方差及全局信息模式接口。
+
+\subsection{小因子上的背景消去与模式分解}
+
+由于背景列在前，可写
+\[
+R=\begin{bmatrix}
+R_{BB}&R_{BP}&\bm r_{By}\\
+0&R_{PP}&\bm r_{Py}
+\end{bmatrix},
+\]
+其中下半部分可包含最后一条纯残差行。
+先对 $R_{PP}$ 做列尺度均衡与 SVD，求有符号强度和可观测模式；
+再由
+$R_{BB}\bm b=\bm r_{By}-R_{BP}\bm I$ 回代背景。
+全过程不构造 $P\T WP$，避免把条件数平方。
+
+最后数据列的独立残差坐标可以是数据依赖的范数，
+不能将它单独解释为一个 Gaussian 测量值。
+它对应的设计行为零，只进入目标的常数项。
+传给后续反演的信号模式由固定设计的非零奇异方向构成。
+源码还显式传递原始有效像素数，保持第一轮的秩阈值和自由度定义，
+不把压缩后的行数误当成新的样本量。
+
+\subsection{复杂度、切换和适用边界}
+
+令总设计列数为 $d=B_{\rm count}+K+1$，分块行数为 $c$。
+附加工作内存为
+\[
+O(cd+d^2)
+\]
+而非 $O(Nd)$。调用者保存的 $N\times K$ 输入轮廓与长度 $N$ 拟合输出仍存在。
+对原始像素数大于 8192 的 \path{solve_joint} 调用，
+默认使用 $c=4096$；小问题保留原密集路径。
+显式 \path{chunk_rows=0} 可请求密集实现，
+正整数可指定块长。
+位置干扰参数的首个专门投影步骤仍有密集 QR，
+因此本轮没有宣称整个位置不确定度分支已经流式化。
+
+在 $N=120000,K=16$ 的固定轮廓例中，
+额外 traced 峰值由 87.49 MB 降至 2.41 MB，
+中位耗时由 0.2072 s 降至 0.05539 s。
+强度、协方差、拟合值和 $\chi^2$ 均与基线核对；
+另有任意试探强度的剖面二次目标恒等性测试，
+而不仅比较一个最优解。
+
+\section{计数似然：先消去不携带参数信息的工作}
+
+\subsection{严格的因子分离}
+
+非负计数模型取
+\[
+\mu_j=\frac{b_j+\sum_kp_{jk}I_k}{g},\qquad I_k\ge0 .
+\]
+这里 $I_k,b_j$ 的单位为 ADU，增益 $g$ 为 ADU/count，
+$\mu_j$ 才是预期光子计数。
+当一行轮廓对所有分量严格为零时，该像素对强度没有信息。
+似然可分为
+\[
+L(\bm I)=L_{\rm signal}(\bm I)\,L_{\rm constant}.
+\]
+新实现将常数因子移出每次优化及区间求解，
+在绝对负对数似然诊断中只计入一次。
+固定背景中的这些像素仍保留在 WLS 背景估计与最终诊断中；
+正计数却零预期的 Poisson 支持矛盾仍明确拒绝。
+删除条件是\textbf{严格零轮廓}，不是弱信号阈值。
+
+\subsection{可聚合 Poisson 观测的充分统计量}
+
+若一组像素具有零背景，且其非零贡献者完全相同、
+每一行中各贡献者的物理轮廓系数严格相等，
+则该行只依赖组总强度 $T$：
+\[
+n_j\sim\operatorname{Poisson}(e_jT).
+\]
+其中 $T$ 仍为 ADU 总强度，$e_j=p_j/g$。
+独立 Poisson 乘积可写为
+\[
+L(T)=\text{const}\times e^{-ET}T^N,\qquad
+N=\sum_j n_j,\quad E=\sum_j e_j.
+\]
+因此 $(N,E)$ 保留了 $T$ 的全部似然信息。
+这同时覆盖单个峰的非均匀轮廓和完全重合的相同轮廓贡献。
+近似相等的轮廓不聚合；非零背景和一般重叠继续逐像素处理。
+原始逐像素诊断和完整协方差语义仍保留。
+
+\subsection{独立强度组的条件剖面化为一个对偶根}
+
+若聚合后的各组贡献者互不交叉，
+\[
+N_g\sim\operatorname{Poisson}(e_gT_g),
+\]
+固定总强度 $\sum_gT_g=t$ 后，
+非负 nuisance 求解为
+\[
+\min_{T_g\ge0,\ \sum_gT_g=t}
+\sum_g(e_gT_g-N_g\log T_g).
+\]
+对 $N_g>0$，KKT 条件给出
+\begin{equation}
+T_g=\frac{N_g}{e_g+\lambda}\ (N_g>0),\qquad
+\sum_{g:N_g>0}\frac{N_g}{e_g+\lambda}=t .
+\label{eq:dual}
+\end{equation}
+总计数为正且没有进入下述零计数边界分配分支时，
+右式对 $\lambda$ 单调，故多维约束优化转成唯一的一维根。
+使用
+$z=(\lambda+\min e_g)t/\sum_gN_g$，
+根位于无量纲区间 $[0,1]$。
+
+零计数组必须保留：当最低曝光组的 $N_g=0$，
+它可在 $\lambda=-\min e_g$ 处接纳剩余强度，
+成为活跃边界解。源码解析处理这一切换，
+不把零计数组直接删除，也不以微小伪计数替代。
+若全部计数为零，固定总量分配给最低曝光组即可。
+完全重合组中的单个分量仍不可辨识；
+分配到组内部的数值比例只用于构造等价状态，不产生新的测量信息。
+
+\section{条件剖面区间：稳定似然差与单位不变的求根}
+
+\subsection{为何大常数会损坏区间}
+
+给定要报告的线性量 $t=\bm c\T\bm I$，似然比函数为
+\[
+\Lambda(t)=2\left[
+\min_{\bm I\ge0,\ \bm c\T\bm I=t}\ell(\bm I)-\ell(\widehat{\bm I})\right].
+\]
+若两个负对数似然都包含 $10^{17}$ 量级的参数无关常数，
+直接相减可以丢掉决定区间的 $O(1)$ 增量。
+优化器终止并不能修复已经在函数计算中丢失的信息。
+
+对 Gaussian WLS，令
+$\bm r_0=A\widehat{\bm x}-\bm y$，
+$\bm d=A(\bm x-\widehat{\bm x})$，则
+\begin{equation}
+\Delta\ell=\bm r_0\T\bm d+\tfrac12\bm d\T\bm d .
+\label{eq:gaussdelta}
+\end{equation}
+这保留了交叉项与二次项，无需相减两个大残差平方和。
+
+对 Poisson，令 $\delta=\mu-\mu_0$、$u=\delta/\mu_0$，
+\begin{align}
+\Delta\ell
+ &=\delta-n\log(1+u)\\
+ &=\mu_0\{u-\log(1+u)\}
+   +(\mu_0-n)\log(1+u).
+\label{eq:poisdelta}
+\end{align}
+当 $|u|\le1/8$ 时，以 $\operatorname{log1p}$ 和
+$u-\log(1+u)=u^2/2-u^3/3+\cdots$ 的有限展开稳定计算。
+$\delta$ 直接从线性预测器的参数变化计算，
+避免先算两个大均值再相减。零均值、正计数等支持边界单独处理。
+
+Poisson--Gaussian 路径继续使用精确的离散--连续概率模型，
+以第一轮受控截断的数值卷积求值，
+先逐像素计算相对于最优点的对数密度差，再累加；
+严格零轮廓像素的常数项已移出。
+这里没有新增一个闭式 Poisson--Gaussian 对偶求解器，
+也没有把精确计数模型替换为 Gaussian 近似。
+最终剖面精度受卷积误差、浮点误差和优化验收共同约束。
+
+\subsection{求根与 nuisance 优化的验收}
+
+区间上端点及内部下端点满足 $\Lambda(t)=q_{\chi^2_1}(\gamma)$；
+若下端点在非负边界 $t=0$，允许 $\Lambda(0)\le q_{\chi^2_1}(\gamma)$。
+固定 ADU 绝对容差会使相同物理问题在单位变换下产生不同精度；
+Brent 求根的坐标终止条件见 SciPy 文档\cite{scipybrent}。
+新实现把根括区映射到无量纲坐标，解出后重新评价端点的似然比残差；
+仅满足求根器的坐标终止条件不足以发布端点。
+无量纲根的绝对与相对容差均为 $10^{-12}$；
+需要满足等式的端点还须通过
+\[
+|\Lambda(t)-q|\le10^{-6}\max(1,q),
+\]
+否则返回 \path{profile_failed}。
+
+两个独立反例给出了实际修复证据。参数无关 $\chi^2=1.6\times10^{17}$
+时，单信号的解析区间为 $[1.64003598,5.55996395]$，
+第一轮却返回 $[0,7.47298331]$ 且上端 LR 为零；
+本轮恢复解析值。另一 PG 例只把 ADU 单位乘 $10^{-12}$，
+第一轮的上界由正常尺度的 $5.78669768137$ 变成零；
+本轮得到 $5.78669768137\times10^{-12}$，换回原单位后一致。
+
+一般重叠的 nuisance 状态从最近的已解可行状态开始，
+并重新检查当前目标及 KKT 条件。
+可分 Poisson 情形使用式~\eqref{eq:dual}，
+Gaussian 和一般计数分支保留各自原有约束模型。
+条件不满足或端点不能验收时，返回明确的区间状态。
+
+区间仍\textbf{条件于固定背景、给定轮廓、增益、读出噪声与几何}。
+$\chi^2_1$ 阈值属于渐近校准，
+在极低计数和非负边界处不是精确覆盖率保证。
+本轮修复数值求解与单位一致性，并不把渐近阈值改称有限样本精确区间。
+完全不可辨识的分量继续返回不可辨识；
+可辨识的总强度仍可有有限区间。
+
+\section{缩放：精确变量投影与固定支撑图}
+
+\subsection{在每个尺度处先解完全部线性强度}
+
+白化后的全局模型为
+\begin{equation}
+\bm y=A(\bm\beta)\bm I+\bm\epsilon,\qquad
+\widehat{\bm I}(\bm\beta)
+=\argmin_{\bm I\in\R^n}\norm{A(\bm\beta)\bm I-\bm y}^2 .
+\end{equation}
+强度有符号，尺度通过正增益
+$g_c=k_c\exp(\bm x_c\T\bm\beta)$ 进入。
+新路径只把少量尺度参数 $\bm\beta$ 交给非线性求解器，
+每个试探点都用尺度均衡 SVD 解出全部 $\bm I$。
+变量投影是已有可分非线性最小二乘方法\cite{golub1973,oleary2013}；
+本轮实现针对带重复强度 ID、协方差白化和有符号信息模式的 Ariadne 模型。
+
+\subsection{必须保留的残差导数项}
+
+记 $\bm r=A\widehat{\bm I}-\bm y$，
+在 $A$ 满列秩且秩局部不变时，$A\T\bm r=0$。
+微分此正规正交条件，仅用于推导而不用于数值构造，
+可得
+\begin{equation}
+\boxed{\quad
+\frac{\partial\bm r}{\partial\beta_j}
+=(I-AA^+)\frac{\partial A}{\partial\beta_j}\widehat{\bm I}
+-(A^+)\T
+ \left(\frac{\partial A}{\partial\beta_j}\right)\T\bm r .
+\quad}
+\label{eq:varproj}
+\end{equation}
+第二项在零残差时消失，在实际有噪声数据中通常存在。
+省略它给出的并非完整剖面残差 Jacobian。
+独立中心差分测试覆盖远离零残差的点，
+专门验证此项不可丢弃。
+
+计算时令 $A=\widetilde A S$，
+$\widetilde A=U\Sigma V\T$，
+用
+$(A^+)\T=U\Sigma^{-1}V\T S^{-1}$ 应用伴随项。
+微分针对原始物理 $A$，不把数值列尺度的导数混入物理参数。
+秩不足时转回既有交替有符号 WLS 与尺度优化路径，必要时联合精修，并记录原因；
+不添加 ridge 来掩盖退化。
+
+\subsection{一次编译贡献算子，按固定结构求线性子问题}
+
+令 $C$ 为固定白化贡献算子，$E$ 把贡献映射到强度 ID，则
+\[
+A(\bm\beta)=C\diag(\bm g)E .
+\]
+一个强度可被多个贡献引用，且各贡献的特征和增益可不同。
+新实现一次组装 CSR 形式的 $C$ 及其转置，
+每次试探仅更新 $\bm g$，再批量形成残差与导数。
+
+利用 $C,E$ 的固定布尔支撑构造观测行--强度二部图，
+把线性求解分为互不连通的分量，并将相同矩阵形状的分量批量 SVD。
+支撑图使用贡献的\textbf{可能非零连接}，
+不使用某次试探后正负贡献抵消得到的暂时零值；
+否则会错误切断参数变化后重新出现的连接。
+尺度 $\bm\beta$ 始终全局共享，非线性问题没有被错误拆开。
+
+列均衡后的分量矩阵的奇异谱并集等于相应整体块对角矩阵的奇异谱。
+所有分量使用共同的最大奇异值和同一个相对秩阈值，
+避免每块单独相对截断改变整体可辨识性判定。
+孤立无响应行保留在残差中，无观测强度列触发秩不足处理。
+优化调用还关闭未消费的全量联合 Jacobian 副本。
+
+该求解器通过 \path{--optimizer profiled} 显式启用，
+默认的 \path{alternating} 路径保留。
+最终仍由原有物理 Jacobian、驻点判据、曲率检查与协方差流程验收；
+局部收敛不等于全局最优保证，最终 Gaussian 协方差也不因此变成精确非线性后验。
+
+\section{导出：保持观测语义并控制格式量化}
+
+\subsection{为什么不能先拆强度再写 HKLF5}
+
+HKLF5 用若干贡献者行表达同一个重叠观测，
+前续贡献者的批次编号取负，最后一行取正；
+同一观测各行携带共同的测量强度和标准差\cite{parkin2021}。
+把不可分观测强行分摊到各孪晶域，会向下游传递原始像素并未支持的分量信息。
+本轮保留共同观测语义、畴映射、指数映射及原有验证条件。
+
+\subsection{两遍读取替代整表载入}
+
+第一遍逐条检查 JSONL 主数据，验证唯一 ID、贡献者和格式可表示范围，
+同时收集共同尺度所需的极值。
+第二遍沿同一打开的文件句柄写出 HKL 和逐条 provenance。
+不再驻留全部观测、协方差载荷或输出行列表。
+唯一 ID 集仍为 $O(N)$；内存改进不能称为严格 $O(1)$。
+文件身份、大小及修改时间在两遍之间核对。
+输出先写临时文件，再以拒绝覆盖的方式安装，
+避免验证后期失败留下一个貌似完成的数据文件。
+
+\subsection{共同尺度与极弱标准差}
+
+固定小数字段可能把正标准差舍入为零。
+设共同乘数为 $c>0$，写出
+\[
+I'=cI,\qquad \sigma'=c\sigma .
+\]
+格式化前 $I'/\sigma'=I/\sigma$，
+强度符号和相对尺度不变。
+一般数据保持既有乘数规则；
+仅在最小标准差将丢失时，在全部字段上界允许的范围内扩大共同尺度。
+若动态范围导致任何共同尺度都无法同时容纳强度和非零标准差，则明确拒绝。
+
+小数字段量化步长为 $0.01$，
+折回原单位后的名义半量化间隔为 $0.005/c$。
+sidecar 记录尺度、量化步长和相对标准差舍入影响；
+该半间隔描述十进制格式量化，不是对二进制乘法和重新解析误差的严格证书。
+共同放大不增加测量信息，也不能让 HKLF5 保存完整协方差。
+主 JSONL 与协方差仍是完整科学记录。
+
+\section{测量结果与验证证据}
+
+\subsection{比较口径}
+
+所有第二轮基准比较对象为\textbf{第一轮交付}，不是未优化的上游 DIALS。
+冻结的基线代码位于
+\path{benchmarks/baseline-first-principles.zip}。
+每个基准记录随机种子、输入形状、重复次数和 Python/NumPy/SciPy 版本。
+默认数值环境与原生 DIALS 环境不同，报告未将它们混作同一软件环境。
+内存数字来自一次函数调用的 \path{tracemalloc} 额外峰值，
+通常排除已分配输入，不代表进程 RSS 或整个数据还原任务的峰值。
+
+\begin{table}[htbp]
+\centering\small
+\caption{第二轮已完成的同问题比较；MB 按 $10^6$ 字节计}
+\begin{tabularx}{\textwidth}{@{}p{.35\textwidth}rrX@{}}
+\toprule
+用例 & 第一轮 & 第二轮 & 解释\\
+\midrule
+原生双晶体 EM，中位秒 & 1.7422 & 0.3549 & 4.91 倍；两者收敛\\
+几何兼容度 $400\times128$，秒 & 1.3114 & 0.02217 & 59.14 倍；相同候选\\
+完整混合 200 万对，峰值 MB & 146.02 & 21.86 & 约减少 85\%\\
+WLS 12 万像素、16 分量，秒 & 0.20724 & 0.05539 & 3.74 倍\\
+同一 WLS 附加峰值 MB & 87.49 & 2.41 & 约减少 97.2\%\\
+HKLF5 15000 条观测，峰值 MB & 167.88 & 1.33 & 约减少 99.2\%\\
+同一 HKLF5 导出，秒 & 1.1898 & 1.4718 & 两遍读取，约慢 24\%\\
+\bottomrule
+\end{tabularx}
+\label{tab:benchmarks}
+\end{table}
+
+完整混合 E 步的耗时受共享主机调度影响明显，
+原始重复值保存在 JSON，本报告只对这一用例主张内存收益。
+HKLF5 的正常尺度样例输出与第一轮逐字节一致；
+其明确收益是内存和弱标准差表示，未宣称该样例提速。
+
+\begin{table}[htbp]
+\centering\small
+\caption{轮廓、计数区间与缩放的完整子任务比较}
+\begin{tabularx}{\textwidth}{@{}p{.44\textwidth}rrX@{}}
+\toprule
+用例 & 第一轮/s & 第二轮/s & 结果\\
+\midrule
+相关 Gaussian，1064895 体素 & 2.68427 & 1.23784 & 2.17 倍\\
+Gaussian 值和三轴导数，143715 体素 & 2.41212 & 0.40440 & 5.96 倍\\
+200 参考、4 节点原生模板学习 & 0.29276 & 0.12246 & 2.39 倍\\
+4096 像素、4 独立 Poisson，拟合及区间 & 0.20967 & 0.03704 & 5.66 倍\\
+31 信号和32768零轮廓像素，PG 拟合及区间 & 0.59088 & 0.21191 & 2.79 倍\\
+$1000:1$ 一般 PG 强弱重叠，拟合及区间 & 0.31600 & 0.31118 & 基本持平\\
+120 块、60 强度、2 尺度完整缩放 & 0.20294 & 0.10080 & 2.01 倍\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+大 Gaussian 值计算的额外峰值由 51.39 MB 降至 14.23 MB；
+模板学习由 29.05 MB 降至 3.60 MB，模板最大差 $5.20\times10^{-18}$，
+参考来源一致。窄盒子值和三轴导数的中位时间比为 4.53，
+较小体积的值计算为 1.47；这些原始重复值有主机抖动，
+不作为普适加速倍数。
+
+独立 Poisson 样例把 4096 个参数相关行压缩为 4 行，
+计时覆盖拟合及全部条件区间，而非只计聚合内核。
+严格零轮廓 halo 的 PG 样例不能代表所有尾部非零的 Gaussian 轮廓；
+一般强弱重叠样例基本持平，仍使用同一精确概率模型。
+计数基准还记录配对 process CPU，三种情况的时间比分别为
+5.66、2.79 和 1.02。
+
+缩放例以相同容差完成两条路径，$\chi^2$ 差 $9\times10^{-15}$，
+强度最大差 $6.38\times10^{-11}$，全联合协方差差 $4.45\times10^{-13}$。
+线性分量矩阵元素由 14400 降至 720，
+但完整流程的额外峰值仅由 1.4109 MB 降至 1.3432 MB，
+因为最终联合不确定度矩阵仍需计算。局部矩阵节省不能等同于整任务内存节省。
+
+\subsection{数值回归与科学范围}
+
+\RoundTwoTests。完整记录为
+\path{reports/round2_validation.json}。
+原生环境为 Python 3.12.16、NumPy 2.5.4、SciPy 1.18.1、
+DIALS 3.30.1、dxtbx 3.30.0、cctbx-base 2026.9。
+DIALS Python distribution 元数据为 3.30，安装的 conda release 为 3.30.1，
+验证记录分别保存这两种版本证据。
+验证包括原有接口与数据契约、新增数学恒等式、原生合成实验和退化反例。
+关键检查覆盖：
+\begin{itemize}
+\item 解析旋转导数与原生有限差分、共享晶体、跨扫描圈数、模型缓存失效及几何相切；
+\item Gaussian 面通量的独立积分、轴置换、极窄峰、尾概率及输出数组复用；
+\item 流式 WLS 的任意参数目标、协方差、背景秩和近重合弱模式；
+\item 条件区间的大常数消减、单位变换、Poisson 零计数活跃边界及不可辨识总量；
+\item 变量投影的完整导数、重复贡献、支撑抵消、共同秩阈值及原有鞍点检查；
+\item 流式导出的同组行语义、共同缩放、动态范围失败与既有输出保护。
+\end{itemize}
+
+这些结果支持源码数学一致性、指定合成问题上的精度与性能。
+它们尚不能量化真实复杂孪晶中的弱反射召回率、合并统计或结构解析成功率。
+实际仪器标定误差、散射模型失配、吸收、辐射损伤和实验噪声相关性，
+仍需用真实原始帧及后续结构结果评价。
+
+\section{使用、升级与复现}
+
+\subsection{选择升级方式}
+
+完整源码包可直接解压检查，原有安装流程继续使用。
+已有最初 Git 基线的工作树，可先运行只读检查：
+\begin{lstlisting}
+python scripts/apply_numerical_update.py /path/to/Ariadne
+python scripts/apply_numerical_update.py /path/to/Ariadne --apply
+\end{lstlisting}
+如果工作树已经应用第一轮交付，选择增量：
+\begin{lstlisting}
+python scripts/apply_numerical_update.py /path/to/Ariadne \
+  --from-first-delivery
+python scripts/apply_numerical_update.py /path/to/Ariadne \
+  --from-first-delivery --apply
+\end{lstlisting}
+上下文冲突时脚本失败且不修改文件。
+若用户已将第一轮另行提交，HEAD 自然不同，
+可在审查分支后使用既有 \path{--allow-different-base}，
+实际补丁上下文检查仍强制执行。
+已经包含完整选定补丁时重复应用返回无需修改。
+
+\subsection{启用新的缩放路径}
+
+在既有 \path{global_scale.py} 命令参数后加
+\path{--optimizer profiled}；
+Python 接口为
+\path{fit_global(..., optimizer='profiled')}。
+其他本轮内核更新自动接入原有调用路径。
+选择新的优化器不改变强度有符号约定、已知校正因子、拟合模型、
+可辨识性要求或最终结果验收规则。
+
+\subsection{复现入口}
+
+\begin{lstlisting}
+python scripts/run_numerical_validation.py \
+  --scope numerical --output reports/local_round2_validation.json
+
+# In the pinned native DIALS runtime:
+python scripts/run_numerical_validation.py \
+  --scope native --output reports/local_native_validation.json
+
+python benchmarks/geometry_round2.py
+python benchmarks/profiles_round2.py
+python benchmarks/streamed_wls.py
+python benchmarks/likelihood_round2.py
+python benchmarks/variable_projection.py
+python benchmarks/export_round2.py
+\end{lstlisting}
+
+为便于控制 BLAS 并行和共享主机噪声，交付测量采用单线程环境变量；
+具体命令及每个基准的参数说明见 \path{ROUND2_OPTIMIZATION.md}。
+脚本支持使用冻结基线，不需要联网重新取得第一轮代码。
+原生测试使用合成 experiments 和 shoebox fixtures，
+无需下载用户原始衍射图像。
+
+\section{方法贡献与后续实验应回答的问题}
+
+本轮的实际方法改变可以归纳为三条。
+第一，把物理模型的微分结构用于计算：反射的隐函数导数和体素边界通量
+消除了有限差分步长及多次重复前向计算。
+第二，把统计目标的等价表示用于计算：完整 WLS 平方根因子、
+参数无关因子分离、严格 Poisson 充分统计量和无量纲区间，
+使省内存与保留弱信息可以同时实现。
+第三，把固定观测结构用于计算：一次编译贡献算子，
+按支撑图批量线性求解，再对全局尺度做精确变量投影。
+
+这些是相对于 Ariadne 第一轮实现可审查、可运行的方法创新。
+QR、隐函数求导、充分统计量和变量投影本身都有既有理论来源；
+是否构成领域内首创，需要独立文献审查与真实衍射验证。
+下一阶段最有判别力的实验，应固定输入校准与预测支持，
+比较跨晶畴重叠等级的强度偏差、弱反射不确定度覆盖、
+不同扫描之间的可观测模式一致性、结构精修残差以及整任务峰值内存。
+真实数据可同时揭示轮廓失配和几何系统误差，超出本报告合成回归的证据范围。
+
+\begin{thebibliography}{9}
+\footnotesize
+\setlength{\parskip}{0pt}
+\setlength{\itemsep}{2pt}
+\bibitem{waterman2016}
+D. G. Waterman et al.
+Diffraction-geometry refinement in the DIALS framework.
+\emph{Acta Crystallographica D} \textbf{72}, 558--575 (2016).
+\url{https://doi.org/10.1107/S2059798316002187}.
+\bibitem{demmel2008}
+J. Demmel, L. Grigori, M. Hoemmen and J. Langou.
+Communication-optimal parallel and sequential QR and LU factorizations.
+UCB/EECS-2008-89 (2008).
+\url{https://www2.eecs.berkeley.edu/Pubs/TechRpts/2008/EECS-2008-89.html}.
+\bibitem{golub1973}
+G. H. Golub and V. Pereyra.
+The differentiation of pseudo-inverses and nonlinear least squares problems whose variables separate.
+\emph{SIAM Journal on Numerical Analysis} \textbf{10}, 413--432 (1973).
+\url{https://doi.org/10.1137/0710036}.
+\bibitem{oleary2013}
+D. P. O'Leary and B. W. Rust.
+Variable Projection for Nonlinear Least Squares Problems.
+\emph{Computational Optimization and Applications} \textbf{54}, 579--593 (2013).
+\url{https://doi.org/10.1007/s10589-012-9492-9}.
+\bibitem{parkin2021}
+S. R. Parkin.
+Practical hints and tips for solution of pseudo-merohedric twins: three case studies.
+\emph{Acta Crystallographica E} \textbf{77}, 452--465 (2021).
+\url{https://doi.org/10.1107/S205698902100342X}.
+\bibitem{scipyaffine}
+SciPy documentation. \texttt{scipy.ndimage.affine\_transform}.
+\url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html}.
+Accessed 2026-10-29.
+\bibitem{scipybrent}
+SciPy documentation. \texttt{scipy.optimize.brentq}.
+\url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brentq.html}.
+Accessed 2026-10-29.
+\end{thebibliography}
+\end{document}

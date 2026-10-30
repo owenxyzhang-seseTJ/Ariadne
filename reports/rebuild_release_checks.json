@@ -1,0 +1,12 @@
+{
+  "baseline": "Ariadne_Deep_Optimization_R2_20261029.zip",
+  "checked_R2_numerical_files": 29,
+  "changed_R2_numerical_files": [],
+  "current_report_pages": 16,
+  "PDF_renderer": "Poppler pdftoppm via render_pdf.py",
+  "all_pages_visually_reviewed": true,
+  "latex_overfull_boxes": 0,
+  "latex_missing_glyphs": 0,
+  "wheel_installation": "offline pip --no-deps into a fresh target; CLI capabilities passed",
+  "wheel_scope": "no native DIALS, SHELX or MCP invocation"
+}

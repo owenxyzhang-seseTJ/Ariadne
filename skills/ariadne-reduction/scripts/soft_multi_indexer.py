@@ -16,6 +16,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 from dials.array_family import flex
 from dxtbx.model.experiment_list import ExperimentListFactory
+from rotation_geometry import compatibility_metrics
 
 
 def raw_key(experiment):
@@ -81,7 +82,7 @@ def assign(args):
     observed_raw_keys = [raw_key(m) for m in observed_experiments]
     model_signatures = {(eid, panel): signature(m, panel) for eid, m in enumerate(models) for panel in range(len(m.detector))}
     observed_signatures = {(eid, panel): signature(m, panel) for eid, m in enumerate(observed_experiments) for panel in range(len(m.detector))}
-    matrices = [np.asarray(m.crystal.get_A()).reshape(3, 3) for m in models]
+    matrices = np.array([np.asarray(m.crystal.get_A()).reshape(3, 3) for m in models])
     buckets = defaultdict(list)
     geometry = {}
     for row, (eid, panel) in enumerate(zip(pred_ids, pred_panels)):
@@ -118,23 +119,27 @@ def assign(args):
             if len(nearby) > args.max_candidates_per_spot:
                 status = 'candidate_budget_exceeded'  # Retain the spot; never silently truncate possible contributors.
             else:
-                C = np.diag(variances[i]) + model_cov
-                for local in nearby:
-                    row = int(rows[local])
-                    predicted_eid = int(pred_ids[row])
-                    A = matrices[predicted_eid]
-                    q_error = q[i] - A @ hkl[row]
-                    if np.linalg.norm(q_error) > q_tolerance:
-                        continue
-                    residual = y[i] - predicted[row]  # Unwrapped scan radians, not modulo 2pi across different exposures.
-                    D2 = float(residual @ np.linalg.solve(C, residual))
-                    if D2 <= args.max_mahalanobis2:
-                        log_density = -.5 * (D2 + np.linalg.slogdet(C)[1] + 3 * np.log(2 * np.pi))
+                candidates = rows[np.asarray(nearby, dtype=int)]
+                if len(candidates):
+                    q_delta = q[i] - np.einsum('nij,nj->ni', matrices[pred_ids[candidates]], hkl[candidates])
+                    q_distance = np.linalg.norm(q_delta, axis=1)
+                    reciprocal_ok = q_distance <= q_tolerance
+                    candidates, q_distance = candidates[reciprocal_ok], q_distance[reciprocal_ok]
+                if len(candidates):
+                    C = np.diag(variances[i]) + model_cov
+                    # All candidates share this observation's covariance. Use
+                    # one triangular factorization instead of one dense solve
+                    # and determinant for each possible crystallite.
+                    residuals, distance2, log_densities = compatibility_metrics(y[i], predicted[candidates], C)
+                    for local in np.flatnonzero(distance2 <= args.max_mahalanobis2):
+                        row = int(candidates[local])
+                        predicted_eid = int(pred_ids[row])
+                        residual, D2, log_density = residuals[local], float(distance2[local]), log_densities[local]
                         matches.append({'prediction_row': row, 'experiment_id': predicted_eid,
                                         'lattice_id': config['experiment_to_lattice'][str(predicted_eid)],
                                         'hkl': hkl[row].tolist(), 'mahalanobis2': D2,
                                         'compatibility': float(np.exp(-.5 * D2)), 'log_position_density': float(log_density),
-                                        'q_residual_invA': float(np.linalg.norm(q_error)),
+                                        'q_residual_invA': float(q_distance[local]),
                                         'residual_mm_mm_rad': residual.tolist()})
                 if matches:
                     status = 'single_explanation' if len(matches) == 1 else 'multiple_explanations'

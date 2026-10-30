@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import importlib.util
 import json
 from pathlib import Path
 import sys
@@ -13,7 +14,7 @@ import numpy as np
 
 SCRIPTS = Path(__file__).resolve().parents[1] / 'skills/ariadne-reduction/scripts'
 sys.path.insert(0, str(SCRIPTS))
-from global_scale import equivalent_hkl, prepare, scale, make_corrections
+from global_scale import equivalent_hkl, prepare, scale
 
 
 def inputs():
@@ -60,6 +61,7 @@ def inputs():
     return records, config, beta, truth
 
 
+@unittest.skipUnless(importlib.util.find_spec('cctbx'), 'Requires cctbx symmetry operations')
 class GlobalScaleTests(unittest.TestCase):
     def test_symmetry_keeps_anomalous_pairs_when_declared(self):
         self.assertNotEqual(equivalent_hkl([1,2,3], 'P 1', True), equivalent_hkl([-1,-2,-3], 'P 1', True))
@@ -111,6 +113,7 @@ class GlobalScaleTests(unittest.TestCase):
                   'chi2':fit['chi2'], 'corrected_groups':len(corrected)-1,
                   'fit_only_groups':len(corrections['fit_only_observations'])}))
 
+    @unittest.skipUnless(importlib.util.find_spec('dials'), 'Requires native DIALS/dxtbx geometry')
     def test_native_geometry_identity_and_lp(self):
         from test_centroid_em import DialsAdapterTests
         from dials.array_family import flex

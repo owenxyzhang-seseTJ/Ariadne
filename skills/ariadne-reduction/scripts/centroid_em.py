@@ -81,7 +81,7 @@ def covariance_factors(covariance):
 
 
 def expectation(y, means, whitening, log_normalizer, allowed, counts,
-                outlier_density, outlier_fraction):
+                outlier_density, outlier_fraction, *, pair_block_size=65536):
     """Return normalized responsibilities and complete row log densities.
 
     `counts` includes ALL components in the row's scan, even those on other
@@ -91,19 +91,68 @@ def expectation(y, means, whitening, log_normalizer, allowed, counts,
     """
     if not 0 < outlier_fraction < 1:
         raise ValueError('Outlier fraction must be strictly between zero and one')
-    counts = np.asarray(counts, dtype=float)
-    outlier_density = np.asarray(outlier_density, dtype=float)
+    counts = np.broadcast_to(np.asarray(counts, dtype=float), (len(y),))
+    outlier_density = np.broadcast_to(np.asarray(outlier_density, dtype=float), (len(y),))
     if np.any(counts <= 0) or np.any(outlier_density <= 0):
         raise ValueError('Need nonempty complete prediction sets and positive outlier density')
-    residual = np.einsum('iab,ijb->ija', whitening, y[:, None, :] - means[None, :, :])
-    log_components = (log_normalizer[:, None] - .5 * np.sum(residual**2, axis=2)
-                      + np.log1p(-outlier_fraction) - np.log(counts)[:, None])
-    log_components = np.where(allowed, log_components, -np.inf)
+    if pair_block_size < 1:
+        raise ValueError('Pair block size must be positive')
+    # Only the public N*M responsibility output is dense. Differences and
+    # whitened residuals are bounded blocks, never a full N*M*3 tensor. The
+    # output first stores log components, then is normalized in place.
+    responsibilities = np.empty((len(y), len(means)))
     log_outlier = np.log(outlier_fraction) + np.log(outlier_density)
-    log_density = np.logaddexp(logsumexp(log_components, axis=1), log_outlier)
-    responsibilities = np.exp(log_components - log_density[:, None])
+    log_density = np.empty(len(y))
+    columns = min(len(means), max(1, min(2048, pair_block_size)))
+    rows = max(1, pair_block_size // max(columns, 1))
+    for first in range(0, len(y), rows):
+        selected = slice(first, min(first + rows, len(y)))
+        log_sum = np.full(len(y[selected]), -np.inf)
+        normalizer = (log_normalizer[selected] + np.log1p(-outlier_fraction)
+                      - np.log(counts[selected]))
+        for start in range(0, len(means), max(columns, 1)):
+            candidates = slice(start, min(start + columns, len(means)))
+            delta = y[selected, None, :] - means[None, candidates, :]
+            residual = np.einsum('iab,ijb->ija', whitening[selected], delta)
+            component = responsibilities[selected, candidates]
+            component[:] = normalizer[:, None] - .5 * np.einsum('ija,ija->ij', residual, residual)
+            component[~allowed[selected, candidates]] = -np.inf
+            log_sum = np.logaddexp(log_sum, logsumexp(component, axis=1))
+        log_density[selected] = np.logaddexp(log_sum, log_outlier[selected])
+        for start in range(0, len(means), max(columns, 1)):
+            component = responsibilities[selected, start:start + columns]
+            np.subtract(component, log_density[selected, None], out=component)
+            np.exp(component, out=component)
     outlier = np.exp(log_outlier - log_density)
     return responsibilities, outlier, log_density
+
+
+def candidate_support(raw_keys, model_keys, observed_ids, predicted_ids,
+                      observed_panels, predicted_panels):
+    """Exact scan/panel membership without Python work per observation pair.
+
+    Integer labels represent equality of complete immutable raw-scan keys.
+    Counts include every panel, as required by the joint panel/position model.
+    """
+    labels = {key: label for label, key in enumerate(dict.fromkeys(raw_keys))}
+    observed = np.asarray([labels[raw_keys[int(eid)]] for eid in observed_ids])
+    predicted = np.asarray([labels[model_keys[int(eid)]] for eid in predicted_ids])
+    counts = np.bincount(predicted, minlength=len(labels))[observed]
+    allowed = observed[:, None] == predicted[None, :]
+    allowed &= np.asarray(observed_panels)[:, None] == np.asarray(predicted_panels)[None, :]
+    return allowed, counts
+
+
+def weighted_residual_squares(y, means, responsibilities, pair_block_size=65536):
+    """Expected XYZ square residuals using the same bounded pair workspace."""
+    totals = np.zeros(3)
+    columns = max(1, min(len(means), 2048, pair_block_size))
+    rows = max(1, pair_block_size // columns)
+    for first in range(0, len(y), rows):
+        for start in range(0, len(means), columns):
+            delta = y[first:first + rows, None, :] - means[None, start:start + columns, :]
+            totals += np.einsum('ij,ija,ija->a', responsibilities[first:first + rows, start:start + columns], delta, delta)
+    return totals
 
 
 def weighted_targets(y, whitening, responsibilities):
@@ -155,7 +204,12 @@ def fit_em(adapter, y, covariance, allowed, counts, outlier_density, *,
                 pred = adapter.predict(values)[active]
                 return np.einsum('jab,jb->ja', factors, pred - targets).ravel()
 
+            def jacobian(values):
+                derivative = adapter.jacobian(values, active)
+                return np.einsum('jab,jbp->jap', factors, derivative).reshape(-1, len(values))
+
             result = least_squares(objective, x, bounds=adapter.bounds,
+                                   jac=jacobian if callable(getattr(adapter, 'jacobian', None)) else '2-point',
                                    x_scale='jac', max_nfev=max_nfev,
                                    ftol=tolerance, xtol=tolerance, gtol=tolerance)
             trial_means = adapter.predict(result.x)
@@ -256,6 +310,7 @@ class DialsCrystalAdapter:
         self.budget = budget
         self.flex = flex
         self.parameterisations = []
+        self._crystal_parameters = []
         crystal_ids = {}
         self.experiment_crystals = []
         lower, upper, values = [], [], []
@@ -269,14 +324,17 @@ class DialsCrystalAdapter:
                 crystal_ids[key] = len(crystal_ids)
                 orientation = CrystalOrientationParameterisation(e.crystal)
                 cell = CrystalUnitCellParameterisation(e.crystal)
+                parameter_slices = []
                 for parameterisation, radius in (
                         (orientation, np.full(3, orientation_bound_mrad)),
                         (cell, np.maximum(np.abs(cell.get_param_vals()), 1.) * cell_relative_bound)):
                     v = np.asarray(parameterisation.get_param_vals())
+                    parameter_slices.append(slice(len(values), len(values) + len(v)))
                     values.extend(v)
                     lower.extend(v - radius)
                     upper.extend(v + radius)
                     self.parameterisations.append(parameterisation)
+                self._crystal_parameters.append((orientation, cell, *parameter_slices))
             self.experiment_crystals.append(crystal_ids[key])
         self.n_crystals = len(crystal_ids)
         self.x0 = np.asarray(values)
@@ -305,17 +363,41 @@ class DialsCrystalAdapter:
         self.reference = np.asarray(self.table['xyzcal.mm']).copy()
         self.table['xyzobs.mm.value'] = flex.vec3_double([tuple(p) for p in self.reference])
         self.predictor = ExperimentsPredictorFactory.from_experiments(self.models)
+        self._prediction_values = None
+        self._prediction_state = None
+        self._prediction_cache = None
 
-    def set_values(self, values):
+    def _set_parameter_values(self, values):
+        values = np.asarray(values, dtype=float)
+        if values.shape != self.x0.shape or not np.all(np.isfinite(values)):
+            raise ValueError('Require one finite value per crystal parameter')
         start = 0
         for parameterisation in self.parameterisations:
             stop = start + len(parameterisation.get_param_vals())
             parameterisation.set_param_vals(list(values[start:stop]))
             start = stop
 
+    def set_values(self, values):
+        self._set_parameter_values(values)
+        self._prediction_cache = None
+
+    def _geometry_state(self):
+        # The fixed-instrument contract is checked in run(). Including actual
+        # model state also prevents stale predictions after explicit changes by
+        # programmatic callers. No centroid or fitted observation enters this.
+        return tuple((tuple(e.crystal.get_A()), repr(e.beam.to_dict()),
+                      repr(e.detector.to_dict()), repr(e.goniometer.to_dict()),
+                      repr(e.scan.to_dict())) for e in self.models)
+
     def predict(self, values):
+        self.budget.check()
+        self._set_parameter_values(values)
+        state = self._geometry_state()
+        if (self._prediction_cache is not None and state == self._prediction_state
+                and np.array_equal(values, self._prediction_values)):
+            return self._prediction_cache.copy()
         self.budget.check(prediction=True)
-        self.set_values(values)
+        self._prediction_cache = None
         # Clear stale prediction flags before each native prediction.
         self.table.unset_flags(self.flex.bool(len(self.table), True), self.table.flags.predicted)
         self.predictor(self.table)
@@ -323,7 +405,42 @@ class DialsCrystalAdapter:
         valid = np.asarray(self.table.get_flags(self.table.flags.predicted), dtype=bool)
         if not np.all(valid) or not np.all(np.isfinite(prediction)):
             raise ValueError('Frozen candidate became physically unpredictable; reduce local bounds')
+        self._prediction_values = np.array(values, copy=True)
+        self._prediction_state = state
+        self._prediction_cache = prediction.copy()
         return prediction
+
+    def jacobian(self, values, rows=None):
+        """Analytic selected-row Ewald/projection Jacobian, with native U/B units."""
+        from rotation_geometry import crystal_prediction_jacobian
+        prediction = self.predict(values)
+        rows = np.arange(len(self.table)) if rows is None else np.asarray(rows, dtype=int)
+        if rows.ndim != 1 or np.any(rows < 0) or np.any(rows >= len(self.table)):
+            raise ValueError('Invalid prediction rows for Jacobian')
+        result = np.zeros((len(rows), 3, len(values)))
+        hkl = np.asarray(self.table['miller_index'], dtype=float)
+        for eid, experiment in enumerate(self.models):
+            local = np.flatnonzero(self.ids[rows] == eid)
+            if not len(local):
+                continue
+            selected = rows[local]
+            orientation, cell, orient_slice, cell_slice = self._crystal_parameters[self.experiment_crystals[eid]]
+            U = np.asarray(experiment.crystal.get_U()).reshape(3, 3)
+            B = np.asarray(experiment.crystal.get_B()).reshape(3, 3)
+            dU = np.array([np.asarray(value.elems).reshape(3, 3) for value in orientation.get_ds_dp()])
+            dB = np.array([np.asarray(value.elems).reshape(3, 3) for value in cell.get_ds_dp()])
+            dA = np.concatenate((dU @ B, U @ dB))
+            detector = np.array([np.asarray(panel.get_D_matrix()).reshape(3, 3) for panel in experiment.detector])
+            block = crystal_prediction_jacobian(
+                hkl[selected], prediction[selected, 2], experiment.beam.get_s0(),
+                experiment.goniometer.get_rotation_axis_datum(),
+                np.asarray(experiment.goniometer.get_fixed_rotation()).reshape(3, 3),
+                np.asarray(experiment.goniometer.get_setting_rotation()).reshape(3, 3),
+                U @ B, dA, detector[self.panels[selected]])
+            split = orient_slice.stop - orient_slice.start
+            result[local, :, orient_slice] = block[:, :, :split]
+            result[local, :, cell_slice] = block[:, :, split:]
+        return result
 
 
 def run(args):
@@ -441,10 +558,7 @@ def run(args):
                                       args.orientation_bound_mrad, args.cell_relative_bound)
         if len(table) * len(adapter.table) > args.max_pairs:
             raise BudgetExceeded('Full observation/prediction pair budget exceeded; no truncation')
-        allowed_scan = np.array([[raw_keys[int(eid)] == model_keys[int(pid)]
-                                  for pid in adapter.ids] for eid in ids])
-        counts = allowed_scan.sum(axis=1)
-        allowed = allowed_scan & (panels[:, None] == adapter.panels[None, :])
+        allowed, counts = candidate_support(raw_keys, model_keys, ids, adapter.ids, panels, adapter.panels)
         if np.any(counts == 0):
             raise ValueError('A hypothesis omits an observed raw scan')
         initial = adapter.reference.copy()
@@ -452,16 +566,21 @@ def run(args):
                      density[train], outlier_fraction=args.outlier_fraction,
                      em_iterations=args.em_iterations, max_nfev=args.max_iterations,
                      min_support=args.min_anchors, tolerance=args.em_tolerance)
-        fitted.append((path, adapter, initial, fit, allowed, counts))
+        # Only the first fit needs its training responsibility matrix for the
+        # diagnostic reflection table. Other hypotheses retain final scores and
+        # sufficient diagnostics, not a second dense N*M array each.
+        if fitted:
+            del fit['responsibilities']
+        fitted.append((path, adapter, initial, fit, allowed[heldout], counts[heldout]))
     train_indices = np.flatnonzero(train)
     test_indices = np.flatnonzero(heldout)
     evaluations, final_scores = [], []
     white, lognorm = covariance_factors(covariance[heldout])
     for path, adapter, initial, fit, allowed, counts in fitted:
         _, _, initial_ll = expectation(y[heldout], initial, white, lognorm,
-                                       allowed[heldout], counts[heldout], density[heldout], args.outlier_fraction)
+                                       allowed, counts, density[heldout], args.outlier_fraction)
         _, _, final_ll = expectation(y[heldout], fit['means'], white, lognorm,
-                                     allowed[heldout], counts[heldout], density[heldout], args.outlier_fraction)
+                                     allowed, counts, density[heldout], args.outlier_fraction)
         final_scores.append(final_ll)
         evaluation = {k: fit[k] for k in ('status', 'reason', 'training_log_likelihood_history',
                       'effective_crystal_support', 'jacobian_rank', 'parameter_count', 'at_parameter_bound', 'optimizer_history')}
@@ -497,8 +616,7 @@ def run(args):
     for eid, e in enumerate(adapter.models):
         if e.identifier:
             training.experiment_identifiers()[eid] = e.identifier
-    expected_square = np.einsum('ij,ija->a', resp,
-                                (y[train, None, :] - fit['means'][None, :, :])**2)
+    expected_square = weighted_residual_squares(y[train], fit['means'], resp)
     rmsds = np.sqrt(expected_square / max(float(resp.sum()), np.finfo(float).tiny))
     report = {'schema': 'ariadne-joint-geometry/1', **partition,
               'status': 'proposal_requires_holdout_review' if fit['status'] == 'converged' else 'unresolved',
@@ -517,6 +635,8 @@ def run(args):
               'covariance_approximation': 'full Cholesky whitening; diagonal measured variance unless xyzobs.mm.covariance (mat3) supplied; fixed full model covariance',
               'candidate_policy': 'fixed initial complete observable prediction identities per hypothesis, positions updated at every objective call; equal component prior mass per raw scan, no gating/truncation',
               'support_scope': 'local frozen prediction support; not scan-varying, intensity, visibility, or multi-source centroid inference',
+              'geometry_derivatives': 'analytic implicit Ewald-sphere and detector-projection derivatives; native DIALS symmetry-preserving U/B parameters; selected active rows only',
+              'pair_workspace': 'bounded blocks; all candidate masses retained; no responsibility or distance cutoff',
               'outlier_fraction': args.outlier_fraction,
               'outlier_density_by_row': density[heldout].tolist(),
               'outlier_support': 'uniform joint panel/mm/mm/rad density over full detector area times scan range; identical across hypotheses',

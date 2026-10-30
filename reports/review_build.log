@@ -1,0 +1,245 @@
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - setuptools>=68
+* Getting build dependencies for sdist...
+running egg_info
+writing src/ariadne.egg-info/PKG-INFO
+writing dependency_links to src/ariadne.egg-info/dependency_links.txt
+writing entry points to src/ariadne.egg-info/entry_points.txt
+writing requirements to src/ariadne.egg-info/requires.txt
+writing top-level names to src/ariadne.egg-info/top_level.txt
+reading manifest file 'src/ariadne.egg-info/SOURCES.txt'
+writing manifest file 'src/ariadne.egg-info/SOURCES.txt'
+WARNING `project.license` as a TOML table is deprecated
+!!
+
+        ********************************************************************************
+        Please use a simple string containing a SPDX expression for `project.license`. You can also use `project.license-files`. (Both options available on setuptools>=77.0.0).
+
+        By 2027-Feb-18, you need to update your project and remove deprecated calls
+        or your builds will no longer be supported.
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+* Installed build dependency versions:
+  - setuptools==84.2.1
+* Building sdist...
+running sdist
+running egg_info
+writing src/ariadne.egg-info/PKG-INFO
+writing dependency_links to src/ariadne.egg-info/dependency_links.txt
+writing entry points to src/ariadne.egg-info/entry_points.txt
+writing requirements to src/ariadne.egg-info/requires.txt
+writing top-level names to src/ariadne.egg-info/top_level.txt
+reading manifest file 'src/ariadne.egg-info/SOURCES.txt'
+writing manifest file 'src/ariadne.egg-info/SOURCES.txt'
+warning: sdist: standard file not found: should have one of README, README.rst, README.txt, README.md
+
+running check
+creating ariadne-0.7.0
+creating ariadne-0.7.0/src/ariadne
+creating ariadne-0.7.0/src/ariadne.egg-info
+creating ariadne-0.7.0/src/ariadne/agent
+copying files to ariadne-0.7.0...
+copying pyproject.toml -> ariadne-0.7.0
+copying src/ariadne/__init__.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/contracts.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/crystal.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/errors.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/evidence.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/feedback.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/feedback_bridge.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/lattice_math.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/ranking.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/server.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/spots.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/worker.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne.egg-info/PKG-INFO -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne.egg-info/SOURCES.txt -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne.egg-info/dependency_links.txt -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne.egg-info/entry_points.txt -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne.egg-info/requires.txt -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne.egg-info/top_level.txt -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne/agent/__init__.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/actions.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/backends.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/bundles.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/cli.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/engine.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/loop.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/mcp_tools.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/native_inspect.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/planner.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/process.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/spec.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/store.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/util.py -> ariadne-0.7.0/src/ariadne/agent
+Writing ariadne-0.7.0/setup.cfg
+Creating tar archive
+removing 'ariadne-0.7.0' (and everything under it)
+WARNING `project.license` as a TOML table is deprecated
+!!
+
+        ********************************************************************************
+        Please use a simple string containing a SPDX expression for `project.license`. You can also use `project.license-files`. (Both options available on setuptools>=77.0.0).
+
+        By 2027-Feb-18, you need to update your project and remove deprecated calls
+        or your builds will no longer be supported.
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+* Building wheel from sdist
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - setuptools>=68
+* Getting build dependencies for wheel...
+running egg_info
+writing src/ariadne.egg-info/PKG-INFO
+writing dependency_links to src/ariadne.egg-info/dependency_links.txt
+writing entry points to src/ariadne.egg-info/entry_points.txt
+writing requirements to src/ariadne.egg-info/requires.txt
+writing top-level names to src/ariadne.egg-info/top_level.txt
+reading manifest file 'src/ariadne.egg-info/SOURCES.txt'
+writing manifest file 'src/ariadne.egg-info/SOURCES.txt'
+WARNING `project.license` as a TOML table is deprecated
+!!
+
+        ********************************************************************************
+        Please use a simple string containing a SPDX expression for `project.license`. You can also use `project.license-files`. (Both options available on setuptools>=77.0.0).
+
+        By 2027-Feb-18, you need to update your project and remove deprecated calls
+        or your builds will no longer be supported.
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+* Installed build dependency versions:
+  - setuptools==84.2.1
+* Building wheel...
+running bdist_wheel
+running build
+running build_py
+creating build/lib/ariadne
+copying src/ariadne/evidence.py -> build/lib/ariadne
+copying src/ariadne/errors.py -> build/lib/ariadne
+copying src/ariadne/__init__.py -> build/lib/ariadne
+copying src/ariadne/feedback_bridge.py -> build/lib/ariadne
+copying src/ariadne/server.py -> build/lib/ariadne
+copying src/ariadne/spots.py -> build/lib/ariadne
+copying src/ariadne/ranking.py -> build/lib/ariadne
+copying src/ariadne/feedback.py -> build/lib/ariadne
+copying src/ariadne/worker.py -> build/lib/ariadne
+copying src/ariadne/contracts.py -> build/lib/ariadne
+copying src/ariadne/lattice_math.py -> build/lib/ariadne
+copying src/ariadne/crystal.py -> build/lib/ariadne
+creating build/lib/ariadne/agent
+copying src/ariadne/agent/engine.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/__init__.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/actions.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/mcp_tools.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/spec.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/loop.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/planner.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/store.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/util.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/process.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/bundles.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/backends.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/cli.py -> build/lib/ariadne/agent
+copying src/ariadne/agent/native_inspect.py -> build/lib/ariadne/agent
+running egg_info
+writing src/ariadne.egg-info/PKG-INFO
+writing dependency_links to src/ariadne.egg-info/dependency_links.txt
+writing entry points to src/ariadne.egg-info/entry_points.txt
+writing requirements to src/ariadne.egg-info/requires.txt
+writing top-level names to src/ariadne.egg-info/top_level.txt
+reading manifest file 'src/ariadne.egg-info/SOURCES.txt'
+writing manifest file 'src/ariadne.egg-info/SOURCES.txt'
+installing to build/bdist.linux-x86_64/wheel
+running install
+running install_lib
+creating build/bdist.linux-x86_64/wheel
+creating build/bdist.linux-x86_64/wheel/ariadne
+copying build/lib/ariadne/evidence.py -> build/bdist.linux-x86_64/wheel/./ariadne
+copying build/lib/ariadne/errors.py -> build/bdist.linux-x86_64/wheel/./ariadne
+copying build/lib/ariadne/__init__.py -> build/bdist.linux-x86_64/wheel/./ariadne
+copying build/lib/ariadne/feedback_bridge.py -> build/bdist.linux-x86_64/wheel/./ariadne
+copying build/lib/ariadne/server.py -> build/bdist.linux-x86_64/wheel/./ariadne
+copying build/lib/ariadne/spots.py -> build/bdist.linux-x86_64/wheel/./ariadne
+copying build/lib/ariadne/ranking.py -> build/bdist.linux-x86_64/wheel/./ariadne
+copying build/lib/ariadne/feedback.py -> build/bdist.linux-x86_64/wheel/./ariadne
+copying build/lib/ariadne/worker.py -> build/bdist.linux-x86_64/wheel/./ariadne
+copying build/lib/ariadne/contracts.py -> build/bdist.linux-x86_64/wheel/./ariadne
+copying build/lib/ariadne/lattice_math.py -> build/bdist.linux-x86_64/wheel/./ariadne
+creating build/bdist.linux-x86_64/wheel/ariadne/agent
+copying build/lib/ariadne/agent/engine.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/__init__.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/actions.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/mcp_tools.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/spec.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/loop.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/planner.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/store.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/util.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/process.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/bundles.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/backends.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/cli.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/agent/native_inspect.py -> build/bdist.linux-x86_64/wheel/./ariadne/agent
+copying build/lib/ariadne/crystal.py -> build/bdist.linux-x86_64/wheel/./ariadne
+running install_egg_info
+Copying src/ariadne.egg-info to build/bdist.linux-x86_64/wheel/./ariadne-0.7.0-py3.12.egg-info
+running install_scripts
+creating build/bdist.linux-x86_64/wheel/ariadne-0.7.0.dist-info/WHEEL
+creating '/tmp/ariadne-review-yrkrerbr/dist/.tmp-juydhf85/ariadne-0.7.0-py3-none-any.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
+adding 'ariadne/__init__.py'
+adding 'ariadne/contracts.py'
+adding 'ariadne/crystal.py'
+adding 'ariadne/errors.py'
+adding 'ariadne/evidence.py'
+adding 'ariadne/feedback.py'
+adding 'ariadne/feedback_bridge.py'
+adding 'ariadne/lattice_math.py'
+adding 'ariadne/ranking.py'
+adding 'ariadne/server.py'
+adding 'ariadne/spots.py'
+adding 'ariadne/worker.py'
+adding 'ariadne/agent/__init__.py'
+adding 'ariadne/agent/actions.py'
+adding 'ariadne/agent/backends.py'
+adding 'ariadne/agent/bundles.py'
+adding 'ariadne/agent/cli.py'
+adding 'ariadne/agent/engine.py'
+adding 'ariadne/agent/loop.py'
+adding 'ariadne/agent/mcp_tools.py'
+adding 'ariadne/agent/native_inspect.py'
+adding 'ariadne/agent/planner.py'
+adding 'ariadne/agent/process.py'
+adding 'ariadne/agent/spec.py'
+adding 'ariadne/agent/store.py'
+adding 'ariadne/agent/util.py'
+adding 'ariadne-0.7.0.dist-info/METADATA'
+adding 'ariadne-0.7.0.dist-info/WHEEL'
+adding 'ariadne-0.7.0.dist-info/entry_points.txt'
+adding 'ariadne-0.7.0.dist-info/top_level.txt'
+adding 'ariadne-0.7.0.dist-info/RECORD'
+removing build/bdist.linux-x86_64/wheel
+WARNING `project.license` as a TOML table is deprecated
+!!
+
+        ********************************************************************************
+        Please use a simple string containing a SPDX expression for `project.license`. You can also use `project.license-files`. (Both options available on setuptools>=77.0.0).
+
+        By 2027-Feb-18, you need to update your project and remove deprecated calls
+        or your builds will no longer be supported.
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+Successfully built ariadne-0.7.0.tar.gz and ariadne-0.7.0-py3-none-any.whl

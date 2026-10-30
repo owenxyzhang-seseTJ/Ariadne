@@ -8,12 +8,12 @@ import json
 from pathlib import Path
 import sys
 import numpy as np
-from scipy.ndimage import map_coordinates
-from dials.array_family import flex
-from dials.algorithms.shoebox import MaskCode
+from profile_learning import signal_moments, learning_array_bytes, stream_templates
 
 
 def learn(args):
+    from dials.array_family import flex
+    from dials.algorithms.shoebox import MaskCode
     references = flex.reflection_table.from_file(str(args.references))
     config = json.loads(args.calibration.read_text())
     if config.get('schema') != 'scxrd-profile-calibration/1':
@@ -56,15 +56,9 @@ def learn(args):
         if not np.all(np.isfinite(signal)) or signal.sum() <= 0:
             rejected.append({'source_row': int(source[i]), 'reason': 'no_positive_foreground_signal'})
             continue
-        normalized = signal / signal.sum()
-        grid = np.asarray(np.meshgrid(*[np.arange(n) + .5 for n in signal.shape], indexing='ij'))
-        centre = np.asarray([(normalized * coordinate).sum() for coordinate in grid])
-        delta = grid.reshape(3, -1).T - centre
-        covariance = (delta.T * normalized.ravel()) @ delta
-        # Uniform within-voxel approximation; recorded as modelling regularization.
-        covariance += np.eye(3) / 12
+        centre, covariance = signal_moments(signal)
         keys[(int(references['id'][i]), int(references['panel'][i]))].append({
-            'signal': normalized, 'centre': centre - .5, 'covariance_zyx': covariance,
+            'reference_index': i, 'shape': signal.shape, 'centre': centre - .5, 'covariance_zyx': covariance,
             'position_xyz': positions[i], 'source_row': int(source[i])})
     args.output.mkdir(parents=True, exist_ok=False)
     entries = []
@@ -74,59 +68,38 @@ def learn(args):
             continue
         covariance = np.mean([p['covariance_zyx'] for p in profiles], axis=0)
         # Preserve the full supplied empirical support after centroid alignment.
-        support = np.max([np.maximum(p['centre'], np.asarray(p['signal'].shape) - 1 - p['centre']) for p in profiles], axis=0)
+        support = np.max([np.maximum(p['centre'], np.asarray(p['shape']) - 1 - p['centre']) for p in profiles], axis=0)
         radii = np.ceil(np.maximum(support + 1, args.support_sigma * np.sqrt(np.diag(covariance)))).astype(int)
         shape = tuple((2 * radii + 1).tolist())
-        if np.prod(shape) > args.max_template_voxels or np.prod(shape) * (len(profiles) + 3) * 8 > args.max_learning_bytes:
+        if np.prod(shape) > args.max_template_voxels or learning_array_bytes(profiles, shape) + 4096 > args.max_learning_bytes:
             rejected.append({'experiment_id': exp_id, 'panel': panel, 'reason': 'template_memory_budget'})
             continue
-        target = np.asarray(np.meshgrid(*[np.arange(n) - (n - 1) / 2 for n in shape], indexing='ij')).reshape(3, -1)
-        total = np.zeros(shape)
-        for profile in profiles:
-            coordinates = target + profile['centre'][:, None]
-            aligned = map_coordinates(profile['signal'], coordinates, order=1, mode='constant', cval=0).reshape(shape)
-            if aligned.sum() > 0:
-                profile['aligned'] = aligned / aligned.sum()
-                total += profile['aligned']
-        if not np.isfinite(total.sum()) or total.sum() <= 0:
-            rejected.append({'experiment_id': exp_id, 'panel': panel, 'reason': 'failed_profile_alignment'})
+        def load_signal(profile):
+            box = boxes[profile['reference_index']]
+            data = np.asarray(box.data.as_numpy_array(), dtype=float)
+            background = np.asarray(box.background.as_numpy_array(), dtype=float)
+            mask = np.asarray(box.mask.as_numpy_array(), dtype=int)
+            accepted = ((mask & int(MaskCode.Valid)) != 0) & ((mask & int(MaskCode.Foreground)) != 0)
+            return np.where(accepted, np.maximum(data - background, 0), 0)
+
+        try:
+            name, local_model = stream_templates(
+                profiles, load_signal, shape, args.output, f'profile_exp{exp_id}_panel{panel}',
+                grid_xyz=args.local_grid, min_local_references=args.min_local_references,
+                shrinkage_references=args.shrinkage_references, max_learning_bytes=args.max_learning_bytes)
+        except ValueError as exc:
+            rejected.append({'experiment_id': exp_id, 'panel': panel,
+                             'reason': 'failed_profile_alignment', 'detail': str(exc)})
             continue
-        total /= total.sum()
-        name = f'profile_exp{exp_id}_panel{panel}.npy'
-        np.save(args.output / name, total, allow_pickle=False)
         entry = {'experiment_id': exp_id, 'panel': panel, 'template': name, 'template_shape_zyx': list(shape),
                         'covariance_px_xyz': covariance[::-1, ::-1].tolist(), 'noise_model': config['noise_model'],
                         'provenance': {'reference_file': str(args.references.resolve()),
                                        'source_rows': [p['source_row'] for p in profiles],
                                        'isolation': config['isolation_provenance'], 'background': config['background_provenance'],
                                        'regularization': 'uniform within-voxel variance 1/12; local templates shrink to pooled reference'}}
-        if np.prod(args.local_grid) > 1:
-            # Fixed grid bounds and complexity; no intensity-dependent template fitting.
-            coordinates = np.asarray([p['position_xyz'] for p in profiles])
-            low, high = coordinates.min(axis=0), coordinates.max(axis=0)
-            span = np.maximum(high - low, 1.)
-            dimensions = np.asarray(args.local_grid)
-            bins = np.minimum(np.floor((coordinates - low) / span * dimensions).astype(int), dimensions - 1)
-            nodes = []
-            for cell in np.ndindex(*args.local_grid):
-                local = [p for p, index in zip(profiles, bins) if np.array_equal(index, cell) and 'aligned' in p]
-                if len(local) < args.min_local_references:
-                    continue
-                alpha = len(local) / (len(local) + args.shrinkage_references)
-                local_template = np.mean([p['aligned'] for p in local], axis=0)
-                shrunk = alpha * local_template + (1 - alpha) * total
-                shrunk /= shrunk.sum()
-                local_covariance = alpha * np.mean([p['covariance_zyx'] for p in local], axis=0) + (1 - alpha) * covariance
-                local_name = f'profile_exp{exp_id}_panel{panel}_node_{cell[0]}_{cell[1]}_{cell[2]}.npy'
-                np.save(args.output / local_name, shrunk, allow_pickle=False)
-                nodes.append({'grid_index': list(cell), 'template': local_name,
-                              'covariance_px_xyz': local_covariance[::-1, ::-1].tolist(),
-                              'shrinkage_weight': alpha, 'n_references': len(local),
-                              'source_rows': [p['source_row'] for p in local]})
-            entry['local_model'] = {'grid_xyz': list(args.local_grid), 'low_xyz': low.tolist(), 'span_xyz': span.tolist(),
-                                    'nodes': nodes, 'prior_reference_count': args.shrinkage_references,
-                                    'outside_support': 'pooled reference; no local extrapolation',
-                                    'selection': 'trilinear nonnegative weights; missing nodes use pooled reference'}
+        if local_model is not None:
+            entry['local_model'] = local_model
+        entry['provenance']['accumulation'] = 'cellwise normalized sums; separable affine alignment with bounded-tile fallback; temporary local sums until pooled mean is known'
         entries.append(entry)
     library = {'schema': 'scxrd-profile-library/1', 'implementation_status': 'experimental_untested',
                'entries': entries, 'basis': config['basis'], 'experiment_to_domain': config['experiment_to_domain'],

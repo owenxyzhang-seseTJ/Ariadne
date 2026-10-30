@@ -1,0 +1,26 @@
+{
+  "build": "0.7.0-rebuild-20261030",
+  "version": "0.7.0",
+  "date": "2026-10-30",
+  "reconstruction": true,
+  "lost_archive_restored_bit_identically": false,
+  "baseline_archive": "Ariadne_Deep_Optimization_R2_20261029.zip",
+  "baseline_sha256": "458cb5f31503c5f5a869605c0223434a8a6a75f99fdcc944c2584b4d9eec521c",
+  "original_upstream_commit": "797ac22ffa9b81da2dd977e013bea8f114b49eb2",
+  "inherited_numerical_scripts_modified": "Only unused imports removed during publication review; numerical algorithms unchanged",
+  "report": "reports/Ariadne_0_7_0_Technical_Report.pdf",
+  "report_source": "reports/Ariadne_0_7_0_Technical_Report.tex",
+  "guide": "AGENT_GUIDE.zh-CN.md",
+  "validation": "reports/github_review_validation.json",
+  "source_manifest": "RELEASE_MANIFEST.json",
+  "wheel": "dist/ariadne-0.7.0-py3-none-any.whl",
+  "not_redistributed": [
+    "DIALS compiled runtime",
+    "SHELXT",
+    "SHELXL",
+    "font files",
+    "API credentials"
+  ],
+  "archive_verification": "python scripts/verify_release.py",
+  "publication_review": "CODE_REVIEW.zh-CN.md"
+}

@@ -13,6 +13,8 @@ import sys
 import numpy as np
 from scipy.linalg import qr, solve_triangular
 from constrained_pixels import fit_constrained
+from information_modes import from_projected_svd, conditional_component_diagnostics
+from orthogonal_compression import augmented_qr
 
 
 def background_basis(shape, mode):
@@ -28,7 +30,19 @@ def background_basis(shape, mode):
     return np.column_stack(columns)
 
 
-def solve_joint(data, variance, profiles, valid, background, rcond):
+def solve_joint(data, variance, profiles, valid, background, rcond, *, chunk_rows=None):
+    """Solve signed WLS; large patches use a bounded-workspace QR reduction.
+
+    None selects streaming above 8192 raw pixels, 0 requests the original
+    dense path, and a positive integer forces the specified streaming chunk.
+    Both paths retain the same objective, rank convention and output units.
+    """
+    if chunk_rows is None:
+        chunk_rows = 4096 if len(data) > 8192 else 0
+    if isinstance(chunk_rows, (bool, np.bool_)) or not isinstance(chunk_rows, (int, np.integer)) or chunk_rows < 0:
+        raise ValueError('chunk_rows must be a nonnegative integer or None')
+    if chunk_rows:
+        return _solve_streamed(data, variance, profiles, valid, background, rcond, chunk_rows)
     y, v = data[valid], variance[valid]
     P, B = profiles[valid], background[valid]
     if len(y) <= P.shape[1] + B.shape[1] + 2:
@@ -38,6 +52,49 @@ def solve_joint(data, variance, profiles, valid, background, rcond):
     # QR 消去背景，避免构造像素数平方大小的投影矩阵。
     Q, R = qr(Bw, mode='economic')
     return _solve_joint_from_qr(y, v, Pw, yw, profiles, valid, background, rcond, Q, R)
+
+
+def _solve_streamed(data, variance, profiles, valid, background, rcond, chunk_rows):
+    factor, pixels = augmented_qr(data, variance, profiles, background, valid, chunk_rows)
+    nuisance, components = background.shape[1], profiles.shape[1]
+    if pixels <= nuisance + components + 2:
+        raise ValueError('Too few valid pixels for joint signal/background fit')
+    rb = factor[:nuisance, :nuisance]
+    if np.min(np.abs(np.diag(rb))) <= np.max(np.abs(np.diag(rb))) * 1e-12:
+        raise ValueError('Background basis is rank deficient')
+    # Triangularity has already eliminated the first nuisance columns.
+    design = factor[nuisance:, nuisance:-1]
+    target = factor[nuisance:, -1]
+    scales = np.linalg.norm(design, axis=0)
+    if np.any(scales <= 1e-15):
+        raise ValueError('Signal indistinguishable from background or fully masked')
+    left, singular, right = np.linalg.svd(design / scales, full_matrices=False)
+    modes = from_projected_svd(target, left, singular, right, scales, nuisance,
+                               valid_pixels=pixels)
+    modes['compression'] = {'method': 'streamed augmented Householder QR',
+                            'rows': len(factor), 'chunk_rows': int(chunk_rows),
+                            'original_valid_pixels': pixels}
+    rank = int(np.count_nonzero(singular > singular[0] * rcond))
+    if not rank:
+        raise ValueError('No identifiable signal subspace')
+    retained = right[:rank].T
+    intensities = (retained @ ((left[:, :rank].T @ target) / singular[:rank])) / scales
+    root = (retained / singular[:rank]) / scales[:, None]
+    covariance = root @ root.T
+    beta = solve_triangular(rb, factor[:nuisance, -1] - factor[:nuisance, nuisance:-1] @ intensities)
+    fitted = profiles @ intensities + background @ beta
+    # A short residual vector retains the discarded-data constant without the
+    # cancellation inherent in y'y - b' (A'A)^-1 b.
+    residual = target - design @ intensities
+    chi2 = float(residual @ residual)
+    dof = pixels - rank - nuisance
+    return {'intensities_internal': intensities,
+            'covariance_identifiable_subspace': covariance,
+            'nullspace': right[rank:], 'column_scales': scales, 'rank': rank,
+            'singular_values': singular, 'background_coefficients': beta,
+            'fitted': fitted, 'chi2': chi2, 'dof': dof,
+            'reduced_chi2': chi2 / dof if dof > 0 else None,
+            'information_modes': modes}
 
 
 def _solve_joint_from_qr(y, v, Pw, yw, profiles, valid, background, rcond, Q, R):
@@ -52,6 +109,7 @@ def _solve_joint_from_qr(y, v, Pw, yw, profiles, valid, background, rcond, Q, R)
     if np.any(scales <= 1e-15):
         raise ValueError('Signal indistinguishable from background or fully masked')
     U, singular, Vh = np.linalg.svd(design / scales, full_matrices=False)
+    information_modes = from_projected_svd(target, U, singular, Vh, scales, background.shape[1])
     rank = int(np.sum(singular > singular[0] * rcond))
     if not rank:
         raise ValueError('No identifiable signal subspace')
@@ -66,7 +124,8 @@ def _solve_joint_from_qr(y, v, Pw, yw, profiles, valid, background, rcond, Q, R)
     return {'intensities_internal': intensities, 'covariance_identifiable_subspace': covariance,
             'nullspace': Vh[rank:], 'column_scales': scales, 'rank': rank,
             'singular_values': singular, 'background_coefficients': beta, 'fitted': fitted,
-            'chi2': chi2, 'dof': dof, 'reduced_chi2': chi2 / dof if dof > 0 else None}
+            'chi2': chi2, 'dof': dof, 'reduced_chi2': chi2 / dof if dof > 0 else None,
+            'information_modes': information_modes}
 
 
 def solve_position_joint(data, variance, profiles, valid, background, derivatives, rcond, tolerance, max_shift):
@@ -216,6 +275,14 @@ def fit_patch(path, metadata, args):
             quality.append('total_profile_likelihood_interval_failed')
     if result.get('converged') is False:
         quality.append('constrained_fit_not_converged')
+    likelihood_diagnostics = result.get('likelihood_diagnostics') or {}
+    covariance_usable = likelihood_diagnostics.get('covariance_estimate_usable', True)
+    if not covariance_usable:
+        quality.append('likelihood_curvature_unresolved_use_profile_intervals')
+        # An internal fallback metric must never masquerade as an observed
+        # information error bar.  Exact profile intervals remain available.
+        for measurement in [total, *components]:
+            measurement['variance'] = None
     if any(components[i]['identifiable'] for i in result.get('boundary_components', [])):
         quality.append('nonnegative_boundary_not_representable_by_gaussian_sigma')
     if args.estimator != 'signed-wls' and total['identifiable'] and total['intensity'] <= 1e-7:
@@ -229,11 +296,17 @@ def fit_patch(path, metadata, args):
         quality.append('profile_or_background_misfit')
     if noise and args.irls and iterations >= args.max_iterations and change >= args.iteration_tolerance:
         quality.append('irls_not_converged')
+    modes = result.get('information_modes')
+    if modes is not None:
+        modes['variance_model'] = 'irls_plugin' if args.irls else 'fixed'
+        modes['variance_source'] = metadata.get('variance_source', 'supplied pixel variance; external calibration/estimation assumptions apply')
+        modes['pixel_ownership'] = metadata.get('pixel_ownership', 'must be verified independent of other observation regions')
     return {'schema': 'scxrd-pixel-group/1', 'observation_id': metadata['observation_id'],
             'status': status, 'quality_flags': quality, 'contributors': metadata['contributors'],
             'basis': metadata['basis'], 'corrected': False, 'intensity_semantics': 'detector_group_counts',
             'total': total, 'components': components,
-            'covariance_identifiable_subspace': result['covariance_identifiable_subspace'].tolist(),
+            'covariance_identifiable_subspace': result['covariance_identifiable_subspace'].tolist() if covariance_usable else None,
+            'covariance_estimate_usable': bool(covariance_usable),
             'covariance_scope': result.get('covariance_scope', 'conditional on supplied fixed profiles, geometry and calibrated pixel-noise model; background uncertainty included'),
             'estimator': args.estimator, 'intensity_unit': 'calibrated_adu',
             'intensity_definition': 'full-profile amplitude; no further partiality division',
@@ -242,6 +315,8 @@ def fit_patch(path, metadata, args):
             'boundary_components': result.get('boundary_components', []),
             'position_model': result.get('position_model'),
             'likelihood_diagnostics': result.get('likelihood_diagnostics'),
+            'information_modes': modes,
+            'weak_signal_diagnostics': conditional_component_diagnostics(result),
             'overlap_diagnostics': {'bbox': 'conservative ROI/background-halo connectivity only',
                                     'profile_weighted_correlations': correlations.tolist(),
                                     'design_condition_number': condition,

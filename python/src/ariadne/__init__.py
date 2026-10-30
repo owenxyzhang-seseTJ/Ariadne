@@ -1,2 +1,2 @@
-"""Ariadne: experimental, unbenchmarked DIALS source extensions."""
-__version__ = "0.5.0"
+"""Ariadne: diffraction reduction and persistent structure-analysis agents."""
+__version__ = "0.7.0"

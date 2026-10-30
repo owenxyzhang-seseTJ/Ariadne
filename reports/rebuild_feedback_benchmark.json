@@ -1,0 +1,35 @@
+{
+  "schema": "ariadne-rebuild-feedback-benchmark/1",
+  "groups": 512,
+  "latents": 2048,
+  "observations": 1024,
+  "global_factors": 6,
+  "seed": 20261030,
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "dense_reference": {
+    "seconds": [
+      1.019480453999904,
+      0.7361503499998889,
+      0.6230223860000024
+    ],
+    "median_seconds": 0.7361503499998889,
+    "peak_traced_bytes": 159419750
+  },
+  "block_low_rank": {
+    "seconds": [
+      0.20277888699990854,
+      0.19460252499993658,
+      0.21113477700009753
+    ],
+    "median_seconds": 0.20277888699990854,
+    "peak_traced_bytes": 2524448
+  },
+  "speedup": 3.630310634855299,
+  "traced_memory_ratio": 0.015835227442020202,
+  "max_mean_difference": 7.105427357601002e-15,
+  "max_covariance_difference": 2.3314683517128287e-15,
+  "predictive_nll_difference": 2.2737367544323206e-13,
+  "data_rank": 1024,
+  "scope": "Synthetic fixed Gaussian model. Dense output versus equivalent covariance factors. Allocation excludes pre-existing inputs; not RSS."
+}

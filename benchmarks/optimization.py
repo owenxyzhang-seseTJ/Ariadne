@@ -2,7 +2,6 @@
 """固定基线与当前源码的数值、时间及分配测量。使用 ariadne-env python 运行。"""
 from __future__ import annotations
 import argparse
-from contextlib import contextmanager
 import gc
 import itertools
 import json

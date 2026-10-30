@@ -7,7 +7,7 @@ from unittest.mock import patch
 import numpy as np
 from numpy.testing import assert_allclose
 from scipy.optimize import brentq, minimize_scalar
-from scipy.special import gammaln, logsumexp, xlogy
+from scipy.special import gammaln, logsumexp
 from scipy.stats import chi2
 
 SCRIPTS = Path(__file__).resolve().parents[1] / 'skills' / 'ariadne-reduction' / 'scripts'

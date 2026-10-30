@@ -1,3 +1,5 @@
+> Version notice: this is the inherited R2 guide. For the 0.7.0 reconstruction, read README.md and AGENT_GUIDE.zh-CN.md. Historical test claims below are not current validation.
+
 # Ariadne
 
 **単結晶回折データの処理、複数格子解析、および反射強度の同時推定を行う エージェントネイティブ計算フレームワーク。**

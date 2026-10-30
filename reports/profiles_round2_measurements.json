@@ -1,0 +1,245 @@
+{
+  "baseline": "first-principles delivery 2026-10-29; baseline-first-principles.zip",
+  "environment": {
+    "python": "3.12.16 (main, Oct 26 2026, 11:37:43) [GCC 15.3.0]",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "thread_settings": {
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": null
+    }
+  },
+  "repeats": 3,
+  "scope": "Synthetic Gaussian boxes and synthetic native DIALS shoebox calibration; no experimental spot accuracy claim",
+  "memory_scope": "tracemalloc peak includes Python/NumPy allocations during one call and outputs, excludes preloaded libraries and externally held inputs; not whole-process RSS",
+  "working_byte_budget": 8388608,
+  "gaussian": [
+    {
+      "name": "correlated_volume",
+      "shape_xyz": [
+        33,
+        35,
+        21
+      ],
+      "voxel_count": 24255,
+      "before": {
+        "seconds": [
+          0.09527560900005483,
+          0.0820090289998916,
+          0.1999549450001723
+        ],
+        "median_seconds": 0.09527560900005483,
+        "cpu_seconds": [
+          0.09521614900000008,
+          0.08200530900000014,
+          0.19925097399999991
+        ],
+        "median_cpu_seconds": 0.09521614900000008,
+        "peak_traced_bytes": 1182255
+      },
+      "after": {
+        "seconds": [
+          0.05325378899942734,
+          0.06478044599953137,
+          0.09479936699972313
+        ],
+        "median_seconds": 0.06478044599953137,
+        "cpu_seconds": [
+          0.0530859760000002,
+          0.06472241099999998,
+          0.09446846399999975
+        ],
+        "median_cpu_seconds": 0.06472241099999998,
+        "peak_traced_bytes": 605327
+      },
+      "speedup": 1.470746419386246,
+      "cpu_speedup": 1.4711465090507847,
+      "traced_memory_ratio": 1.9530848615706882,
+      "max_absolute_value_difference": 2.7755575615628914e-17
+    },
+    {
+      "name": "narrow_value_and_xyz_derivatives",
+      "shape_xyz": [
+        13,
+        15,
+        9
+      ],
+      "voxel_count": 1755,
+      "before": {
+        "seconds": [
+          1.2137970100002349,
+          0.4066038480004863,
+          0.2903438890007237
+        ],
+        "median_seconds": 0.4066038480004863,
+        "cpu_seconds": [
+          1.2066998989999997,
+          0.406464787,
+          0.28909963400000027
+        ],
+        "median_cpu_seconds": 0.406464787,
+        "peak_traced_bytes": 151274
+      },
+      "after": {
+        "seconds": [
+          0.08607158400081971,
+          0.08968321799966361,
+          0.0935002539999914
+        ],
+        "median_seconds": 0.08968321799966361,
+        "cpu_seconds": [
+          0.08606554099999997,
+          0.08968211000000004,
+          0.09349806500000035
+        ],
+        "median_cpu_seconds": 0.08968211000000004,
+        "peak_traced_bytes": 141739
+      },
+      "speedup": 4.533778527015071,
+      "cpu_speedup": 4.532283941579874,
+      "traced_memory_ratio": 1.067271534298958,
+      "max_absolute_value_difference": 2.220446049250313e-16,
+      "max_difference_from_legacy_step_0_001_gradient": 3.875271745723552e-07,
+      "derivative_reference": "Independent original-density score integral in tests/test_profiles_round2.py; old finite differences have O(step^2) bias."
+    },
+    {
+      "name": "large_correlated_volume",
+      "shape_xyz": [
+        129,
+        127,
+        65
+      ],
+      "voxel_count": 1064895,
+      "before": {
+        "seconds": [
+          2.6438810190002187,
+          2.799936295000407,
+          2.684270429999742
+        ],
+        "median_seconds": 2.684270429999742,
+        "cpu_seconds": [
+          2.643615576,
+          2.798641035000001,
+          2.677128204999999
+        ],
+        "median_cpu_seconds": 2.677128204999999,
+        "peak_traced_bytes": 51386755
+      },
+      "after": {
+        "seconds": [
+          1.3310367270005372,
+          1.2378420700006245,
+          1.1795876059995862
+        ],
+        "median_seconds": 1.2378420700006245,
+        "cpu_seconds": [
+          1.3307258359999992,
+          1.2374962729999979,
+          1.1791195630000004
+        ],
+        "median_cpu_seconds": 1.2374962729999979,
+        "peak_traced_bytes": 14228847
+      },
+      "speedup": 2.1685079987614153,
+      "cpu_speedup": 2.1633424386078968,
+      "traced_memory_ratio": 3.611448981073449,
+      "max_absolute_value_difference": 1.734723475976807e-17
+    },
+    {
+      "name": "large_value_and_xyz_derivatives",
+      "shape_xyz": [
+        65,
+        67,
+        33
+      ],
+      "voxel_count": 143715,
+      "before": {
+        "seconds": [
+          2.412119169000107,
+          3.211480732000382,
+          2.2476646680006525
+        ],
+        "median_seconds": 2.412119169000107,
+        "cpu_seconds": [
+          2.4108497739999954,
+          3.209536176999997,
+          2.2458667669999954
+        ],
+        "median_cpu_seconds": 2.4108497739999954,
+        "peak_traced_bytes": 11576055
+      },
+      "after": {
+        "seconds": [
+          0.5721210470001097,
+          0.4043980010001178,
+          0.38590355399992404
+        ],
+        "median_seconds": 0.4043980010001178,
+        "cpu_seconds": [
+          0.5720832519999988,
+          0.40385147100000296,
+          0.3858957019999991
+        ],
+        "median_cpu_seconds": 0.40385147100000296,
+        "peak_traced_bytes": 7804199
+      },
+      "speedup": 5.964715856741845,
+      "cpu_speedup": 5.969644651857608,
+      "traced_memory_ratio": 1.4833110995760104,
+      "max_absolute_value_difference": 1.3877787807814457e-17,
+      "max_difference_from_legacy_step_0_001_gradient": 1.098643197250393e-08,
+      "derivative_reference": "Independent original-density score integral in tests/test_profiles_round2.py; old finite differences have O(step^2) bias."
+    }
+  ],
+  "template_learning": {
+    "status": "compared_native_dials_shoeboxes",
+    "references": 200,
+    "template_shape_zyx": [
+      17,
+      23,
+      31
+    ],
+    "local_nodes": 4,
+    "before": {
+      "seconds": [
+        0.2007812189995093,
+        0.2927603600001021,
+        0.29548721599985583
+      ],
+      "median_seconds": 0.2927603600001021,
+      "cpu_seconds": [
+        0.20077732300000406,
+        0.29263518500000174,
+        0.29543749599999813
+      ],
+      "median_cpu_seconds": 0.29263518500000174,
+      "peak_traced_bytes": 29047161
+    },
+    "after": {
+      "seconds": [
+        0.1281440360007764,
+        0.1082209670003067,
+        0.12245848900056444
+      ],
+      "median_seconds": 0.12245848900056444,
+      "cpu_seconds": [
+        0.1281380440000035,
+        0.10821890300000092,
+        0.12245693799999913
+      ],
+      "median_cpu_seconds": 0.12245693799999913,
+      "peak_traced_bytes": 3603257
+    },
+    "speedup": 2.390690611891779,
+    "cpu_speedup": 2.3896986955529123,
+    "traced_memory_ratio": 8.061362539502456,
+    "max_absolute_template_difference": 5.204170427930421e-18,
+    "max_absolute_covariance_difference": 1.7763568394002505e-15,
+    "same_reference_provenance": true,
+    "temporary_node_sums_remaining": 0
+  },
+  "working_budget_scope": "Gaussian quadrature scratch only; excludes inputs, outputs and small axis vectors; conservative buffer accounting, not a process-RSS hard limit",
+  "quadrature_accuracy": "Per numerical axis max(6, ceil(3*sqrt(precision[j,j]))+2), reject above 64; retained resolution heuristic, not a rigorous integration error certificate"
+}

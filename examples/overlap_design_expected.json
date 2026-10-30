@@ -1,0 +1,56 @@
+{
+  "selected_ids": [
+    "close_triangle_02"
+  ],
+  "budget_packages": 1,
+  "initial_rank": 2,
+  "final_rank": 3,
+  "remaining_nullity": 0,
+  "rank_threshold": 1.423480187115644e-09,
+  "parameter_scales": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "rank_threshold_reference": "largest singular value of the entire supplied candidate pool",
+  "remaining_nullspace_physical_parameters": [],
+  "steps": [
+    {
+      "selected": {
+        "id": "close_triangle_02",
+        "rank_gain": 1,
+        "resulting_rank": 3,
+        "projected_new_direction_singular_values": [
+          0.5773502691896257
+        ],
+        "weakest_new_direction_singular_value": 0.5773502691896257,
+        "log_pseudodeterminant_gain": -1.0986122886681091
+      },
+      "alternatives": [
+        {
+          "id": "repeat_01",
+          "rank_gain": 0,
+          "resulting_rank": 2,
+          "projected_new_direction_singular_values": [
+            2.220446049250313e-16
+          ],
+          "weakest_new_direction_singular_value": 0.0,
+          "log_pseudodeterminant_gain": 4.615120516841259
+        },
+        {
+          "id": "close_triangle_02",
+          "rank_gain": 1,
+          "resulting_rank": 3,
+          "projected_new_direction_singular_values": [
+            0.5773502691896257
+          ],
+          "weakest_new_direction_singular_value": 0.5773502691896257,
+          "log_pseudodeterminant_gain": -1.0986122886681091
+        }
+      ]
+    }
+  ],
+  "criterion": "rank gain, weakest new null-direction singular value, log pseudo-determinant gain",
+  "information_compression": "QR square-root information; at most P rows per block; no normal-matrix inversion",
+  "scope": "greedy simulated design selection from supplied candidates; independent noise blocks; no hardware control"
+}

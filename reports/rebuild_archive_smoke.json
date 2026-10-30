@@ -1,0 +1,24 @@
+{
+  "build": "0.7.0-rebuild-20261030",
+  "verification": "Fresh ZIP extraction passed the release manifest; all available test suites and native-Gemmi demo re-run from the extracted tree",
+  "inherited_R2": {
+    "tests": 173,
+    "passed": 167,
+    "skipped": 6,
+    "failures": 0,
+    "errors": 0
+  },
+  "reconstruction": {
+    "tests": 113,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 112
+  },
+  "python_source_files_identical_to_tested_archive": 103,
+  "demo_actions": 5,
+  "demo_candidate": "good",
+  "demo_input_unchanged": true,
+  "demo_resume_did_not_repeat": true,
+  "final_package_difference": "Added verification metadata; tested Python source unchanged"
+}

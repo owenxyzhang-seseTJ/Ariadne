@@ -1,0 +1,318 @@
+{
+  "baseline_commit": "797ac22ffa9b81da2dd977e013bea8f114b49eb2",
+  "seed": 20261029,
+  "measurement_scope": "synthetic lattice kernels; excludes raw diffraction images and native DIALS",
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "measurements": [
+    {
+      "name": "orthogonal_narrow",
+      "rows": 5000,
+      "before": {
+        "seconds": [
+          0.014238794999982929,
+          0.01365566200001922,
+          0.017856646999916848,
+          0.02606565800010685,
+          0.015134055000089575,
+          0.013398285999983273,
+          0.016553430999920238
+        ],
+        "median_seconds": 0.015134055000089575
+      },
+      "after": {
+        "seconds": [
+          0.013656128000093304,
+          0.012928412000064782,
+          0.011291659000107757,
+          0.017112382000050275,
+          0.019605990000172824,
+          0.015354860999877928,
+          0.01388625200002025
+        ],
+        "median_seconds": 0.01388625200002025
+      },
+      "speedup": 1.08985887625167,
+      "max_log_density_difference": 2.2737367544323206e-13,
+      "max_nearest_distance_difference": 0.0,
+      "independent_direct_reference_rows": 129,
+      "baseline_max_log_reference_error": 1.1368683772161603e-13,
+      "updated_max_log_reference_error": 1.7053025658242404e-13,
+      "baseline_max_nearest_reference_error": 3.469446951953614e-18,
+      "updated_max_nearest_reference_error": 3.469446951953614e-18,
+      "algorithm": {
+        "periodic_representation": "real",
+        "periodic_axis_representations": [
+          "real",
+          "real",
+          "real"
+        ],
+        "periodic_selected_radius_xyz": [
+          1,
+          1,
+          1
+        ],
+        "periodic_terms": 9,
+        "effective_score_chunk": 512,
+        "periodic_factorization": "orthogonal_1d",
+        "periodic_images": 27,
+        "periodic_radius_xyz": [
+          1,
+          1,
+          1
+        ],
+        "periodic_basis_transform": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "nearest_lattice_point_certified": true,
+        "periodic_truncation": "finite Gaussian-tail neighborhood; no certified density error bound"
+      }
+    },
+    {
+      "name": "orthogonal_broad",
+      "rows": 5000,
+      "before": {
+        "seconds": [
+          0.030382084999928338,
+          0.03487243900008252,
+          0.035865531999888844,
+          0.027163405000010243,
+          0.026253967000002376,
+          0.03455744200005029,
+          0.029436754000016663
+        ],
+        "median_seconds": 0.030382084999928338
+      },
+      "after": {
+        "seconds": [
+          0.015447645999984161,
+          0.024506523000127345,
+          0.015085561999967467,
+          0.011037713999940024,
+          0.00894656499986013,
+          0.00266676399996868,
+          0.0019017950000943529
+        ],
+        "median_seconds": 0.011037713999940024
+      },
+      "speedup": 2.752570414498276,
+      "max_log_density_difference": 2.168404344971009e-18,
+      "max_nearest_distance_difference": 0.0,
+      "independent_direct_reference_rows": 129,
+      "baseline_max_log_reference_error": 7.160071147094271e-16,
+      "updated_max_log_reference_error": 7.165492157956699e-16,
+      "baseline_max_nearest_reference_error": 4.336808689942018e-19,
+      "updated_max_nearest_reference_error": 4.336808689942018e-19,
+      "algorithm": {
+        "periodic_representation": "fourier",
+        "periodic_axis_representations": [
+          "fourier",
+          "fourier",
+          "fourier"
+        ],
+        "periodic_selected_radius_xyz": [
+          2,
+          2,
+          3
+        ],
+        "periodic_terms": 7,
+        "effective_score_chunk": 512,
+        "periodic_factorization": "orthogonal_1d",
+        "periodic_images": 3705,
+        "periodic_radius_xyz": [
+          9,
+          7,
+          6
+        ],
+        "periodic_basis_transform": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "nearest_lattice_point_certified": true,
+        "periodic_truncation": "finite Gaussian-tail neighborhood; no certified density error bound"
+      }
+    },
+    {
+      "name": "coupled_broad",
+      "rows": 5000,
+      "before": {
+        "seconds": [
+          0.01955288199997085,
+          0.02064589899987368,
+          0.031272542000124304,
+          0.016302300000006653,
+          0.01834178199987946,
+          0.020436082000060196,
+          0.017029777999823636
+        ],
+        "median_seconds": 0.01955288199997085
+      },
+      "after": {
+        "seconds": [
+          0.024544311999989077,
+          0.011280554999984815,
+          0.010831904000042414,
+          0.011161587999822586,
+          0.014415610000014567,
+          0.013294378999944456,
+          0.01074505999986286
+        ],
+        "median_seconds": 0.011280554999984815
+      },
+      "speedup": 1.733326241483435,
+      "max_log_density_difference": 0.0,
+      "max_nearest_distance_difference": 0.0,
+      "independent_direct_reference_rows": 129,
+      "baseline_max_log_reference_error": 6.465368605074184e-16,
+      "updated_max_log_reference_error": 6.465368605074184e-16,
+      "baseline_max_nearest_reference_error": 8.673617379884035e-19,
+      "updated_max_nearest_reference_error": 8.673617379884035e-19,
+      "algorithm": {
+        "periodic_representation": "fourier",
+        "periodic_terms": 62,
+        "effective_score_chunk": 512,
+        "periodic_selected_radius_xyz": [
+          2,
+          2,
+          2
+        ],
+        "periodic_factorization": "coupled_3d",
+        "periodic_images": 3705,
+        "periodic_radius_xyz": [
+          9,
+          7,
+          6
+        ],
+        "periodic_basis_transform": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "nearest_lattice_point_certified": true,
+        "periodic_truncation": "finite Gaussian-tail neighborhood; no certified density error bound"
+      }
+    },
+    {
+      "name": "sheared_equivalent_lattice",
+      "rows": 5000,
+      "before": {
+        "seconds": [
+          0.0164403249998486,
+          0.023895453000022826,
+          0.02195414300012999,
+          0.01977143699991757,
+          0.038810052999906475,
+          0.02321364099998391,
+          0.020521554999959335
+        ],
+        "median_seconds": 0.02195414300012999
+      },
+      "after": {
+        "seconds": [
+          0.013023304999933316,
+          0.010512141999925007,
+          0.012732604999882824,
+          0.00898168000003352,
+          0.016456292999919242,
+          0.015254474000130358,
+          0.012432348000174898
+        ],
+        "median_seconds": 0.012732604999882824
+      },
+      "speedup": 1.7242459811116444,
+      "max_log_density_difference": 4063.5578683257368,
+      "max_nearest_distance_difference": 0.07334458627048172,
+      "independent_direct_reference_rows": 129,
+      "baseline_max_log_reference_error": 3712.191507351775,
+      "updated_max_log_reference_error": 3.410605131648481e-13,
+      "baseline_max_nearest_reference_error": 0.06889079384798151,
+      "updated_max_nearest_reference_error": 1.3877787807814457e-17,
+      "algorithm": {
+        "periodic_representation": "real",
+        "periodic_axis_representations": [
+          "real",
+          "real",
+          "real"
+        ],
+        "periodic_selected_radius_xyz": [
+          1,
+          1,
+          1
+        ],
+        "periodic_terms": 9,
+        "effective_score_chunk": 512,
+        "periodic_factorization": "orthogonal_1d",
+        "periodic_images": 27,
+        "periodic_radius_xyz": [
+          1,
+          1,
+          1
+        ],
+        "periodic_basis_transform": [
+          [
+            1,
+            -12,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "nearest_lattice_point_certified": true,
+        "periodic_truncation": "finite Gaussian-tail neighborhood; no certified density error bound"
+      }
+    }
+  ]
+}

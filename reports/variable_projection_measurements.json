@@ -1,0 +1,84 @@
+{
+  "baseline": "first-principles delivery 20261029",
+  "blocks": 120,
+  "measurements": 240,
+  "intensity_parameters": 60,
+  "scale_parameters": 2,
+  "repeats": 7,
+  "warmups": 1,
+  "controls": {
+    "max_iterations": 100,
+    "tolerance": 1e-08,
+    "rcond": 1e-10,
+    "max_seconds": 120.0
+  },
+  "timings": {
+    "before": {
+      "seconds": [
+        0.3030203230000552,
+        0.2029434249998303,
+        0.2190277990002869,
+        0.25818738699945243,
+        0.13571275300000707,
+        0.1540047959997537,
+        0.1625899489999938
+      ],
+      "median_seconds": 0.2029434249998303,
+      "status": "converged",
+      "reason": "converged",
+      "chi2": 3.9661533607826978,
+      "gradient_norm": 8.461330083972558e-11,
+      "trace_states": 7,
+      "profiled_evaluations": null,
+      "traced_peak_bytes": 1410869,
+      "memory_run_status": "converged"
+    },
+    "after": {
+      "seconds": [
+        0.21203897099985625,
+        0.06629083500047273,
+        0.07206440499976452,
+        0.2102857399995628,
+        0.10858425200058264,
+        0.06983434999983729,
+        0.10079873399990902
+      ],
+      "median_seconds": 0.10079873399990902,
+      "status": "converged",
+      "reason": "converged",
+      "chi2": 3.966153360782707,
+      "gradient_norm": 2.6316601328503138e-12,
+      "trace_states": 3,
+      "profiled_evaluations": 13,
+      "traced_peak_bytes": 1343170,
+      "memory_run_status": "converged"
+    }
+  },
+  "equivalent_completion": true,
+  "equivalent_completion_speedup": 2.01335291572227,
+  "linear_subproblem_batches": [
+    {
+      "components": 20,
+      "rows_each": 12,
+      "intensities_each": 3
+    }
+  ],
+  "linear_matrix_entries": 720,
+  "unpartitioned_matrix_entries": 14400,
+  "maximum_absolute_differences": {
+    "I": 6.38102903849358e-11,
+    "beta": 1.2440326546681035e-12,
+    "joint_covariance": 4.449218771185315e-13,
+    "parameter_response": 6.267764085521321e-13
+  },
+  "environment": {
+    "python": "3.12.16 (main, Oct 26 2026, 11:37:43) [GCC 15.3.0]",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "memory_scope": "tracemalloc peak in a separate complete-fit run; not resident memory or total process size",
+  "scope": "synthetic correlated composite observations; shared global beta, independent linear intensity components; identical objective, tolerances, signed amplitudes and final uncertainty model"
+}

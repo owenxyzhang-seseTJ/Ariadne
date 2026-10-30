@@ -21,8 +21,7 @@ import uuid
 
 from mcp.server.fastmcp import FastMCP
 from ariadne.contracts import (AcceptanceRecord, ArtifactText, Cancellation, Capabilities, CreatedJob,
-                               Handoff, Hypothesis, JobInspection, OperationHandle, Progress,
-                               analysis_contracts, spec_for)
+                               Handoff, Hypothesis, JobInspection, OperationHandle, analysis_contracts, spec_for)
 from ariadne.errors import ToolError
 from ariadne.evidence import append_event, save_hypothesis
 
@@ -135,7 +134,18 @@ def pid_alive(pid, group=False):
                                capture_output=True, text=True, timeout=5).stdout.strip()
     except (OSError, subprocess.SubprocessError):
         return True
-    return bool(state) and not state.startswith('Z')
+    # A second process query can be empty even after signal 0 succeeded (for
+    # example, restricted ps visibility). Absence of ps output is not proof of
+    # death. Recheck the kernel instead of reporting a running child as dead.
+    if not state:
+        try:
+            os.killpg(pid, 0) if group else os.kill(pid, 0)
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            return True
+        return True
+    return not state.startswith('Z')
 
 
 def log_tail(path, lines=12, width=400):
@@ -212,13 +222,16 @@ def job_lock(job):
 @mcp.tool(annotations={'readOnlyHint': True})
 def capabilities() -> Capabilities:
     """Read configured software and algorithm status without running calculations."""
-    config = read_json(os.environ['SCXRD_RUNTIME_CONFIG'])
-    return {'product': 'Ariadne', 'version': '0.5.0', 'runtime': config,
+    configured = os.environ.get('SCXRD_RUNTIME_CONFIG')
+    config = read_json(configured) if configured and Path(configured).is_file() else {
+        'schema': 'ariadne-runtime/1', 'configured': False,
+        'installation': 'Set SCXRD_RUNTIME_CONFIG to the matching scientific runtime record.'}
+    return {'product': 'Ariadne', 'version': '0.7.0', 'runtime': config,
             'operations': list(OPERATIONS), 'typed_options': {op: list(v) for op, v in OPTIONS.items()},
             'acceptance': 'process completion requires separate scientific evidence decision',
             'analyses': analysis_contracts(),
             'composite_absorption_scaling': 'shared empirical log-scale/degree-2 directional fit on equivalent composite observations; local identifiable fits only',
-            'tests': 'not_run_as_requested'}
+            'tests': 'not_run_by_capabilities; see reports for recorded verification'}
 
 
 @mcp.tool(annotations={'readOnlyHint': False, 'destructiveHint': False})
@@ -381,7 +394,7 @@ def submit_operation(path, stage, operation, argv, expected_outputs, timeout_sec
         control = path / 'control' / token
         control.mkdir(parents=True)
         command = {'argv': argv, 'expected_outputs': expected_outputs,
-                   'software_version': 'DIALS 3.30.1 + Ariadne 0.5.0 Python source overlay',
+                   'software_version': 'DIALS 3.30.1 + Ariadne 0.7.0 Python source overlay',
                    'purpose': operation, 'scientific_acceptance': 'requires separate agent-reviewed evidence'}
         atomic_json(control / 'command.json', command)
         task = {'schema': 'ariadne-operation/1', 'operation_id': token, 'job': str(path),
@@ -530,6 +543,9 @@ def propose_hypothesis(job: str, model_artifacts: list[str], evidence_artifacts:
 def main():
     mcp.run(transport='stdio')
 
+
+from ariadne.agent.mcp_tools import register as _register_agent_tools
+_register_agent_tools(mcp)
 
 if __name__ == '__main__':
     main()
