@@ -21,7 +21,9 @@ The complete R2 numerical code and DIALS Python-source patch are retained. New c
 
 The agent supports audit, solve, refine, reduce, feedback and explicit custom DAGs. It has 13 registered action types, 8 additional optional MCP session tools, a deterministic policy, and an optional Chat Completions JSON planner. External executable paths come only from the operator-owned JSON file selected by `ARIADNE_EXECUTABLES_CONFIG`; task-level overrides are rejected. Native crystal/feedback actions run in supervised subprocesses with deadlines and cancellation.
 
-Installing from `./python` builds an optional C++17 multiscale proposal kernel. It preserves the reference count-excess model, releases the GIL, and fuses summed-area background/scale statistics. A C++ compiler is required for this acceleration. `ARIADNE_REQUIRE_NATIVE=1` makes a missing compiler/build error fatal; `ARIADNE_DISABLE_NATIVE=1` explicitly builds the portable Python fallback. The portable wheel in `dist/` uses that fallback. Current measured comparisons and reproduction commands are in `reports/current_validation/`.
+Installing from `./python` builds an optional C++17 multiscale proposal kernel. It preserves the reference count-excess model, releases the GIL, fuses summed-area background/scale statistics, and adds a well-conditioned known-background WLS path with full Cholesky covariance. A C++ compiler is required for this acceleration. `ARIADNE_REQUIRE_NATIVE=1` makes a missing compiler/build error fatal; `ARIADNE_DISABLE_NATIVE=1` explicitly builds the portable Python fallback. The portable wheel in `dist/` uses that fallback.
+
+Apple MLX/Metal is measured as an optional experimental comparison, not a default backend. On the tested M5, float32 Metal was faster for large spot images but changed a small number of thresholded weak-spot pixels, so the exact C++ decision remains the production path. Current measured comparisons and reproduction commands are in `reports/current_validation/`.
 
 ## Minimal demonstration
 

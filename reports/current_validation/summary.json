@@ -2,7 +2,7 @@
   "schema": "ariadne-combined-validation/1",
   "date": "2026-10-31",
   "ariadne": {
-    "passed": 355,
+    "passed": 359,
     "subtests_passed": 136,
     "failed": 0,
     "errors": 0,
@@ -20,13 +20,15 @@
     3,
     4
   ],
-  "native_backend": "C++17 fused proposal kernel; compiled and exercised",
+  "native_backend": "C++17 fused proposal kernel and fixed-background eigen/Cholesky WLS; native wheel compiled and exercised",
   "python": "3.12.15 (main, Oct 13 2026, 16:47:20) [Clang 21.1.8 ]",
   "platform": "macOS-26.5-arm64-arm-64bit",
   "benchmarks": [
     "native_prediction.json",
     "ariadne_dials.json",
     "ariadne_dials_native.json",
+    "gpu_spots.json",
     "xtal_shelxl.json"
-  ]
+  ],
+  "gpu_assessment": "Apple M5 Metal/MLX float32 is 1.54-1.68x faster on 512-2048 square spot images but changes 4-11 threshold pixels; experimental only"
 }

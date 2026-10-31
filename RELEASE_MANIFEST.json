@@ -1,7 +1,7 @@
 {
   "schema": "ariadne-release-manifest/2",
   "build": "0.7.0-integrated-native-20261031",
-  "generated_utc": "2026-10-31T06:12:58.568181+00:00",
+  "generated_utc": "2026-10-31T06:38:17.346752+00:00",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -65,7 +65,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 5592
+      "bytes": 5945
     },
     {
       "path": "README.zh-CN.md",
@@ -508,6 +508,10 @@
       "bytes": 8066
     },
     {
+      "path": "benchmarks/gpu_spots.py",
+      "bytes": 7664
+    },
+    {
       "path": "benchmarks/lattice_principles.py",
       "bytes": 5695
     },
@@ -553,11 +557,11 @@
     },
     {
       "path": "dist/ariadne-0.7.0-py3-none-any.whl",
-      "bytes": 74311
+      "bytes": 76186
     },
     {
       "path": "dist/ariadne-0.7.0.tar.gz",
-      "bytes": 62840
+      "bytes": 64790
     },
     {
       "path": "docs/R2_README.md",
@@ -609,7 +613,7 @@
     },
     {
       "path": "implementation-status.json",
-      "bytes": 2204
+      "bytes": 2229
     },
     {
       "path": "licenses/DIALS-LICENSE.txt",
@@ -665,7 +669,7 @@
     },
     {
       "path": "python/src/ariadne/_native.cpp",
-      "bytes": 7246
+      "bytes": 15474
     },
     {
       "path": "python/src/ariadne/agent/__init__.py",
@@ -801,7 +805,7 @@
     },
     {
       "path": "reports/current_validation/README.zh-CN.md",
-      "bytes": 6698
+      "bytes": 7110
     },
     {
       "path": "reports/current_validation/ariadne_dials.json",
@@ -809,7 +813,11 @@
     },
     {
       "path": "reports/current_validation/ariadne_dials_native.json",
-      "bytes": 19318
+      "bytes": 19320
+    },
+    {
+      "path": "reports/current_validation/gpu_spots.json",
+      "bytes": 3816
     },
     {
       "path": "reports/current_validation/native_prediction.json",
@@ -817,7 +825,7 @@
     },
     {
       "path": "reports/current_validation/summary.json",
-      "bytes": 737
+      "bytes": 967
     },
     {
       "path": "reports/current_validation/xtal_shelxl.json",
@@ -1141,7 +1149,7 @@
     },
     {
       "path": "skills/ariadne-reduction/scripts/overlap_integrator.py",
-      "bytes": 23800
+      "bytes": 29391
     },
     {
       "path": "skills/ariadne-reduction/scripts/overlap_observability.py",
@@ -1293,7 +1301,7 @@
     },
     {
       "path": "tests_rebuild/test_correction_covariance.py",
-      "bytes": 2832
+      "bytes": 5247
     },
     {
       "path": "tests_rebuild/test_crystal.py",
