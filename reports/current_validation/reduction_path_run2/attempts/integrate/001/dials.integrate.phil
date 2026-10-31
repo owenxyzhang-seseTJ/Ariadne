@@ -1,0 +1,4 @@
+input {
+  experiments = /Users/xiaoyuzhang/Documents/单晶/ariadne/github-release/reports/current_validation/reduction_path_run2/attempts/refine/001/refined.expt
+  reflections = /Users/xiaoyuzhang/Documents/单晶/ariadne/github-release/reports/current_validation/reduction_path_run2/attempts/refine/001/refined.refl
+}

@@ -8,6 +8,7 @@ asymptotics, NOT exact coverage (including at a nonnegative boundary).
 from __future__ import annotations
 
 import numpy as np
+from scipy.linalg import qr
 from scipy.optimize import brentq, lsq_linear, minimize
 from scipy.stats import chi2
 
@@ -48,6 +49,23 @@ def _minimize_nonnegative(fun, initial):
     value, grad = fun(result.x)
     error = _projected_error(result.x, grad)
     return result.x, value, bool(result.success and np.isfinite(value) and error <= 1e-6), error, str(result.message)
+
+
+def _compress_gaussian(design, target):
+    """Preserve ||A x - b|| for every x in at most K+1 Householder QR rows.
+
+    The augmented target column retains the parameter-independent residual, so
+    this also preserves absolute objectives and MLE-centered likelihood ratios.
+    No rank cutoff is used: weak and null directions keep their original role
+    in the nonnegative fits and equality-constrained total profiles.
+    """
+    columns = design.shape[1] + 1
+    if len(target) <= max(128, 4 * columns):
+        return design, target
+    augmented = np.empty((len(target), columns), order='F')
+    augmented[:, :-1], augmented[:, -1] = design, target
+    factor = qr(augmented, mode='r', overwrite_a=True, check_finite=False)[0][:columns].copy()
+    return factor[:, :-1], factor[:, -1]
 
 
 def _poisson_predictor_reduction(counts, background, design, profiles):
@@ -422,6 +440,8 @@ def fit_constrained(y, variance, profiles, valid, basis, noise, method, rcond,
     units = 1 / norms
     weighted *= units
     gaussian = (weighted, (fit_data - fit_background) * fit_root_weight)
+    if method == 'nnls':
+        gaussian = _compress_gaussian(*gaussian)
     photon_design = signal_profiles * (units/gain)
     model_background = fit_background / gain
     model_counts = counts[signal_rows]
@@ -553,9 +573,10 @@ def fit_constrained(y, variance, profiles, valid, basis, noise, method, rcond,
                             'valid_pixels': len(data),
                             'parameter_dependent_pixels': int(signal_rows.sum()),
                             'parameter_independent_pixels': int((~signal_rows).sum()),
-                            'optimization_observations': len(model_background),
+                            'optimization_observations': len(gaussian[1]) if method == 'nnls' else len(model_background),
+                            'gaussian_qr_rows_removed': int(signal_rows.sum())-len(gaussian[1]) if method == 'nnls' else 0,
                             'poisson_sufficient_statistics_rows_removed': reduced_rows,
-                            'scope': 'exact zero-profile factor separation; exact equal-contributor zero-background Poisson sums; no weak-pixel threshold'},
+                            'scope': 'exact zero-profile factor separation; Gaussian augmented Householder QR; exact equal-contributor zero-background Poisson sums; no weak-pixel threshold'},
                         'gain_unit': 'ADU/count', 'readout_variance_unit': 'ADU^2',
                         'noise_provenance': noise.get('provenance', noise.get('source')) if noise else None,
                         'covariance_information_status': covariance_status,

@@ -1,0 +1,2424 @@
+{
+  "schema": "ariadne-gaussian-profile-compression-benchmark/1",
+  "environment": {
+    "python": "3.13.13 | packaged by conda-forge | (main, Apr  8 2026, 02:29:07) [Clang 19.1.7 ]",
+    "executable": "/Users/xiaoyuzhang/miniforge3/bin/python3",
+    "numpy": "2.5.2",
+    "scipy": "1.18.1",
+    "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "thread_environment": {
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1",
+      "BLIS_NUM_THREADS": "1"
+    }
+  },
+  "baseline": "Current fit_constrained with only _compress_gaussian replaced by identity; original uncompressed pixel solver",
+  "timing": "perf_counter around complete fit_constrained including all component/total profile intervals; no excluded warmup; alternating order",
+  "input": "Synthetic seed 6817; three normalized overlapping Gaussian profiles; 16 background-only pixels; six masked signal pixels; heterogeneous fixed variance",
+  "limitations": "Synthetic Gaussian NNLS only; single process/thread; not real observations or Poisson/PG; timings vary by machine and load",
+  "cases": [
+    {
+      "requested_signal_rows": 64,
+      "valid_signal_rows": 58,
+      "component_count": 3,
+      "seconds": {
+        "uncompressed": [
+          0.022296291979728267,
+          0.012629958015168086,
+          0.01269820801098831,
+          0.012083167006494477,
+          0.012219292024383321
+        ],
+        "compressed": [
+          0.013035167008638382,
+          0.012784083024598658,
+          0.012743041006615385,
+          0.012470082991058007,
+          0.012030457990476862
+        ]
+      },
+      "median_seconds": {
+        "uncompressed": 0.012629958015168086,
+        "compressed": 0.012743041006615385
+      },
+      "speedup": 0.9911259022560945,
+      "runs": [
+        {
+          "repeat": 1,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.022296291979728267,
+            "compressed": 0.013035167008638382
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2495.302777271937,
+                13.609108453014668,
+                1794.8736743064064
+              ],
+              "objective": 22.830525053056938,
+              "pixel_projected_gradient_inf_norm": 7.202965896510099e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2480.0593870562093,
+                  "upper": 2510.5461674875905
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 31.09866126548694
+                },
+                {
+                  "status": "ok",
+                  "lower": 1780.7899682538848,
+                  "upper": 1808.9573803589255
+                },
+                {
+                  "status": "ok",
+                  "lower": 4289.2284972870575,
+                  "upper": 4318.342622775648
+                }
+              ],
+              "optimization_observations": 58
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2495.302777271937,
+                13.609108453014668,
+                1794.8736743064064
+              ],
+              "objective": 22.830525053056938,
+              "pixel_projected_gradient_inf_norm": 7.202965896510099e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2480.0593870562093,
+                  "upper": 2510.5461674875905
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 31.09866126548694
+                },
+                {
+                  "status": "ok",
+                  "lower": 1780.7899682538848,
+                  "upper": 1808.9573803589255
+                },
+                {
+                  "status": "ok",
+                  "lower": 4289.2284972870575,
+                  "upper": 4318.342622775648
+                }
+              ],
+              "optimization_observations": 58
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 0.0,
+            "max_intensity_absolute_difference": 0.0,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 2,
+          "order": [
+            "compressed",
+            "uncompressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.012629958015168086,
+            "compressed": 0.012784083024598658
+          },
+          "results": {
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2495.302777271937,
+                13.609108453014668,
+                1794.8736743064064
+              ],
+              "objective": 22.830525053056938,
+              "pixel_projected_gradient_inf_norm": 7.202965896510099e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2480.0593870562093,
+                  "upper": 2510.5461674875905
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 31.09866126548694
+                },
+                {
+                  "status": "ok",
+                  "lower": 1780.7899682538848,
+                  "upper": 1808.9573803589255
+                },
+                {
+                  "status": "ok",
+                  "lower": 4289.2284972870575,
+                  "upper": 4318.342622775648
+                }
+              ],
+              "optimization_observations": 58
+            },
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2495.302777271937,
+                13.609108453014668,
+                1794.8736743064064
+              ],
+              "objective": 22.830525053056938,
+              "pixel_projected_gradient_inf_norm": 7.202965896510099e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2480.0593870562093,
+                  "upper": 2510.5461674875905
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 31.09866126548694
+                },
+                {
+                  "status": "ok",
+                  "lower": 1780.7899682538848,
+                  "upper": 1808.9573803589255
+                },
+                {
+                  "status": "ok",
+                  "lower": 4289.2284972870575,
+                  "upper": 4318.342622775648
+                }
+              ],
+              "optimization_observations": 58
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 0.0,
+            "max_intensity_absolute_difference": 0.0,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 3,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.01269820801098831,
+            "compressed": 0.012743041006615385
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2495.302777271937,
+                13.609108453014668,
+                1794.8736743064064
+              ],
+              "objective": 22.830525053056938,
+              "pixel_projected_gradient_inf_norm": 7.202965896510099e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2480.0593870562093,
+                  "upper": 2510.5461674875905
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 31.09866126548694
+                },
+                {
+                  "status": "ok",
+                  "lower": 1780.7899682538848,
+                  "upper": 1808.9573803589255
+                },
+                {
+                  "status": "ok",
+                  "lower": 4289.2284972870575,
+                  "upper": 4318.342622775648
+                }
+              ],
+              "optimization_observations": 58
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2495.302777271937,
+                13.609108453014668,
+                1794.8736743064064
+              ],
+              "objective": 22.830525053056938,
+              "pixel_projected_gradient_inf_norm": 7.202965896510099e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2480.0593870562093,
+                  "upper": 2510.5461674875905
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 31.09866126548694
+                },
+                {
+                  "status": "ok",
+                  "lower": 1780.7899682538848,
+                  "upper": 1808.9573803589255
+                },
+                {
+                  "status": "ok",
+                  "lower": 4289.2284972870575,
+                  "upper": 4318.342622775648
+                }
+              ],
+              "optimization_observations": 58
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 0.0,
+            "max_intensity_absolute_difference": 0.0,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 4,
+          "order": [
+            "compressed",
+            "uncompressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.012083167006494477,
+            "compressed": 0.012470082991058007
+          },
+          "results": {
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2495.302777271937,
+                13.609108453014668,
+                1794.8736743064064
+              ],
+              "objective": 22.830525053056938,
+              "pixel_projected_gradient_inf_norm": 7.202965896510099e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2480.0593870562093,
+                  "upper": 2510.5461674875905
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 31.09866126548694
+                },
+                {
+                  "status": "ok",
+                  "lower": 1780.7899682538848,
+                  "upper": 1808.9573803589255
+                },
+                {
+                  "status": "ok",
+                  "lower": 4289.2284972870575,
+                  "upper": 4318.342622775648
+                }
+              ],
+              "optimization_observations": 58
+            },
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2495.302777271937,
+                13.609108453014668,
+                1794.8736743064064
+              ],
+              "objective": 22.830525053056938,
+              "pixel_projected_gradient_inf_norm": 7.202965896510099e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2480.0593870562093,
+                  "upper": 2510.5461674875905
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 31.09866126548694
+                },
+                {
+                  "status": "ok",
+                  "lower": 1780.7899682538848,
+                  "upper": 1808.9573803589255
+                },
+                {
+                  "status": "ok",
+                  "lower": 4289.2284972870575,
+                  "upper": 4318.342622775648
+                }
+              ],
+              "optimization_observations": 58
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 0.0,
+            "max_intensity_absolute_difference": 0.0,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 5,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.012219292024383321,
+            "compressed": 0.012030457990476862
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2495.302777271937,
+                13.609108453014668,
+                1794.8736743064064
+              ],
+              "objective": 22.830525053056938,
+              "pixel_projected_gradient_inf_norm": 7.202965896510099e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2480.0593870562093,
+                  "upper": 2510.5461674875905
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 31.09866126548694
+                },
+                {
+                  "status": "ok",
+                  "lower": 1780.7899682538848,
+                  "upper": 1808.9573803589255
+                },
+                {
+                  "status": "ok",
+                  "lower": 4289.2284972870575,
+                  "upper": 4318.342622775648
+                }
+              ],
+              "optimization_observations": 58
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2495.302777271937,
+                13.609108453014668,
+                1794.8736743064064
+              ],
+              "objective": 22.830525053056938,
+              "pixel_projected_gradient_inf_norm": 7.202965896510099e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2480.0593870562093,
+                  "upper": 2510.5461674875905
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 31.09866126548694
+                },
+                {
+                  "status": "ok",
+                  "lower": 1780.7899682538848,
+                  "upper": 1808.9573803589255
+                },
+                {
+                  "status": "ok",
+                  "lower": 4289.2284972870575,
+                  "upper": 4318.342622775648
+                }
+              ],
+              "optimization_observations": 58
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 0.0,
+            "max_intensity_absolute_difference": 0.0,
+            "objective_absolute_difference": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "requested_signal_rows": 700,
+      "valid_signal_rows": 694,
+      "component_count": 3,
+      "seconds": {
+        "uncompressed": [
+          0.019799583998974413,
+          0.019313208991661668,
+          0.01919145800638944,
+          0.018963040987728164,
+          0.01884658299968578
+        ],
+        "compressed": [
+          0.01754037500359118,
+          0.016114208003273234,
+          0.01597887498792261,
+          0.01582108301226981,
+          0.015645874984329566
+        ]
+      },
+      "median_seconds": {
+        "uncompressed": 0.01919145800638944,
+        "compressed": 0.01597887498792261
+      },
+      "speedup": 1.201051890129625,
+      "runs": [
+        {
+          "repeat": 1,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.019799583998974413,
+            "compressed": 0.01754037500359118
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2491.677330847153,
+                7.438185424442037e-13,
+                1771.8796984559385
+              ],
+              "objective": 369.209527969729,
+              "pixel_projected_gradient_inf_norm": 2.6677161040175e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2448.0568509310256,
+                  "upper": 2527.1542620648884
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 53.99393421956996
+                },
+                {
+                  "status": "ok",
+                  "lower": 1726.5803215932171,
+                  "upper": 1806.3883956961315
+                },
+                {
+                  "status": "ok",
+                  "lower": 4217.037795202718,
+                  "upper": 4310.075906837804
+                }
+              ],
+              "optimization_observations": 694
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2491.6773308471543,
+                2.9892491423691035e-25,
+                1771.8796984559392
+              ],
+              "objective": 369.2095279697289,
+              "pixel_projected_gradient_inf_norm": 5.6122792569753855e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2448.0568509310265,
+                  "upper": 2527.154262064889
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 53.993934219568814
+                },
+                {
+                  "status": "ok",
+                  "lower": 1726.5803215932178,
+                  "upper": 1806.3883956961317
+                },
+                {
+                  "status": "ok",
+                  "lower": 4217.037795202719,
+                  "upper": 4310.075906837806
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 1.8189894035458565e-12,
+            "max_intensity_absolute_difference": 1.3642420526593924e-12,
+            "objective_absolute_difference": 5.684341886080802e-14
+          }
+        },
+        {
+          "repeat": 2,
+          "order": [
+            "compressed",
+            "uncompressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.019313208991661668,
+            "compressed": 0.016114208003273234
+          },
+          "results": {
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2491.6773308471543,
+                2.9892491423691035e-25,
+                1771.8796984559392
+              ],
+              "objective": 369.2095279697289,
+              "pixel_projected_gradient_inf_norm": 5.6122792569753855e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2448.0568509310265,
+                  "upper": 2527.154262064889
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 53.993934219568814
+                },
+                {
+                  "status": "ok",
+                  "lower": 1726.5803215932178,
+                  "upper": 1806.3883956961317
+                },
+                {
+                  "status": "ok",
+                  "lower": 4217.037795202719,
+                  "upper": 4310.075906837806
+                }
+              ],
+              "optimization_observations": 4
+            },
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2491.677330847153,
+                7.438185424442037e-13,
+                1771.8796984559385
+              ],
+              "objective": 369.209527969729,
+              "pixel_projected_gradient_inf_norm": 2.6677161040175e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2448.0568509310256,
+                  "upper": 2527.1542620648884
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 53.99393421956996
+                },
+                {
+                  "status": "ok",
+                  "lower": 1726.5803215932171,
+                  "upper": 1806.3883956961315
+                },
+                {
+                  "status": "ok",
+                  "lower": 4217.037795202718,
+                  "upper": 4310.075906837804
+                }
+              ],
+              "optimization_observations": 694
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 1.8189894035458565e-12,
+            "max_intensity_absolute_difference": 1.3642420526593924e-12,
+            "objective_absolute_difference": 5.684341886080802e-14
+          }
+        },
+        {
+          "repeat": 3,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.01919145800638944,
+            "compressed": 0.01597887498792261
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2491.677330847153,
+                7.438185424442037e-13,
+                1771.8796984559385
+              ],
+              "objective": 369.209527969729,
+              "pixel_projected_gradient_inf_norm": 2.6677161040175e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2448.0568509310256,
+                  "upper": 2527.1542620648884
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 53.99393421956996
+                },
+                {
+                  "status": "ok",
+                  "lower": 1726.5803215932171,
+                  "upper": 1806.3883956961315
+                },
+                {
+                  "status": "ok",
+                  "lower": 4217.037795202718,
+                  "upper": 4310.075906837804
+                }
+              ],
+              "optimization_observations": 694
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2491.6773308471543,
+                2.9892491423691035e-25,
+                1771.8796984559392
+              ],
+              "objective": 369.2095279697289,
+              "pixel_projected_gradient_inf_norm": 5.6122792569753855e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2448.0568509310265,
+                  "upper": 2527.154262064889
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 53.993934219568814
+                },
+                {
+                  "status": "ok",
+                  "lower": 1726.5803215932178,
+                  "upper": 1806.3883956961317
+                },
+                {
+                  "status": "ok",
+                  "lower": 4217.037795202719,
+                  "upper": 4310.075906837806
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 1.8189894035458565e-12,
+            "max_intensity_absolute_difference": 1.3642420526593924e-12,
+            "objective_absolute_difference": 5.684341886080802e-14
+          }
+        },
+        {
+          "repeat": 4,
+          "order": [
+            "compressed",
+            "uncompressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.018963040987728164,
+            "compressed": 0.01582108301226981
+          },
+          "results": {
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2491.6773308471543,
+                2.9892491423691035e-25,
+                1771.8796984559392
+              ],
+              "objective": 369.2095279697289,
+              "pixel_projected_gradient_inf_norm": 5.6122792569753855e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2448.0568509310265,
+                  "upper": 2527.154262064889
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 53.993934219568814
+                },
+                {
+                  "status": "ok",
+                  "lower": 1726.5803215932178,
+                  "upper": 1806.3883956961317
+                },
+                {
+                  "status": "ok",
+                  "lower": 4217.037795202719,
+                  "upper": 4310.075906837806
+                }
+              ],
+              "optimization_observations": 4
+            },
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2491.677330847153,
+                7.438185424442037e-13,
+                1771.8796984559385
+              ],
+              "objective": 369.209527969729,
+              "pixel_projected_gradient_inf_norm": 2.6677161040175e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2448.0568509310256,
+                  "upper": 2527.1542620648884
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 53.99393421956996
+                },
+                {
+                  "status": "ok",
+                  "lower": 1726.5803215932171,
+                  "upper": 1806.3883956961315
+                },
+                {
+                  "status": "ok",
+                  "lower": 4217.037795202718,
+                  "upper": 4310.075906837804
+                }
+              ],
+              "optimization_observations": 694
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 1.8189894035458565e-12,
+            "max_intensity_absolute_difference": 1.3642420526593924e-12,
+            "objective_absolute_difference": 5.684341886080802e-14
+          }
+        },
+        {
+          "repeat": 5,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.01884658299968578,
+            "compressed": 0.015645874984329566
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2491.677330847153,
+                7.438185424442037e-13,
+                1771.8796984559385
+              ],
+              "objective": 369.209527969729,
+              "pixel_projected_gradient_inf_norm": 2.6677161040175e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2448.0568509310256,
+                  "upper": 2527.1542620648884
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 53.99393421956996
+                },
+                {
+                  "status": "ok",
+                  "lower": 1726.5803215932171,
+                  "upper": 1806.3883956961315
+                },
+                {
+                  "status": "ok",
+                  "lower": 4217.037795202718,
+                  "upper": 4310.075906837804
+                }
+              ],
+              "optimization_observations": 694
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2491.6773308471543,
+                2.9892491423691035e-25,
+                1771.8796984559392
+              ],
+              "objective": 369.2095279697289,
+              "pixel_projected_gradient_inf_norm": 5.6122792569753855e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2448.0568509310265,
+                  "upper": 2527.154262064889
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 53.993934219568814
+                },
+                {
+                  "status": "ok",
+                  "lower": 1726.5803215932178,
+                  "upper": 1806.3883956961317
+                },
+                {
+                  "status": "ok",
+                  "lower": 4217.037795202719,
+                  "upper": 4310.075906837806
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 1.8189894035458565e-12,
+            "max_intensity_absolute_difference": 1.3642420526593924e-12,
+            "objective_absolute_difference": 5.684341886080802e-14
+          }
+        }
+      ]
+    },
+    {
+      "requested_signal_rows": 1600,
+      "valid_signal_rows": 1594,
+      "component_count": 3,
+      "seconds": {
+        "uncompressed": [
+          0.019898250000551343,
+          0.020063333999132738,
+          0.020089124998776242,
+          0.021679792000213638,
+          0.020063082978595048
+        ],
+        "compressed": [
+          0.014193916984368116,
+          0.014279958006227389,
+          0.01422737500979565,
+          0.014128458977211267,
+          0.014490458008367568
+        ]
+      },
+      "median_seconds": {
+        "uncompressed": 0.020063333999132738,
+        "compressed": 0.01422737500979565
+      },
+      "speedup": 1.4101922515797178,
+      "runs": [
+        {
+          "repeat": 1,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.019898250000551343,
+            "compressed": 0.014193916984368116
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2410.7989567566046,
+                1.5440001444470254e-12,
+                1701.763800353562
+              ],
+              "objective": 876.7433929858353,
+              "pixel_projected_gradient_inf_norm": 5.281945324341212e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2346.5811931597286,
+                  "upper": 2463.659755486177
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 79.1503096670533
+                },
+                {
+                  "status": "ok",
+                  "lower": 1633.920656893327,
+                  "upper": 1754.402842626682
+                },
+                {
+                  "status": "ok",
+                  "lower": 4042.4854402903948,
+                  "upper": 4182.640073930013
+                }
+              ],
+              "optimization_observations": 1594
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2410.7989567566046,
+                1.5439999025070035e-12,
+                1701.7638003535615
+              ],
+              "objective": 876.7433929858353,
+              "pixel_projected_gradient_inf_norm": 1.890678622162921e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2346.5811931597286,
+                  "upper": 2463.659755486177
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 79.15030966705305
+                },
+                {
+                  "status": "ok",
+                  "lower": 1633.920656893327,
+                  "upper": 1754.4028426266814
+                },
+                {
+                  "status": "ok",
+                  "lower": 4042.4854402903948,
+                  "upper": 4182.6400739300125
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 9.094947017729282e-13,
+            "max_intensity_absolute_difference": 4.547473508864641e-13,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 2,
+          "order": [
+            "compressed",
+            "uncompressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.020063333999132738,
+            "compressed": 0.014279958006227389
+          },
+          "results": {
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2410.7989567566046,
+                1.5439999025070035e-12,
+                1701.7638003535615
+              ],
+              "objective": 876.7433929858353,
+              "pixel_projected_gradient_inf_norm": 1.890678622162921e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2346.5811931597286,
+                  "upper": 2463.659755486177
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 79.15030966705305
+                },
+                {
+                  "status": "ok",
+                  "lower": 1633.920656893327,
+                  "upper": 1754.4028426266814
+                },
+                {
+                  "status": "ok",
+                  "lower": 4042.4854402903948,
+                  "upper": 4182.6400739300125
+                }
+              ],
+              "optimization_observations": 4
+            },
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2410.7989567566046,
+                1.5440001444470254e-12,
+                1701.763800353562
+              ],
+              "objective": 876.7433929858353,
+              "pixel_projected_gradient_inf_norm": 5.281945324341212e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2346.5811931597286,
+                  "upper": 2463.659755486177
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 79.1503096670533
+                },
+                {
+                  "status": "ok",
+                  "lower": 1633.920656893327,
+                  "upper": 1754.402842626682
+                },
+                {
+                  "status": "ok",
+                  "lower": 4042.4854402903948,
+                  "upper": 4182.640073930013
+                }
+              ],
+              "optimization_observations": 1594
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 9.094947017729282e-13,
+            "max_intensity_absolute_difference": 4.547473508864641e-13,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 3,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.020089124998776242,
+            "compressed": 0.01422737500979565
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2410.7989567566046,
+                1.5440001444470254e-12,
+                1701.763800353562
+              ],
+              "objective": 876.7433929858353,
+              "pixel_projected_gradient_inf_norm": 5.281945324341212e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2346.5811931597286,
+                  "upper": 2463.659755486177
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 79.1503096670533
+                },
+                {
+                  "status": "ok",
+                  "lower": 1633.920656893327,
+                  "upper": 1754.402842626682
+                },
+                {
+                  "status": "ok",
+                  "lower": 4042.4854402903948,
+                  "upper": 4182.640073930013
+                }
+              ],
+              "optimization_observations": 1594
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2410.7989567566046,
+                1.5439999025070035e-12,
+                1701.7638003535615
+              ],
+              "objective": 876.7433929858353,
+              "pixel_projected_gradient_inf_norm": 1.890678622162921e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2346.5811931597286,
+                  "upper": 2463.659755486177
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 79.15030966705305
+                },
+                {
+                  "status": "ok",
+                  "lower": 1633.920656893327,
+                  "upper": 1754.4028426266814
+                },
+                {
+                  "status": "ok",
+                  "lower": 4042.4854402903948,
+                  "upper": 4182.6400739300125
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 9.094947017729282e-13,
+            "max_intensity_absolute_difference": 4.547473508864641e-13,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 4,
+          "order": [
+            "compressed",
+            "uncompressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.021679792000213638,
+            "compressed": 0.014128458977211267
+          },
+          "results": {
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2410.7989567566046,
+                1.5439999025070035e-12,
+                1701.7638003535615
+              ],
+              "objective": 876.7433929858353,
+              "pixel_projected_gradient_inf_norm": 1.890678622162921e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2346.5811931597286,
+                  "upper": 2463.659755486177
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 79.15030966705305
+                },
+                {
+                  "status": "ok",
+                  "lower": 1633.920656893327,
+                  "upper": 1754.4028426266814
+                },
+                {
+                  "status": "ok",
+                  "lower": 4042.4854402903948,
+                  "upper": 4182.6400739300125
+                }
+              ],
+              "optimization_observations": 4
+            },
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2410.7989567566046,
+                1.5440001444470254e-12,
+                1701.763800353562
+              ],
+              "objective": 876.7433929858353,
+              "pixel_projected_gradient_inf_norm": 5.281945324341212e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2346.5811931597286,
+                  "upper": 2463.659755486177
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 79.1503096670533
+                },
+                {
+                  "status": "ok",
+                  "lower": 1633.920656893327,
+                  "upper": 1754.402842626682
+                },
+                {
+                  "status": "ok",
+                  "lower": 4042.4854402903948,
+                  "upper": 4182.640073930013
+                }
+              ],
+              "optimization_observations": 1594
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 9.094947017729282e-13,
+            "max_intensity_absolute_difference": 4.547473508864641e-13,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 5,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.020063082978595048,
+            "compressed": 0.014490458008367568
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2410.7989567566046,
+                1.5440001444470254e-12,
+                1701.763800353562
+              ],
+              "objective": 876.7433929858353,
+              "pixel_projected_gradient_inf_norm": 5.281945324341212e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2346.5811931597286,
+                  "upper": 2463.659755486177
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 79.1503096670533
+                },
+                {
+                  "status": "ok",
+                  "lower": 1633.920656893327,
+                  "upper": 1754.402842626682
+                },
+                {
+                  "status": "ok",
+                  "lower": 4042.4854402903948,
+                  "upper": 4182.640073930013
+                }
+              ],
+              "optimization_observations": 1594
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2410.7989567566046,
+                1.5439999025070035e-12,
+                1701.7638003535615
+              ],
+              "objective": 876.7433929858353,
+              "pixel_projected_gradient_inf_norm": 1.890678622162921e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2346.5811931597286,
+                  "upper": 2463.659755486177
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 79.15030966705305
+                },
+                {
+                  "status": "ok",
+                  "lower": 1633.920656893327,
+                  "upper": 1754.4028426266814
+                },
+                {
+                  "status": "ok",
+                  "lower": 4042.4854402903948,
+                  "upper": 4182.6400739300125
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 9.094947017729282e-13,
+            "max_intensity_absolute_difference": 4.547473508864641e-13,
+            "objective_absolute_difference": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "requested_signal_rows": 12000,
+      "valid_signal_rows": 11994,
+      "component_count": 3,
+      "seconds": {
+        "uncompressed": [
+          0.05250029198941775,
+          0.05067516697454266,
+          0.05082258299808018,
+          0.0508943329914473,
+          0.05093512497842312
+        ],
+        "compressed": [
+          0.014467500004684553,
+          0.014041416987311095,
+          0.01415279199136421,
+          0.013875874981749803,
+          0.013865165994502604
+        ]
+      },
+      "median_seconds": {
+        "uncompressed": 0.0508943329914473,
+        "compressed": 0.014041416987311095
+      },
+      "speedup": 3.624586680777256,
+      "runs": [
+        {
+          "repeat": 1,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.05250029198941775,
+            "compressed": 0.014467500004684553
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2494.143316968092,
+                5.311618237491302e-11,
+                1768.3734876257874
+              ],
+              "objective": 6366.196928019519,
+              "pixel_projected_gradient_inf_norm": 2.3438502751423282e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2339.4749110479856,
+                  "upper": 2639.0159732976817
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 163.23524131310134
+                },
+                {
+                  "status": "ok",
+                  "lower": 1608.644778753591,
+                  "upper": 1912.7277773069438
+                },
+                {
+                  "status": "ok",
+                  "lower": 4070.474543772902,
+                  "upper": 4454.5590654149755
+                }
+              ],
+              "optimization_observations": 11994
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2494.1433169680945,
+                5.3116182514601395e-11,
+                1768.3734876257888
+              ],
+              "objective": 6366.196928019519,
+              "pixel_projected_gradient_inf_norm": 3.523809665076071e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2339.4749110479884,
+                  "upper": 2639.0159732976845
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 163.23524131310123
+                },
+                {
+                  "status": "ok",
+                  "lower": 1608.6447787535924,
+                  "upper": 1912.7277773069447
+                },
+                {
+                  "status": "ok",
+                  "lower": 4070.4745437729066,
+                  "upper": 4454.55906541498
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 4.547473508864641e-12,
+            "max_intensity_absolute_difference": 2.2737367544323206e-12,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 2,
+          "order": [
+            "compressed",
+            "uncompressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.05067516697454266,
+            "compressed": 0.014041416987311095
+          },
+          "results": {
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2494.1433169680945,
+                5.3116182514601395e-11,
+                1768.3734876257888
+              ],
+              "objective": 6366.196928019519,
+              "pixel_projected_gradient_inf_norm": 3.523809665076071e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2339.4749110479884,
+                  "upper": 2639.0159732976845
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 163.23524131310123
+                },
+                {
+                  "status": "ok",
+                  "lower": 1608.6447787535924,
+                  "upper": 1912.7277773069447
+                },
+                {
+                  "status": "ok",
+                  "lower": 4070.4745437729066,
+                  "upper": 4454.55906541498
+                }
+              ],
+              "optimization_observations": 4
+            },
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2494.143316968092,
+                5.311618237491302e-11,
+                1768.3734876257874
+              ],
+              "objective": 6366.196928019519,
+              "pixel_projected_gradient_inf_norm": 2.3438502751423282e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2339.4749110479856,
+                  "upper": 2639.0159732976817
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 163.23524131310134
+                },
+                {
+                  "status": "ok",
+                  "lower": 1608.644778753591,
+                  "upper": 1912.7277773069438
+                },
+                {
+                  "status": "ok",
+                  "lower": 4070.474543772902,
+                  "upper": 4454.5590654149755
+                }
+              ],
+              "optimization_observations": 11994
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 4.547473508864641e-12,
+            "max_intensity_absolute_difference": 2.2737367544323206e-12,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 3,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.05082258299808018,
+            "compressed": 0.01415279199136421
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2494.143316968092,
+                5.311618237491302e-11,
+                1768.3734876257874
+              ],
+              "objective": 6366.196928019519,
+              "pixel_projected_gradient_inf_norm": 2.3438502751423282e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2339.4749110479856,
+                  "upper": 2639.0159732976817
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 163.23524131310134
+                },
+                {
+                  "status": "ok",
+                  "lower": 1608.644778753591,
+                  "upper": 1912.7277773069438
+                },
+                {
+                  "status": "ok",
+                  "lower": 4070.474543772902,
+                  "upper": 4454.5590654149755
+                }
+              ],
+              "optimization_observations": 11994
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2494.1433169680945,
+                5.3116182514601395e-11,
+                1768.3734876257888
+              ],
+              "objective": 6366.196928019519,
+              "pixel_projected_gradient_inf_norm": 3.523809665076071e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2339.4749110479884,
+                  "upper": 2639.0159732976845
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 163.23524131310123
+                },
+                {
+                  "status": "ok",
+                  "lower": 1608.6447787535924,
+                  "upper": 1912.7277773069447
+                },
+                {
+                  "status": "ok",
+                  "lower": 4070.4745437729066,
+                  "upper": 4454.55906541498
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 4.547473508864641e-12,
+            "max_intensity_absolute_difference": 2.2737367544323206e-12,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 4,
+          "order": [
+            "compressed",
+            "uncompressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.0508943329914473,
+            "compressed": 0.013875874981749803
+          },
+          "results": {
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2494.1433169680945,
+                5.3116182514601395e-11,
+                1768.3734876257888
+              ],
+              "objective": 6366.196928019519,
+              "pixel_projected_gradient_inf_norm": 3.523809665076071e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2339.4749110479884,
+                  "upper": 2639.0159732976845
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 163.23524131310123
+                },
+                {
+                  "status": "ok",
+                  "lower": 1608.6447787535924,
+                  "upper": 1912.7277773069447
+                },
+                {
+                  "status": "ok",
+                  "lower": 4070.4745437729066,
+                  "upper": 4454.55906541498
+                }
+              ],
+              "optimization_observations": 4
+            },
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2494.143316968092,
+                5.311618237491302e-11,
+                1768.3734876257874
+              ],
+              "objective": 6366.196928019519,
+              "pixel_projected_gradient_inf_norm": 2.3438502751423282e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2339.4749110479856,
+                  "upper": 2639.0159732976817
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 163.23524131310134
+                },
+                {
+                  "status": "ok",
+                  "lower": 1608.644778753591,
+                  "upper": 1912.7277773069438
+                },
+                {
+                  "status": "ok",
+                  "lower": 4070.474543772902,
+                  "upper": 4454.5590654149755
+                }
+              ],
+              "optimization_observations": 11994
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 4.547473508864641e-12,
+            "max_intensity_absolute_difference": 2.2737367544323206e-12,
+            "objective_absolute_difference": 0.0
+          }
+        },
+        {
+          "repeat": 5,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.05093512497842312,
+            "compressed": 0.013865165994502604
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2494.143316968092,
+                5.311618237491302e-11,
+                1768.3734876257874
+              ],
+              "objective": 6366.196928019519,
+              "pixel_projected_gradient_inf_norm": 2.3438502751423282e-15,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2339.4749110479856,
+                  "upper": 2639.0159732976817
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 163.23524131310134
+                },
+                {
+                  "status": "ok",
+                  "lower": 1608.644778753591,
+                  "upper": 1912.7277773069438
+                },
+                {
+                  "status": "ok",
+                  "lower": 4070.474543772902,
+                  "upper": 4454.5590654149755
+                }
+              ],
+              "optimization_observations": 11994
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [
+                1
+              ],
+              "intensities": [
+                2494.1433169680945,
+                5.3116182514601395e-11,
+                1768.3734876257888
+              ],
+              "objective": 6366.196928019519,
+              "pixel_projected_gradient_inf_norm": 3.523809665076071e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 2339.4749110479884,
+                  "upper": 2639.0159732976845
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 163.23524131310123
+                },
+                {
+                  "status": "ok",
+                  "lower": 1608.6447787535924,
+                  "upper": 1912.7277773069447
+                },
+                {
+                  "status": "ok",
+                  "lower": 4070.4745437729066,
+                  "upper": 4454.55906541498
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 4.547473508864641e-12,
+            "max_intensity_absolute_difference": 2.2737367544323206e-12,
+            "objective_absolute_difference": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "requested_signal_rows": 60000,
+      "valid_signal_rows": 59994,
+      "component_count": 3,
+      "seconds": {
+        "uncompressed": [
+          0.21471249999012798,
+          0.21468962499056943,
+          0.2114773339999374,
+          0.21224441699450836,
+          0.21137804101454094
+        ],
+        "compressed": [
+          0.01837308399262838,
+          0.019016374979401007,
+          0.018596666981466115,
+          0.018577708018710837,
+          0.02144212499842979
+        ]
+      },
+      "median_seconds": {
+        "uncompressed": 0.21224441699450836,
+        "compressed": 0.018596666981466115
+      },
+      "speedup": 11.413035314663443,
+      "runs": [
+        {
+          "repeat": 1,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.21471249999012798,
+            "compressed": 0.01837308399262838
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2303.6566518293225,
+                166.09079530348998,
+                1442.5188125803352
+              ],
+              "objective": 32953.084762338694,
+              "pixel_projected_gradient_inf_norm": 2.875529098980067e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 1893.2716184745154,
+                  "upper": 2690.930111754199
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 684.3924657779753
+                },
+                {
+                  "status": "ok",
+                  "lower": 1008.767690637191,
+                  "upper": 1840.7216735332845
+                },
+                {
+                  "status": "ok",
+                  "lower": 3482.9779958006743,
+                  "upper": 4341.55452362547
+                }
+              ],
+              "optimization_observations": 59994
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2303.656651829288,
+                166.09079530348234,
+                1442.5188125803468
+              ],
+              "objective": 32953.08476233868,
+              "pixel_projected_gradient_inf_norm": 5.909975991065746e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 1893.2716184745225,
+                  "upper": 2690.93011175421
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 684.3924657779775
+                },
+                {
+                  "status": "ok",
+                  "lower": 1008.7676906371895,
+                  "upper": 1840.7216735332831
+                },
+                {
+                  "status": "ok",
+                  "lower": 3482.9779958006825,
+                  "upper": 4341.55452362548
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 1.0913936421275139e-11,
+            "max_intensity_absolute_difference": 3.456079866737127e-11,
+            "objective_absolute_difference": 1.4551915228366852e-11
+          }
+        },
+        {
+          "repeat": 2,
+          "order": [
+            "compressed",
+            "uncompressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.21468962499056943,
+            "compressed": 0.019016374979401007
+          },
+          "results": {
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2303.656651829288,
+                166.09079530348234,
+                1442.5188125803468
+              ],
+              "objective": 32953.08476233868,
+              "pixel_projected_gradient_inf_norm": 5.909975991065746e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 1893.2716184745225,
+                  "upper": 2690.93011175421
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 684.3924657779775
+                },
+                {
+                  "status": "ok",
+                  "lower": 1008.7676906371895,
+                  "upper": 1840.7216735332831
+                },
+                {
+                  "status": "ok",
+                  "lower": 3482.9779958006825,
+                  "upper": 4341.55452362548
+                }
+              ],
+              "optimization_observations": 4
+            },
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2303.6566518293225,
+                166.09079530348998,
+                1442.5188125803352
+              ],
+              "objective": 32953.084762338694,
+              "pixel_projected_gradient_inf_norm": 2.875529098980067e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 1893.2716184745154,
+                  "upper": 2690.930111754199
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 684.3924657779753
+                },
+                {
+                  "status": "ok",
+                  "lower": 1008.767690637191,
+                  "upper": 1840.7216735332845
+                },
+                {
+                  "status": "ok",
+                  "lower": 3482.9779958006743,
+                  "upper": 4341.55452362547
+                }
+              ],
+              "optimization_observations": 59994
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 1.0913936421275139e-11,
+            "max_intensity_absolute_difference": 3.456079866737127e-11,
+            "objective_absolute_difference": 1.4551915228366852e-11
+          }
+        },
+        {
+          "repeat": 3,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.2114773339999374,
+            "compressed": 0.018596666981466115
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2303.6566518293225,
+                166.09079530348998,
+                1442.5188125803352
+              ],
+              "objective": 32953.084762338694,
+              "pixel_projected_gradient_inf_norm": 2.875529098980067e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 1893.2716184745154,
+                  "upper": 2690.930111754199
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 684.3924657779753
+                },
+                {
+                  "status": "ok",
+                  "lower": 1008.767690637191,
+                  "upper": 1840.7216735332845
+                },
+                {
+                  "status": "ok",
+                  "lower": 3482.9779958006743,
+                  "upper": 4341.55452362547
+                }
+              ],
+              "optimization_observations": 59994
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2303.656651829288,
+                166.09079530348234,
+                1442.5188125803468
+              ],
+              "objective": 32953.08476233868,
+              "pixel_projected_gradient_inf_norm": 5.909975991065746e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 1893.2716184745225,
+                  "upper": 2690.93011175421
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 684.3924657779775
+                },
+                {
+                  "status": "ok",
+                  "lower": 1008.7676906371895,
+                  "upper": 1840.7216735332831
+                },
+                {
+                  "status": "ok",
+                  "lower": 3482.9779958006825,
+                  "upper": 4341.55452362548
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 1.0913936421275139e-11,
+            "max_intensity_absolute_difference": 3.456079866737127e-11,
+            "objective_absolute_difference": 1.4551915228366852e-11
+          }
+        },
+        {
+          "repeat": 4,
+          "order": [
+            "compressed",
+            "uncompressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.21224441699450836,
+            "compressed": 0.018577708018710837
+          },
+          "results": {
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2303.656651829288,
+                166.09079530348234,
+                1442.5188125803468
+              ],
+              "objective": 32953.08476233868,
+              "pixel_projected_gradient_inf_norm": 5.909975991065746e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 1893.2716184745225,
+                  "upper": 2690.93011175421
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 684.3924657779775
+                },
+                {
+                  "status": "ok",
+                  "lower": 1008.7676906371895,
+                  "upper": 1840.7216735332831
+                },
+                {
+                  "status": "ok",
+                  "lower": 3482.9779958006825,
+                  "upper": 4341.55452362548
+                }
+              ],
+              "optimization_observations": 4
+            },
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2303.6566518293225,
+                166.09079530348998,
+                1442.5188125803352
+              ],
+              "objective": 32953.084762338694,
+              "pixel_projected_gradient_inf_norm": 2.875529098980067e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 1893.2716184745154,
+                  "upper": 2690.930111754199
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 684.3924657779753
+                },
+                {
+                  "status": "ok",
+                  "lower": 1008.767690637191,
+                  "upper": 1840.7216735332845
+                },
+                {
+                  "status": "ok",
+                  "lower": 3482.9779958006743,
+                  "upper": 4341.55452362547
+                }
+              ],
+              "optimization_observations": 59994
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 1.0913936421275139e-11,
+            "max_intensity_absolute_difference": 3.456079866737127e-11,
+            "objective_absolute_difference": 1.4551915228366852e-11
+          }
+        },
+        {
+          "repeat": 5,
+          "order": [
+            "uncompressed",
+            "compressed"
+          ],
+          "seconds": {
+            "uncompressed": 0.21137804101454094,
+            "compressed": 0.02144212499842979
+          },
+          "results": {
+            "uncompressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2303.6566518293225,
+                166.09079530348998,
+                1442.5188125803352
+              ],
+              "objective": 32953.084762338694,
+              "pixel_projected_gradient_inf_norm": 2.875529098980067e-13,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 1893.2716184745154,
+                  "upper": 2690.930111754199
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 684.3924657779753
+                },
+                {
+                  "status": "ok",
+                  "lower": 1008.767690637191,
+                  "upper": 1840.7216735332845
+                },
+                {
+                  "status": "ok",
+                  "lower": 3482.9779958006743,
+                  "upper": 4341.55452362547
+                }
+              ],
+              "optimization_observations": 59994
+            },
+            "compressed": {
+              "converged": true,
+              "rank": 3,
+              "boundary_components": [],
+              "intensities": [
+                2303.656651829288,
+                166.09079530348234,
+                1442.5188125803468
+              ],
+              "objective": 32953.08476233868,
+              "pixel_projected_gradient_inf_norm": 5.909975991065746e-14,
+              "intervals": [
+                {
+                  "status": "ok",
+                  "lower": 1893.2716184745225,
+                  "upper": 2690.93011175421
+                },
+                {
+                  "status": "ok",
+                  "lower": 0.0,
+                  "upper": 684.3924657779775
+                },
+                {
+                  "status": "ok",
+                  "lower": 1008.7676906371895,
+                  "upper": 1840.7216735332831
+                },
+                {
+                  "status": "ok",
+                  "lower": 3482.9779958006825,
+                  "upper": 4341.55452362548
+                }
+              ],
+              "optimization_observations": 4
+            }
+          },
+          "comparison": {
+            "max_endpoint_absolute_difference": 1.0913936421275139e-11,
+            "max_intensity_absolute_difference": 3.456079866737127e-11,
+            "objective_absolute_difference": 1.4551915228366852e-11
+          }
+        }
+      ]
+    }
+  ]
+}

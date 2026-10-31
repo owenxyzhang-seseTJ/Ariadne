@@ -1,0 +1,14 @@
+.....................................................ss......... [ 69%]
+............................        [100%]
+=============================== warnings summary ===============================
+tests_rebuild/test_matched_threshold_extension.py::test_extension_matches_raw_adu_and_preserves_corrected_input[False]
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+tests_rebuild/test_matched_threshold_extension.py::test_extension_matches_raw_adu_and_preserves_corrected_input[False]
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+tests_rebuild/test_matched_threshold_extension.py::test_extension_matches_raw_adu_and_preserves_corrected_input[False]
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+90 passed, 2 skipped, 3 warnings, 45 subtests passed in 13.11s

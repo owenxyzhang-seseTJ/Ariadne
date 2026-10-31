@@ -1,0 +1,20 @@
+/Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:82: SetuptoolsDeprecationWarning: `project.license` as a TOML table is deprecated
+!!
+
+        ********************************************************************************
+        Please use a simple string containing a SPDX expression for `project.license`. You can also use `project.license-files`. (Both options available on setuptools>=77.0.0).
+
+        By 2027-Feb-18, you need to update your project and remove deprecated calls
+        or your builds will no longer be supported.
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  corresp(dist, value, root_dir)
+running build_ext
+building 'ariadne._native' extension
+clang++ -fno-strict-overflow -Wsign-compare -Wunreachable-code -DNDEBUG -O2 -Wall -fPIC -O2 -isystem /Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/include -fdebug-prefix-map=/Users/runner/miniforge3/conda-bld/python-split_1791909693091/work=/usr/local/src/conda/python-split-3.12.15 -arch arm64 -fPIC -O2 -isystem /Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/include -fdebug-prefix-map=/Users/runner/miniforge3/conda-bld/python-split_1791909693091/work=/usr/local/src/conda/python-split-3.12.15 -arch arm64 -I/Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/lib/python3.12/site-packages/numpy/_core/include -I/Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/include/python3.12 -c src/ariadne/_native.cpp -o build/temp.macosx-11.0-arm64-cpython-312/src/ariadne/_native.o -O3 -std=c++17
+clang++ -fno-strict-overflow -Wsign-compare -Wunreachable-code -DNDEBUG -O2 -Wall -fPIC -O2 -isystem /Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/include -fdebug-prefix-map=/Users/runner/miniforge3/conda-bld/python-split_1791909693091/work=/usr/local/src/conda/python-split-3.12.15 -arch arm64 -fPIC -O2 -isystem /Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/include -fdebug-prefix-map=/Users/runner/miniforge3/conda-bld/python-split_1791909693091/work=/usr/local/src/conda/python-split-3.12.15 -arch arm64 -bundle -undefined dynamic_lookup -Wl,-rpath,/Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/lib -L/Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/lib -Wl,-rpath,/Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/lib -L/Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/lib build/temp.macosx-11.0-arm64-cpython-312/src/ariadne/_native.o -o build/lib.macosx-11.0-arm64-cpython-312/ariadne/_native.cpython-312-darwin.so
+ld: warning: duplicate -rpath '/Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/lib' ignored
+copying build/lib.macosx-11.0-arm64-cpython-312/ariadne/_native.cpython-312-darwin.so -> src/ariadne

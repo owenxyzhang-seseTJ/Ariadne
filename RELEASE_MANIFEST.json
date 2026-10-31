@@ -1,7 +1,7 @@
 {
   "schema": "ariadne-release-manifest/2",
   "build": "0.7.0-dials-deep-accuracy-20261031",
-  "generated_utc": "2026-10-31T07:23:02.061159+00:00",
+  "generated_utc": "2026-10-31T11:22:03.063227+00:00",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -65,11 +65,11 @@
     },
     {
       "path": "README.md",
-      "bytes": 6587
+      "bytes": 7084
     },
     {
       "path": "README.zh-CN.md",
-      "bytes": 3377
+      "bytes": 4092
     },
     {
       "path": "ROUND2_OPTIMIZATION.md",
@@ -508,6 +508,10 @@
       "bytes": 3812
     },
     {
+      "path": "benchmarks/gaussian_profile_compression.py",
+      "bytes": 7500
+    },
+    {
       "path": "benchmarks/geometry_round2.py",
       "bytes": 8066
     },
@@ -522,6 +526,22 @@
     {
       "path": "benchmarks/likelihood_round2.py",
       "bytes": 9552
+    },
+    {
+      "path": "benchmarks/matched_spots.py",
+      "bytes": 11092
+    },
+    {
+      "path": "benchmarks/matched_spots_fixtures.py",
+      "bytes": 7378
+    },
+    {
+      "path": "benchmarks/matched_spots_parity.py",
+      "bytes": 3776
+    },
+    {
+      "path": "benchmarks/matched_spots_timing.py",
+      "bytes": 4583
     },
     {
       "path": "benchmarks/native_prediction.py",
@@ -561,19 +581,19 @@
     },
     {
       "path": "dist/ariadne-0.7.0-cp312-cp312-macosx_11_0_arm64.whl",
-      "bytes": 102692
+      "bytes": 163563
     },
     {
       "path": "dist/ariadne-0.7.0-py3-none-any.whl",
-      "bytes": 77889
+      "bytes": 100532
     },
     {
       "path": "dist/ariadne-0.7.0.tar.gz",
-      "bytes": 66467
+      "bytes": 89020
     },
     {
       "path": "docs/R2_README.md",
-      "bytes": 25385
+      "bytes": 26931
     },
     {
       "path": "docs/R2_README.zh-CN.md",
@@ -657,7 +677,7 @@
     },
     {
       "path": "patches/dials-3.30.1-ariadne.patch",
-      "bytes": 9558
+      "bytes": 13135
     },
     {
       "path": "python/MANIFEST.in",
@@ -677,7 +697,7 @@
     },
     {
       "path": "python/src/ariadne/_native.cpp",
-      "bytes": 25135
+      "bytes": 61756
     },
     {
       "path": "python/src/ariadne/agent/__init__.py",
@@ -693,7 +713,7 @@
     },
     {
       "path": "python/src/ariadne/agent/backends.py",
-      "bytes": 14085
+      "bytes": 17150
     },
     {
       "path": "python/src/ariadne/agent/bundles.py",
@@ -773,11 +793,15 @@
     },
     {
       "path": "python/src/ariadne/server.py",
-      "bytes": 30377
+      "bytes": 30461
     },
     {
       "path": "python/src/ariadne/spots.py",
-      "bytes": 6134
+      "bytes": 32854
+    },
+    {
+      "path": "python/src/ariadne/threshold_adapter.py",
+      "bytes": 2802
     },
     {
       "path": "python/src/ariadne/worker.py",
@@ -816,6 +840,10 @@
       "bytes": 5902
     },
     {
+      "path": "reports/current_validation/MATCHED_OPTIMIZATION.zh-CN.md",
+      "bytes": 13997
+    },
+    {
       "path": "reports/current_validation/README.zh-CN.md",
       "bytes": 7367
     },
@@ -832,12 +860,416 @@
       "bytes": 35012
     },
     {
+      "path": "reports/current_validation/gaussian_profile_compression.json",
+      "bytes": 76366
+    },
+    {
       "path": "reports/current_validation/gpu_spots.json",
       "bytes": 3816
     },
     {
+      "path": "reports/current_validation/matched_native_build_output.txt",
+      "bytes": 2870
+    },
+    {
+      "path": "reports/current_validation/matched_parity.json",
+      "bytes": 9263
+    },
+    {
+      "path": "reports/current_validation/matched_real_absolute.json",
+      "bytes": 19452
+    },
+    {
+      "path": "reports/current_validation/matched_real_dxtbx.json",
+      "bytes": 19535
+    },
+    {
+      "path": "reports/current_validation/matched_regression_output.txt",
+      "bytes": 1023
+    },
+    {
+      "path": "reports/current_validation/matched_test.json",
+      "bytes": 20208
+    },
+    {
+      "path": "reports/current_validation/matched_timing.json",
+      "bytes": 11277
+    },
+    {
+      "path": "reports/current_validation/matched_timing_before_fusion.json",
+      "bytes": 7284
+    },
+    {
+      "path": "reports/current_validation/matched_timing_final.json",
+      "bytes": 7580
+    },
+    {
+      "path": "reports/current_validation/matched_validation.json",
+      "bytes": 20384
+    },
+    {
       "path": "reports/current_validation/native_prediction.json",
       "bytes": 804
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/attempts/find_spots/001/process.command.json",
+      "bytes": 715
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/attempts/find_spots/001/process.process.json",
+      "bytes": 113
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/attempts/find_spots/001/process.stderr.log",
+      "bytes": 70
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/attempts/find_spots/001/process.stdout.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/attempts/import/001/dials.import.log",
+      "bytes": 686
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/attempts/import/001/imported.expt",
+      "bytes": 5784
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/attempts/import/001/process.command.json",
+      "bytes": 5154
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/attempts/import/001/process.process.json",
+      "bytes": 113
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/attempts/import/001/process.stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/attempts/import/001/process.stdout.log",
+      "bytes": 795
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/executables.json",
+      "bytes": 89
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run/reduction_path.json",
+      "bytes": 1223
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/export_existing/001/compound.hkl",
+      "bytes": 249835
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/export_existing/001/compound.ins",
+      "bytes": 232
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/export_existing/001/dials.export.log",
+      "bytes": 1328
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/export_existing/001/process.command.json",
+      "bytes": 864
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/export_existing/001/process.process.json",
+      "bytes": 112
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/export_existing/001/process.stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/export_existing/001/process.stdout.log",
+      "bytes": 1328
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/find_spots/001/dials.find_spots.log",
+      "bytes": 2817
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/find_spots/001/process.command.json",
+      "bytes": 715
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/find_spots/001/process.process.json",
+      "bytes": 113
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/find_spots/001/process.stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/find_spots/001/process.stdout.log",
+      "bytes": 2817
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/find_spots/001/strong.refl",
+      "bytes": 1103110
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/import/001/dials.import.log",
+      "bytes": 687
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/import/001/imported.expt",
+      "bytes": 5785
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/import/001/process.command.json",
+      "bytes": 5185
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/import/001/process.process.json",
+      "bytes": 112
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/import/001/process.stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/import/001/process.stdout.log",
+      "bytes": 796
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/dials.index.log",
+      "bytes": 34281
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/indexed.expt",
+      "bytes": 9047
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/indexed.refl",
+      "bytes": 1166019
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/inspection.command.json",
+      "bytes": 797
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/inspection.process.json",
+      "bytes": 120
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/inspection.stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/inspection.stdout.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/native_inspection.json",
+      "bytes": 134
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/process.command.json",
+      "bytes": 800
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/process.process.json",
+      "bytes": 113
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/process.stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/index/001/process.stdout.log",
+      "bytes": 34281
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/dials.integrate.log",
+      "bytes": 23308
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/dials.integrate.phil",
+      "bytes": 320
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/inspection.command.json",
+      "bytes": 813
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/inspection.process.json",
+      "bytes": 120
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/inspection.stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/inspection.stdout.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/integrated.expt",
+      "bytes": 19373
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/integrated.refl",
+      "bytes": 392039
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/native_inspection.json",
+      "bytes": 120
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/process.command.json",
+      "bytes": 806
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/process.process.json",
+      "bytes": 113
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/process.stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/integrate/001/process.stdout.log",
+      "bytes": 23302
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/dials.refine.log",
+      "bytes": 7819
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/inspection.command.json",
+      "bytes": 800
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/inspection.process.json",
+      "bytes": 120
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/inspection.stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/inspection.stdout.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/native_inspection.json",
+      "bytes": 134
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/process.command.json",
+      "bytes": 795
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/process.process.json",
+      "bytes": 113
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/process.stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/process.stdout.log",
+      "bytes": 7819
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/refined.expt",
+      "bytes": 19156
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/refine/001/refined.refl",
+      "bytes": 1166019
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/job.hkl",
+      "bytes": 249835
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/job.ins",
+      "bytes": 232
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/job.lxt",
+      "bytes": 8094
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/job_a.hkl",
+      "bytes": 249904
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/job_a.res",
+      "bytes": 2160
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/job_b.hkl",
+      "bytes": 249904
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/job_b.res",
+      "bytes": 4070
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/job_c.hkl",
+      "bytes": 249904
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/job_c.res",
+      "bytes": 3956
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/process.command.json",
+      "bytes": 218
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/process.process.json",
+      "bytes": 114
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/process.stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/attempts/solve_existing/001/process.stdout.log",
+      "bytes": 3261
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/executables.json",
+      "bytes": 89
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/existing_integrated/single_crystal.expt",
+      "bytes": 111302
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/existing_integrated/single_crystal.refl",
+      "bytes": 3292135
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/reduction_path.json",
+      "bytes": 8723
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/reusable/import_imported.expt",
+      "bytes": 2785
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/reusable/index_indexed.expt",
+      "bytes": 5135
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/reusable/integrate_integrated.expt",
+      "bytes": 11522
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/reusable/provenance.json",
+      "bytes": 1266
+    },
+    {
+      "path": "reports/current_validation/reduction_path_run2/reusable/refine_refined.expt",
+      "bytes": 11363
     },
     {
       "path": "reports/current_validation/summary.json",
@@ -1109,11 +1541,15 @@
     },
     {
       "path": "skills/ariadne-reduction/scripts/constrained_pixels.py",
-      "bytes": 32925
+      "bytes": 34023
     },
     {
       "path": "skills/ariadne-reduction/scripts/correct_overlap_groups.py",
       "bytes": 9959
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/dials_runtime.py",
+      "bytes": 4680
     },
     {
       "path": "skills/ariadne-reduction/scripts/dials_tools.py",
@@ -1232,6 +1668,10 @@
       "bytes": 4491
     },
     {
+      "path": "tests/test_gaussian_profile_compression.py",
+      "bytes": 7535
+    },
+    {
       "path": "tests/test_geometry_round2.py",
       "bytes": 10189
     },
@@ -1332,6 +1772,14 @@
       "bytes": 2835
     },
     {
+      "path": "tests_rebuild/test_matched_spots.py",
+      "bytes": 8290
+    },
+    {
+      "path": "tests_rebuild/test_matched_threshold_extension.py",
+      "bytes": 2459
+    },
+    {
       "path": "tests_rebuild/test_native_boundaries.py",
       "bytes": 2726
     },
@@ -1348,12 +1796,20 @@
       "bytes": 5285
     },
     {
+      "path": "tests_rebuild/test_reduction_adapters.py",
+      "bytes": 8445
+    },
+    {
       "path": "tests_rebuild/test_review_regressions.py",
       "bytes": 9503
     },
     {
       "path": "tests_rebuild/test_spot_accuracy.py",
       "bytes": 3465
+    },
+    {
+      "path": "tests_rebuild/validate_reduction_path.py",
+      "bytes": 11909
     },
     {
       "path": "verification/round2_patch_verification.json",

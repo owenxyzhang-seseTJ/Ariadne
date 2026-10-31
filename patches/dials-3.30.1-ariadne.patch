@@ -174,29 +174,66 @@
 +            solutions.extend(accepted)
 --- /dev/null
 +++ b/src/dials/extensions/ariadne_spotfinder_threshold_ext.py
-@@ -0,0 +1,58 @@
-+"""Ariadne modification: calibrated multiscale candidate proposals."""
+@@ -0,0 +1,127 @@
++"""Ariadne modification: matched-filter spot proposals (default) or the earlier
++calibrated multiscale excess statistic."""
 +from __future__ import annotations
 +
 +from scitbx.array_family import flex
 +
-+from ariadne.spots import propose
++from ariadne.spots import propose, propose_matched, radial_bins
++from ariadne.threshold_adapter import corrected_to_adu
 +
 +
 +class AriadneThresholdExt:
-+    """Experimental count-excess proposals; downstream indexing verifies Bragg evidence."""
++    """Ariadne spot proposals; downstream indexing verifies Bragg evidence."""
 +    name = "ariadne"
 +
 +    @staticmethod
 +    def phil():
 +        from libtbx.phil import parse
 +        return parse("""
++algorithm = *matched multiscale
++    .type = choice
++    .help = "matched: radial (2-theta) x tile background, calibrated matched filters, watershed"
++            "and zinger test. multiscale: annulus background and box-sum excess statistic."
 +gain_adu_per_photon = None
 +    .type = float(value_min=0.000001)
++    .help = "ADU per photon; None takes the detector panel gain"
 +offset_adu = 0
 +    .type = float
 +readout_variance_adu = 0
 +    .type = float(value_min=0)
++matched {
++  calibrate = True
++      .type = bool
++      .help = "Estimate effective gain, pedestal and pixel correlations from each frame"
++  false_alarms = 0.02
++      .type = float(value_min=0.000001)
++      .help = "Target expected Gaussian-field noise peaks per panel; requires validation"
++  peak_threshold = None
++      .type = float(value_min=0.1)
++      .help = "Optional z threshold overriding the noise-peak target"
++  local_cells = 4
++      .type = int(value_min=0)
++      .help = "Radius in 2x2 pixel blocks for the local background factor; 0 disables"
++  region_threshold = 3
++      .type = float
++  contrast = 3
++      .type = float(value_min=0)
++  tile = 32
++      .type = int(value_min=4)
++  background_rounds = 2
++      .type = int(value_min=1, value_max=10)
++  radial_background = True
++      .type = bool
++      .help = "Profile the background over 2-theta bins about one pixel wide"
++  zinger_sigma = 4
++      .type = float(value_min=0)
++      .help = "Reject spots whose flux sits in <= 2 adjacent pixels; 0 disables"
++  component_min_size = 1
++      .type = int(value_min=1)
++}
 +noise_model = *poisson poisson_gaussian
 +    .type = choice
 +statistic = *standardized deviance
@@ -221,15 +258,47 @@
 +
 +    def __init__(self, params):
 +        self.params = params.spotfinder.threshold.ariadne
++        self._bins = {}
 +
-+    def compute_threshold(self, image, mask, **kwargs):
++    def _radial_bins(self, imageset, i_panel, mask, region_of_interest):
++        panel = imageset.get_detector()[i_panel]
++        key = (i_panel, region_of_interest, panel.get_image_size(),
++               tuple(panel.get_origin()), tuple(imageset.get_beam().get_unit_s0()))
++        if key not in self._bins:
++            two_theta = panel.get_two_theta_array(imageset.get_beam().get_unit_s0()).as_numpy_array()
++            two_theta = two_theta.reshape(panel.get_image_size()[::-1])
++            if region_of_interest:
++                x0, x1, y0, y1 = region_of_interest
++                two_theta = two_theta[y0:y1, x0:x1]
++            self._bins = {key: radial_bins(two_theta, mask)}
++        return self._bins[key]
++
++    def compute_threshold(self, image, mask, *, imageset=None, i_panel=0, region_of_interest=None,
++                          **kwargs):
 +        p = self.params
-+        selected = propose(image.as_numpy_array(), mask.as_numpy_array(),
-+                           gain=p.gain_adu_per_photon, offset=p.offset_adu,
-+                           readout_variance=p.readout_variance_adu, noise_model=p.noise_model,
-+                           background_width=p.background_width, exclusion_width=p.exclusion_width,
-+                           scales=p.scales, score_threshold=p.score_threshold,
-+                           support_sigma=p.support_sigma, min_valid_fraction=p.min_valid_fraction,
-+                           background_iterations=p.background_iterations,
-+                           statistic=p.statistic, component_min_size=p.component_min_size)
++        data, detector_gain = corrected_to_adu(image.as_numpy_array(), imageset,
++                                               i_panel, region_of_interest)
++        gain = p.gain_adu_per_photon if p.gain_adu_per_photon is not None else detector_gain
++        valid = mask.as_numpy_array()
++        if p.algorithm == "matched":
++            m = p.matched
++            bins = None
++            if m.radial_background and imageset is not None:
++                bins = self._radial_bins(imageset, i_panel, valid, region_of_interest)
++            selected = propose_matched(data, valid, gain=gain, offset=p.offset_adu,
++                                       readout_variance=p.readout_variance_adu, bins=bins,
++                                       tile=m.tile, background_rounds=m.background_rounds,
++                                       calibrate=m.calibrate, false_alarms=m.false_alarms,
++                                       local_cells=m.local_cells, peak_threshold=m.peak_threshold,
++                                       region_threshold=m.region_threshold, contrast=m.contrast,
++                                       zinger_sigma=m.zinger_sigma,
++                                       component_min_size=m.component_min_size)
++        else:
++            selected = propose(data, valid, gain=gain, offset=p.offset_adu,
++                               readout_variance=p.readout_variance_adu, noise_model=p.noise_model,
++                               background_width=p.background_width, exclusion_width=p.exclusion_width,
++                               scales=p.scales, score_threshold=p.score_threshold,
++                               support_sigma=p.support_sigma, min_valid_fraction=p.min_valid_fraction,
++                               background_iterations=p.background_iterations,
++                               statistic=p.statistic, component_min_size=p.component_min_size)
 +        return flex.bool(selected)

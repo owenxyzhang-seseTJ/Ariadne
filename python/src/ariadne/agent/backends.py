@@ -24,7 +24,19 @@ DIALS_OUTPUTS = {
 DIALS_OPTIONS = {
     'import': {},
     'find_spots': {'spotfinder.threshold.algorithm': ('dispersion', 'dispersion_extended', 'radial_profile', 'ariadne'),
-                   'spotfinder.threshold.ariadne.gain_adu_per_photon': float,
+                   'spotfinder.threshold.ariadne.algorithm': ('matched', 'multiscale'),
+                   'spotfinder.threshold.ariadne.matched.calibrate': bool,
+                   'spotfinder.threshold.ariadne.matched.false_alarms': float,
+                   'spotfinder.threshold.ariadne.matched.peak_threshold': 'optional_positive',
+                   'spotfinder.threshold.ariadne.matched.local_cells': 'nonnegative_integer',
+                   'spotfinder.threshold.ariadne.matched.region_threshold': 'finite',
+                   'spotfinder.threshold.ariadne.matched.contrast': 'nonnegative',
+                   'spotfinder.threshold.ariadne.matched.tile': int,
+                   'spotfinder.threshold.ariadne.matched.background_rounds': int,
+                   'spotfinder.threshold.ariadne.matched.radial_background': bool,
+                   'spotfinder.threshold.ariadne.matched.zinger_sigma': 'nonnegative',
+                   'spotfinder.threshold.ariadne.matched.component_min_size': int,
+                   'spotfinder.threshold.ariadne.gain_adu_per_photon': 'optional_positive',
                    'spotfinder.threshold.ariadne.offset_adu': 'finite',
                    'spotfinder.threshold.ariadne.readout_variance_adu': 'nonnegative',
                    'spotfinder.threshold.ariadne.noise_model': ('poisson', 'poisson_gaussian'),
@@ -75,7 +87,13 @@ def typed_options(options: dict, schema: dict) -> dict:
         elif rule is int:
             if isinstance(value, bool) or not isinstance(value, int) or not 0 < value <= 10_000_000:
                 raise ValueError('require bounded positive integer: '+key)
-        elif rule is float:
+        elif rule == 'nonnegative_integer':
+            if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 10_000_000:
+                raise ValueError('require bounded nonnegative integer: '+key)
+        elif rule is float or rule == 'optional_positive':
+            if value is None and rule == 'optional_positive':
+                result[key] = value
+                continue
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 < value < float('inf'):
                 raise ValueError('require positive finite number: '+key)
         elif rule in {'finite', 'nonnegative'}:
@@ -97,6 +115,21 @@ def invoke(ctx, argv, label='process'):
                        lambda: ctx.store.get('cancel_requested', False), pid, label)
 
 
+def dials_command(operation, paths, executables):
+    """One process-local raw reader for the agent and expert MCP entrypoints."""
+    py = executable('scientific_python', {'scientific_python': executables.get('scientific_python', sys.executable)})
+    runner = plugin_root()/'skills/ariadne-reduction/scripts/dials_runtime.py'
+    return [py, str(runner), executable('dials.'+operation, executables), *map(str, paths)]
+
+
+def spotfinding_options(options):
+    options = typed_options(options, DIALS_OPTIONS['find_spots'])
+    options.setdefault('spotfinder.threshold.algorithm', 'ariadne')
+    if options['spotfinder.threshold.algorithm'] == 'ariadne':
+        options.setdefault('spotfinder.threshold.ariadne.algorithm', 'matched')
+    return options
+
+
 def run_dials(ctx, args: dict) -> dict:
     operation = args['operation']
     if operation not in DIALS_OUTPUTS:
@@ -112,7 +145,12 @@ def run_dials(ctx, args: dict) -> dict:
         raise ValueError('wrong number of inputs for '+operation)
     paths = [artifact_path(ctx.root, value) for value in inputs]
     options = typed_options(args.get('options', {}), DIALS_OPTIONS[operation])
-    argv = [executable('dials.'+operation, ctx.executables), *map(str, paths)]
+    if operation == 'find_spots':
+        options = spotfinding_options(options)
+    # Every DIALS process must use the same raw decoder, especially integrate.
+    # Run the installed dispatcher in its scientific Python without changing
+    # site-packages or detector gain to match a threshold-derived noise fit.
+    argv = dials_command(operation, paths, ctx.executables)
     outputs = DIALS_OUTPUTS[operation]
     if operation == 'export':
         if 'shelx.composition' not in options:
@@ -135,6 +173,14 @@ def run_dials(ctx, args: dict) -> dict:
         if ctx.request['mode'] == 'reduce' and result['inspection']['n_crystals'] != 1:
             atomic_json(ctx.directory/'needs_review.json', result)
             raise NeedsReview('automatic single-crystal route cannot continue: use the joint overlap workflow')
+    result['raw_data_adapter'] = {
+        'bruker100': 'signed absolute ADU; baseline only on non-underflow pixels',
+        'scope': 'process-local; same decoder for import, find_spots and integrate',
+        'pixel_unit': 'raw ADU; DIALS corrected data retain (raw-pedestal)/gain',
+        'threshold_calibration': 'selection only; does not modify detector gain or integrated intensities',
+    }
+    if operation == 'find_spots':
+        result['threshold_options'] = options
     result['scientific_acceptance'] = 'not_established'
     return result
 
@@ -161,7 +207,11 @@ def run_analysis(ctx, args: dict) -> dict:
     options = typed_options(args.get('options', {}), option_schema)
     target = ctx.directory/output
     py = executable('scientific_python', {'scientific_python': ctx.executables.get('scientific_python', sys.executable)})
-    argv = [py, str(plugin_root()/'skills/ariadne-reduction/scripts'/script), *map(str, paths)]
+    scripts = plugin_root()/'skills/ariadne-reduction/scripts'
+    argv = [py]
+    if name in {'learn_profiles', 'build_overlaps'}:
+        argv.append(str(scripts/'dials_runtime.py'))
+    argv += [str(scripts/script), *map(str, paths)]
     argv += ['--output', str(target)] if name == 'overlap_observability' else [str(target)]
     for key, value in options.items():
         if isinstance(value, bool):

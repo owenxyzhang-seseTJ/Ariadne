@@ -57,11 +57,19 @@ The source patch is provided in [`patches/dials-3.30.1-ariadne.patch`](patches/d
 |---|---|
 | `algorithms/indexing/lattice_search/__init__.py` | Registers the `ariadne` candidate scorer, its PHIL parameters, and structured candidate-evidence output. |
 | `algorithms/indexing/model_evaluation.py` | Partitions refinement data by scan block, fixes the common instrument geometry, evaluates the refined crystal on held-out observations, and attaches evidence to the candidate result. |
-| `extensions/ariadne_spotfinder_threshold_ext.py` | Implements the DIALS threshold interface and delegates calibrated multi-scale pixel proposals to `ariadne.spots`. |
+| `extensions/ariadne_spotfinder_threshold_ext.py` | Implements the DIALS threshold interface; defaults to self-calibrated matched-filter proposals and retains the multiscale detector. |
 
-The indexing evaluator and lattice-selection path are Python-source modifications. The threshold module is a registered extension. Local profile learning, nonexclusive matching, and joint pixel integration are separate adapters, not replacements for the DIALS C++ kernels. Upstream default algorithm selection remains available; the Ariadne threshold and scorer are selected explicitly.
+The indexing evaluator and lattice-selection path are Python-source modifications. The threshold module is a registered extension. Local profile learning, nonexclusive matching, and joint pixel integration are separate adapters, not replacements for the DIALS C++ kernels. The agent now selects the Ariadne matched threshold by default; upstream algorithms and the Ariadne indexing scorer remain explicit choices.
 
-### 2.1 Calibrated multi-scale spot proposals
+### 2.1 Self-calibrated matched-filter proposals
+
+The current Ariadne threshold defaults to `algorithm=matched`. It estimates a radial profile times a spatial background, calibrates effective gain/pedestal/readout variance, and propagates twelve sampled pixel correlations into two binomial matched filters. Local background corrections remain nonnegative. Gaussian-field peak thresholds are design targets requiring detector-specific validation. Background, calibration and scores use double precision; macOS can use up to four work units without reducing samples or iterations. The [current report](../reports/current_validation/MATCHED_OPTIMIZATION.zh-CN.md) contains equations, held-out comparisons, real-frame reference limitations, timing and reproduction commands. Detection is still slower than DIALS in the recorded comparison.
+
+DIALS supplies corrected pixels to the threshold callback. A temporary inverse of its gain/pedestal correction restores raw ADU for the Ariadne noise model; downstream centroid and integration pixels retain DIALS units. Production adapters use `dials_runtime.py` for consistent signed absolute Bruker100 underflows during import, detection and integration. Explicit expert commands must use that same runner for each image-reading stage.
+
+### 2.2 Retained multiscale proposals
+
+The earlier count-excess detector remains available as `algorithm=multiscale`; its earlier benchmark is retained below.
 
 For an ADU pixel value $Y_j$, a calibrated offset $b_0$, and gain $g$ in ADU per photon, the detection coordinate is
 
@@ -98,7 +106,7 @@ The C++ kernel uses summed-area statistics, can run without the Python GIL, and 
 
 Implementation: [`python/src/ariadne/spots.py`](python/src/ariadne/spots.py).
 
-### 2.2 Scan-block refinement holdout
+### 2.3 Scan-block refinement holdout
 
 The candidate evaluator groups observations by the original `imageset_id` and
 
@@ -112,7 +120,7 @@ The beam, detector, and goniometer are fixed during candidate refinement so that
 
 This is a **conditional refinement holdout**: candidate generation, initial HKL assignment, and non-primitive-cell handling may already have used the observations. It does not constitute independent end-to-end cross-validation. Scan-block partitioning also does not prove that adjacent blocks are statistically independent.
 
-### 2.3 Periodic lattice-density scoring
+### 2.4 Periodic lattice-density scoring
 
 Use the crystallographic reciprocal-space convention without a $2\pi$ factor. For a candidate $A=UB$,
 
@@ -144,7 +152,7 @@ The Gaussian scale $\sigma_q$ and mixture weight $\eta$ are explicit configured 
 
 Candidates must also satisfy held-out support and three-dimensional centered HKL-rank criteria. Insufficient training support, invalid partitions, or insufficient periodic-sum budgets do not receive an accepted candidate score.
 
-### 2.4 Adaptive periodic neighborhoods and memory control
+### 2.5 Adaptive periodic neighborhoods and memory control
 
 The infinite sum is approximated around $\operatorname{round}(A^{-1}\mathbf q)$. The fractional-coordinate noise scale and search radius are
 
@@ -313,11 +321,12 @@ The installer accepts a base-environment prefix and a fresh runtime directory as
 Explicit source-extension selection, in an isolated calculation directory with the actual input artifacts:
 
 ```bash
-# CALIBRATED_GAIN must come from detector calibration.
-ariadne-env dials.find_spots imported.expt \
+# ARIADNE_PLUGIN_ROOT points to this complete checkout.
+# Use the same runner for import and integrate when reading Bruker100 frames.
+ariadne-env dials.python "$ARIADNE_PLUGIN_ROOT/skills/ariadne-reduction/scripts/dials_runtime.py" \
+  "$(command -v dials.find_spots)" imported.expt \
   spotfinder.threshold.algorithm=ariadne \
-  spotfinder.threshold.ariadne.noise_model=poisson \
-  spotfinder.threshold.ariadne.gain_adu_per_photon="$CALIBRATED_GAIN"
+  spotfinder.threshold.ariadne.algorithm=matched
 
 ariadne-env dials.index imported.expt strong.refl \
   indexing.basis_vector_combinations.solution_scorer=ariadne \

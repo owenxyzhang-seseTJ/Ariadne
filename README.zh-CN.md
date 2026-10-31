@@ -24,11 +24,13 @@ python examples/agent/create_demo.py /absolute/path/to/NEW-DEMO
 
 默认采用确定性计划器，也可接入支持结构化 JSON 的语言模型服务。模型只选择注册动作，不编造结果或直接执行 shell。13 类动作和六种工作模式由命令行查询；原 MCP 接口保留，新增八个会话工具。
 
+当前源码增加自校准 matched-filter 检测和 Gaussian NNLS 轮廓压缩。检测保留双精度计算、全部采样和校准轮数，合并遍历并在 macOS 上使用最多四个工作单元；`ARIADNE_MATCHED_THREADS=1..4` 可控制资源。旧 multiscale 检测器仍可选择。`dist/` 的现有 wheel 尚未包含这些源码改动。
+
 ## 已验证到哪里
 
 推送前完整回归为 **323 项通过、11 项跳过、0 项失败或错误**，另有 136 个子测试通过。Gemmi 原生计算与 MCP 工具注册已实际执行；构建后的 wheel 已脱离源码目录安装并完成三节点 CIF 审查。当前记录见 [验证结果](reports/github_review_validation.json)。
 
-跳过项依赖 DIALS/dxtbx 或 cctbx。SHELXT/SHELXL 和模型接口使用明确标识的协议测试程序，真实原始帧的端到端解析准确率尚未验证。技术报告中的旧测试数量对应初次重建，当前结果以本轮审查记录为准。
+上述历史回归的跳过项依赖 DIALS/dxtbx 或 cctbx。当前源码另有[检测与拟合优化报告](reports/current_validation/MATCHED_OPTIMIZATION.zh-CN.md)：两个留出场景的 matched F1 为 0.8181/0.7763，获得真实噪声方差图的 DIALS Extended 为 0.5329/0.6106；召回提高，精确率略低。另保存 40 张真实帧的参考反射对照，检测速度仍未超过 DIALS。报告区分新原始帧链路与既有积分数据的导出验证，尚未证明完整结构解析的准确率与速度。模型接口中的协议测试仍明确标识，旧技术报告与 wheel 不代表本次源码结果。
 
 自动原始帧路线限单晶模型；复杂孪晶通过明确的 custom 联合处理图。结构反馈使用固定 Gaussian 观测模型，当前预测限实数 IT92 X 射线散射，不包含异常散射和溶剂掩膜。模型辅助后验不替代实验数据。
 

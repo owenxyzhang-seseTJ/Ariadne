@@ -1,0 +1,355 @@
+{
+  "cases": [
+    {
+      "name": "grid-200",
+      "shape": [
+        512,
+        512
+      ],
+      "results": [
+        {
+          "threads": 1,
+          "pixel_differences": 0,
+          "pixels": 1818,
+          "max_absolute_errors": {
+            "gain": 1.5543122344752192e-15,
+            "offset": 1.2559397966072083e-15,
+            "readout_variance": 0.0,
+            "kappa": 1.5543122344752192e-15,
+            "kappa_inf": 1.1102230246251565e-15,
+            "thresholds": 1.7763568394002505e-15
+          }
+        },
+        {
+          "threads": 4,
+          "pixel_differences": 0,
+          "pixels": 1818,
+          "max_absolute_errors": {
+            "gain": 1.5543122344752192e-15,
+            "offset": 1.2559397966072083e-15,
+            "readout_variance": 0.0,
+            "kappa": 1.5543122344752192e-15,
+            "kappa_inf": 1.1102230246251565e-15,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      ]
+    },
+    {
+      "name": "grid-301",
+      "shape": [
+        512,
+        512
+      ],
+      "results": [
+        {
+          "threads": 1,
+          "pixel_differences": 0,
+          "pixels": 1519,
+          "max_absolute_errors": {
+            "gain": 1.9984014443252818e-15,
+            "offset": 0.0,
+            "readout_variance": 8.881784197001252e-16,
+            "kappa": 0.0,
+            "kappa_inf": 1.1102230246251565e-16,
+            "thresholds": 0.0
+          }
+        },
+        {
+          "threads": 4,
+          "pixel_differences": 0,
+          "pixels": 1519,
+          "max_absolute_errors": {
+            "gain": 1.9984014443252818e-15,
+            "offset": 0.0,
+            "readout_variance": 8.881784197001252e-16,
+            "kappa": 0.0,
+            "kappa_inf": 1.1102230246251565e-16,
+            "thresholds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "grid-319",
+      "shape": [
+        512,
+        512
+      ],
+      "results": [
+        {
+          "threads": 1,
+          "pixel_differences": 0,
+          "pixels": 1049,
+          "max_absolute_errors": {
+            "gain": 0.0,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 6.661338147750939e-16,
+            "thresholds": 0.0
+          }
+        },
+        {
+          "threads": 4,
+          "pixel_differences": 0,
+          "pixels": 1049,
+          "max_absolute_errors": {
+            "gain": 0.0,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 6.661338147750939e-16,
+            "thresholds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "detector-200",
+      "shape": [
+        512,
+        512
+      ],
+      "results": [
+        {
+          "threads": 1,
+          "pixel_differences": 0,
+          "pixels": 6329,
+          "max_absolute_errors": {
+            "gain": 1.0729195309977513e-12,
+            "offset": 0.0,
+            "readout_variance": 2.2780000108468812e-11,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 2.220446049250313e-16,
+            "thresholds": 0.0
+          }
+        },
+        {
+          "threads": 4,
+          "pixel_differences": 0,
+          "pixels": 6329,
+          "max_absolute_errors": {
+            "gain": 1.0729195309977513e-12,
+            "offset": 0.0,
+            "readout_variance": 2.2780000108468812e-11,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 2.220446049250313e-16,
+            "thresholds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "detector-301",
+      "shape": [
+        512,
+        512
+      ],
+      "results": [
+        {
+          "threads": 1,
+          "pixel_differences": 0,
+          "pixels": 5173,
+          "max_absolute_errors": {
+            "gain": 0.0,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "kappa": 2.220446049250313e-16,
+            "kappa_inf": 2.220446049250313e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        },
+        {
+          "threads": 4,
+          "pixel_differences": 0,
+          "pixels": 5173,
+          "max_absolute_errors": {
+            "gain": 0.0,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "kappa": 2.220446049250313e-16,
+            "kappa_inf": 2.220446049250313e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      ]
+    },
+    {
+      "name": "detector-319",
+      "shape": [
+        512,
+        512
+      ],
+      "results": [
+        {
+          "threads": 1,
+          "pixel_differences": 0,
+          "pixels": 4625,
+          "max_absolute_errors": {
+            "gain": 0.0,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "kappa": 1.1102230246251565e-15,
+            "kappa_inf": 5.551115123125783e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        },
+        {
+          "threads": 4,
+          "pixel_differences": 0,
+          "pixels": 4625,
+          "max_absolute_errors": {
+            "gain": 0.0,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "kappa": 1.1102230246251565e-15,
+            "kappa_inf": 5.551115123125783e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      ]
+    },
+    {
+      "name": "real-20",
+      "shape": [
+        1024,
+        1536
+      ],
+      "results": [
+        {
+          "threads": 1,
+          "pixel_differences": 0,
+          "pixels": 4517,
+          "max_absolute_errors": {
+            "gain": 7.105427357601002e-15,
+            "offset": 1.4210854715202004e-14,
+            "readout_variance": 0.0,
+            "kappa": 1.199040866595169e-14,
+            "kappa_inf": 1.554312234475219e-14,
+            "thresholds": 0.0
+          }
+        },
+        {
+          "threads": 4,
+          "pixel_differences": 0,
+          "pixels": 4517,
+          "max_absolute_errors": {
+            "gain": 7.105427357601002e-15,
+            "offset": 1.4210854715202004e-14,
+            "readout_variance": 0.0,
+            "kappa": 1.199040866595169e-14,
+            "kappa_inf": 1.554312234475219e-14,
+            "thresholds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "real-21",
+      "shape": [
+        1024,
+        1536
+      ],
+      "results": [
+        {
+          "threads": 1,
+          "pixel_differences": 0,
+          "pixels": 3940,
+          "max_absolute_errors": {
+            "gain": 5.329070518200751e-15,
+            "offset": 3.836930773104541e-13,
+            "readout_variance": 3.904376821850519e-12,
+            "kappa": 7.771561172376096e-15,
+            "kappa_inf": 8.43769498715119e-15,
+            "thresholds": 0.0
+          }
+        },
+        {
+          "threads": 4,
+          "pixel_differences": 0,
+          "pixels": 3940,
+          "max_absolute_errors": {
+            "gain": 5.329070518200751e-15,
+            "offset": 3.836930773104541e-13,
+            "readout_variance": 3.904376821850519e-12,
+            "kappa": 7.771561172376096e-15,
+            "kappa_inf": 8.43769498715119e-15,
+            "thresholds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "real-22",
+      "shape": [
+        1024,
+        1536
+      ],
+      "results": [
+        {
+          "threads": 1,
+          "pixel_differences": 0,
+          "pixels": 3891,
+          "max_absolute_errors": {
+            "gain": 1.4210854715202004e-14,
+            "offset": 2.5579538487363607e-13,
+            "readout_variance": 2.5781599077845385e-12,
+            "kappa": 8.881784197001252e-15,
+            "kappa_inf": 1.2878587085651816e-14,
+            "thresholds": 1.7763568394002505e-15
+          }
+        },
+        {
+          "threads": 4,
+          "pixel_differences": 0,
+          "pixels": 3891,
+          "max_absolute_errors": {
+            "gain": 1.4210854715202004e-14,
+            "offset": 2.5579538487363607e-13,
+            "readout_variance": 2.5781599077845385e-12,
+            "kappa": 8.881784197001252e-15,
+            "kappa_inf": 1.2878587085651816e-14,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      ]
+    },
+    {
+      "name": "real-23",
+      "shape": [
+        1024,
+        1536
+      ],
+      "results": [
+        {
+          "threads": 1,
+          "pixel_differences": 0,
+          "pixels": 4771,
+          "max_absolute_errors": {
+            "gain": 2.3092638912203256e-14,
+            "offset": 1.4210854715202004e-14,
+            "readout_variance": 0.0,
+            "kappa": 8.43769498715119e-15,
+            "kappa_inf": 7.993605777301127e-15,
+            "thresholds": 0.0
+          }
+        },
+        {
+          "threads": 4,
+          "pixel_differences": 0,
+          "pixels": 4771,
+          "max_absolute_errors": {
+            "gain": 2.3092638912203256e-14,
+            "offset": 1.4210854715202004e-14,
+            "readout_variance": 0.0,
+            "kappa": 8.43769498715119e-15,
+            "kappa_inf": 7.993605777301127e-15,
+            "thresholds": 0.0
+          }
+        }
+      ]
+    }
+  ],
+  "policy": "Exact boolean masks; float64 noise-model tolerance rtol=1e-7 atol=1e-9."
+}

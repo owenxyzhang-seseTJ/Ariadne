@@ -24,6 +24,8 @@ from ariadne.contracts import (AcceptanceRecord, ArtifactText, Cancellation, Cap
                                Handoff, Hypothesis, JobInspection, OperationHandle, analysis_contracts, spec_for)
 from ariadne.errors import ToolError
 from ariadne.evidence import append_event, save_hypothesis
+from ariadne.agent.backends import DIALS_OPTIONS, dials_command, spotfinding_options
+from ariadne.agent.process import deployment_executables
 
 mcp = FastMCP("Ariadne")
 WORKERS = {}  # pid -> Popen for workers started by this server; poll() reaps exited children.
@@ -42,16 +44,7 @@ OPERATIONS = {
 OPTIONS = {
     'import': {},
     'predict': {'d_min': float, 'force_static': bool, 'ignore_shadows': bool},
-    'find_spots': {'spotfinder.threshold.algorithm': ('dispersion', 'dispersion_extended', 'radial_profile', 'ariadne'),
-                   'spotfinder.threshold.ariadne.gain_adu_per_photon': float,
-                   'spotfinder.threshold.ariadne.offset_adu': float,
-                   'spotfinder.threshold.ariadne.readout_variance_adu': float,
-                   'spotfinder.threshold.ariadne.noise_model': ('poisson', 'poisson_gaussian'),
-                   'spotfinder.threshold.ariadne.statistic': ('standardized', 'deviance'),
-                   'spotfinder.threshold.ariadne.score_threshold': float,
-                   'spotfinder.threshold.ariadne.support_sigma': float,
-                   'spotfinder.threshold.ariadne.component_min_size': int,
-                   'spotfinder.filter.min_spot_size': int},
+    'find_spots': DIALS_OPTIONS['find_spots'],
     'index': {'indexing.method': ('fft3d', 'fft1d', 'real_space_grid_search'), 'indexing.max_cell': float,
               'indexing.basis_vector_combinations.solution_scorer': ('weighted', 'filter', 'ariadne'),
               'indexing.basis_vector_combinations.max_refine': int,
@@ -353,9 +346,17 @@ joint integration/correction scripts and their separate scientific acceptance.
     suffixes = ['.expt'] if operation in ('find_spots', 'predict') else ['.expt', '.refl']
     if operation != 'import' and [p.suffix.lower() for p in input_paths] != suffixes:
         raise ToolError('E_INPUT', 'Use one EXPT or an ordered EXPT/REFL pair; PHIL files are not operation inputs')
-    argv = ['dials.' + operation, *map(str, input_paths)]
-    options = options or {}
+    try:
+        argv = dials_command(operation, input_paths, deployment_executables())
+        options = spotfinding_options(options or {}) if operation == 'find_spots' else (options or {})
+    except (ValueError, RuntimeError) as exc:
+        raise ToolError('E_INPUT', str(exc)) from exc
     for name, value in options.items():
+        if operation == 'find_spots':
+            # Validated with the shared ADU/matched schema, including None and
+            # legitimate zero controls. Keep the expert route's other options.
+            argv.append(name + '=' + str(value))
+            continue
         expected = OPTIONS[operation].get(name)
         if expected is None:
             raise ToolError('E_INPUT', 'Unsupported typed option: ' + name)
@@ -505,7 +506,11 @@ Options that do not apply to the selected analysis are rejected.
     if suffixes and [p.suffix.lower() for p in paths] != suffixes:
         raise ToolError('E_INPUT', 'Scientific input suffixes do not match the declared input roles')
     tool = root() / 'skills/ariadne-reduction/scripts' / executable
-    argv = [sys.executable, str(tool)]
+    argv = [sys.executable]
+    if analysis in ('learn_profiles', 'build_overlaps'):
+        # Pixel-reading analyses must share the process-local raw decoder.
+        argv.append(str(root() / 'skills/ariadne-reduction/scripts' / 'dials_runtime.py'))
+    argv.append(str(tool))
     if analysis == 'compare_hypotheses':
         argv += [str(paths[0]), 'comparison.json', *map(str, paths[1:])]
     elif analysis == 'joint_refine' and refinement_method == 'em':
