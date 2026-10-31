@@ -40,7 +40,7 @@ def make(root: Path, destination: Path):
     records = []
     for path, name in files:
         records.append({'path': name, 'bytes': path.stat().st_size})
-    manifest = {'schema': 'ariadne-release-manifest/2', 'build': '0.7.0-integrated-native-20261031',
+    manifest = {'schema': 'ariadne-release-manifest/2', 'build': '0.7.0-dials-deep-accuracy-20261031',
                 'generated_utc': datetime.now(timezone.utc).isoformat(), 'files': records}
     manifest_path = root/'RELEASE_MANIFEST.json'
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')

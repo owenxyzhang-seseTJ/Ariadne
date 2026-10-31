@@ -170,9 +170,13 @@ def main():
         settings = dict(gain=1., offset=0., readout_variance=3., noise_model='poisson_gaussian',
                         background_width=31, exclusion_width=7, scales=[1,3,5], score_threshold=6.,
                         support_sigma=1., min_valid_fraction=.5, background_iterations=2)
-        np.testing.assert_array_equal(old_spots.propose(image,mask,**settings),spots.propose(image,mask,**settings))
+        new_settings = {**settings, 'statistic': 'deviance', 'component_min_size': 1}
+        np.testing.assert_array_equal(
+            old_spots.propose(image,mask,**settings),
+            spots.propose(image,mask,**new_settings))
         record('multiscale_spots', lambda:old_spots.propose(image,mask,**settings),
-                               lambda:spots.propose(image,mask,**settings),pixels=image.size,mask_exact=True)
+                               lambda:spots.propose(image,mask,**new_settings),
+               pixels=image.size,mask_exact=True)
         entry = {'covariance_px_xyz':np.diag([1.2,1.4,.9]).ravel().tolist()}
         center, bounds = [48.2,48.3,24.1], (0,96,0,96,0,48)
         old = lambda:old_prepare.template_values(entry,None,center,bounds)

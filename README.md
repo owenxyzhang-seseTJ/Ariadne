@@ -21,7 +21,9 @@ The complete R2 numerical code and DIALS Python-source patch are retained. New c
 
 The agent supports audit, solve, refine, reduce, feedback and explicit custom DAGs. It has 13 registered action types, 8 additional optional MCP session tools, a deterministic policy, and an optional Chat Completions JSON planner. External executable paths come only from the operator-owned JSON file selected by `ARIADNE_EXECUTABLES_CONFIG`; task-level overrides are rejected. Native crystal/feedback actions run in supervised subprocesses with deadlines and cancellation.
 
-Installing from `./python` builds an optional C++17 multiscale proposal kernel. It preserves the reference count-excess model, releases the GIL, fuses summed-area background/scale statistics, and adds a well-conditioned known-background WLS path with full Cholesky covariance. A C++ compiler is required for this acceleration. `ARIADNE_REQUIRE_NATIVE=1` makes a missing compiler/build error fatal; `ARIADNE_DISABLE_NATIVE=1` explicitly builds the portable Python fallback. The portable wheel in `dist/` uses that fallback.
+Installing from `./python` builds an optional C++17 multiscale proposal kernel. Its default standardized excess statistic applies the same scale-normalized decision rule to calibrated Poisson and Poisson-Gaussian data; the earlier deviance statistic remains selectable. The kernel releases the GIL, fuses summed-area background and scale statistics, removes undersized components, and includes fused DIALS-compatible fixed-background IRLS with full Cholesky covariance. A C++ compiler is required for this acceleration. `ARIADNE_REQUIRE_NATIVE=1` makes a missing compiler/build error fatal; `ARIADNE_DISABLE_NATIVE=1` explicitly builds the portable Python fallback. `dist/` contains both a platform-specific native wheel and a portable fallback wheel.
+
+The current held-out synthetic comparison raises final-test spot F1 from 0.793 to 0.852, overall recall from 65.7% to 76.2%, and weak-spot recall from 3.4% to 18.2% at 3.5% false positives. Fused profile fitting matches DIALS intensities to about `1e-10` while running faster in the recorded 1/2/4/8-component fixtures. These are controlled synthetic results, not a claim about the full experimental DIALS pipeline.
 
 Apple MLX/Metal is measured as an optional experimental comparison, not a default backend. On the tested M5, float32 Metal was faster for large spot images but changed a small number of thresholded weak-spot pixels, so the exact C++ decision remains the production path. Current measured comparisons and reproduction commands are in `reports/current_validation/`.
 
@@ -36,7 +38,7 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
   python examples/agent/create_demo.py /absolute/path/to/NEW-DEMO
 ```
 
-To install CLI entry points and the MCP dependency, use `python -m pip install ./python`. The wheel in `dist/` contains the Python package, not third-party runtimes. Keep this source directory for the original analysis scripts and expert packs; set `ARIADNE_PLUGIN_ROOT` when needed. Linux, macOS and WSL are supported by the agent's POSIX execution lock.
+To install CLI entry points and the MCP dependency, use `python -m pip install ./python`. Wheels in `dist/` contain the Python package, not third-party runtimes. Keep this source directory for the original analysis scripts and expert packs; set `ARIADNE_PLUGIN_ROOT` when needed. Linux, macOS and WSL are supported by the agent's POSIX execution lock.
 
 ## Validation scope
 

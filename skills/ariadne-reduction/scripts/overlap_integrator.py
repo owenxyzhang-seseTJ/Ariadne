@@ -181,6 +181,97 @@ def _solve_known_background(y, v, weighted_profiles, profiles, rcond):
     }
 
 
+def solve_irls_known_background(data, background, profiles, valid, rcond,
+                                tolerance=1e-12, max_iterations=100):
+    """Fused fixed-background IRLS using the DIALS-compatible weight policy.
+
+    This is used where a background model is already independently determined.
+    Fitted nuisance backgrounds remain on the QR/SVD route in ``solve_joint``.
+    """
+    data = np.asarray(data, dtype=float)
+    background = np.asarray(background, dtype=float)
+    profiles = np.asarray(profiles, dtype=float)
+    valid = np.asarray(valid, dtype=bool)
+    if (data.ndim != 1 or background.shape != data.shape or valid.shape != data.shape
+            or profiles.ndim != 2 or profiles.shape[0] != len(data)
+            or not np.isfinite(data).all() or not np.isfinite(background).all()
+            or np.any(background < 0) or not np.isfinite(profiles).all()
+            or not np.isfinite(rcond) or not 0 < rcond < 1
+            or not np.isfinite(tolerance) or tolerance <= 0
+            or type(max_iterations) is not int or max_iterations < 1):
+        raise ValueError('Invalid fixed-background IRLS inputs')
+    try:
+        from ariadne._native import known_background_irls
+    except ImportError:
+        known_background_irls = None
+    if known_background_irls is not None:
+        native = known_background_irls(
+            data, background, profiles, valid, rcond, tolerance,
+            max_iterations, 1/len(data))
+        if native is not None:
+            intensities, covariance, singular, upper, modes_y, scales, constant, iterations, pixels = native
+            fitted = profiles @ intensities
+            # The final update uses the variance from the preceding IRLS
+            # iteration, exactly as DIALS ProfileFitter does. The retained
+            # information-mode constant records that same weighted quadratic.
+            chi2 = float(constant)
+            dof = int(pixels) - len(intensities)
+            return {
+                'intensities_internal': intensities,
+                'covariance_identifiable_subspace': covariance,
+                'nullspace': np.empty((0, len(intensities))),
+                'column_scales': scales,
+                'rank': len(intensities),
+                'singular_values': singular,
+                'background_coefficients': np.empty(0),
+                'fitted': fitted,
+                'chi2': chi2,
+                'dof': dof,
+                'reduced_chi2': chi2/dof if dof > 0 else None,
+                'iterations': int(iterations),
+                'information_modes': {
+                    'schema': 'ariadne-information-modes/1',
+                    'y': modes_y.tolist(),
+                    'design': (upper*scales[None, :]).tolist(),
+                    'covariance': np.eye(len(intensities)).tolist(),
+                    'rank': len(intensities),
+                    'variance_model': 'fixed',
+                    'valid_pixels': int(pixels),
+                    'nuisance_rank': 0,
+                    'rank_cutoff': float(singular[0]*rcond),
+                    'discarded_singular_values': [],
+                    'discarded_normalized_operator_norm': 0.,
+                    'pixel_chi2_constant': float(constant),
+                    'likelihood_scope': (
+                        'fixed-weight Gaussian quadratic after eliminating known background; '
+                        'conditional on profiles, geometry and supplied variance'),
+                    'intensity_semantics': (
+                        'design acts on original ordered full-profile contributor amplitudes'),
+                    'interpretation': (
+                        'observable linear combinations, not separately measured component intensities'),
+                    'solver': 'fused native DIALS-compatible IRLS',
+                },
+            }
+    return _solve_irls_python(
+        data, background, profiles, valid, rcond, tolerance, max_iterations)
+
+
+def _solve_irls_python(data, background, profiles, valid, rcond,
+                       tolerance, max_iterations):
+    old = np.ones(profiles.shape[1])
+    for iteration in range(max_iterations):
+        variance = background + profiles @ np.maximum(1/len(data), np.abs(old))
+        result = solve_joint(
+            data-background, variance, profiles, valid, np.empty((len(data), 0)), rcond)
+        current = result['intensities_internal']
+        if np.sum((current-old)**2) < tolerance:
+            result['iterations'] = iteration+1
+            return result
+        old = current
+    result['iterations'] = max_iterations
+    return result
+
+
 def _solve_streamed(data, variance, profiles, valid, background, rcond, chunk_rows):
     factor, pixels = augmented_qr(data, variance, profiles, background, valid, chunk_rows)
     nuisance, components = background.shape[1], profiles.shape[1]

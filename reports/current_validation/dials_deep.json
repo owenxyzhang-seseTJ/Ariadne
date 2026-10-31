@@ -1,0 +1,1131 @@
+{
+  "schema": "ariadne-dials-deep-comparison/1",
+  "date": "2026-10-31",
+  "python": "3.12.15 (main, Oct 13 2026, 16:47:20) [Clang 21.1.8 ]",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "numpy": "2.5.4",
+  "dials": "3.30",
+  "splits": {
+    "selection_train": [
+      100,
+      120
+    ],
+    "validation": [
+      200,
+      220
+    ],
+    "final_test": [
+      300,
+      320
+    ]
+  },
+  "spot_results": {
+    "selection_train": {
+      "ariadne_legacy_deviance": {
+        "tp": 683,
+        "fp": 2,
+        "fn": 297,
+        "weak_tp": 19,
+        "weak_total": 193,
+        "strong_tp": 461,
+        "strong_total": 462,
+        "precision": 0.997080291970803,
+        "recall": 0.6969387755102041,
+        "f1": 0.8204204204204205,
+        "weak_recall": 0.09844559585492228,
+        "strong_recall": 0.9978354978354979,
+        "localization_median_pixels": 0.26182371141824523
+      },
+      "ariadne_standardized": {
+        "tp": 765,
+        "fp": 42,
+        "fn": 215,
+        "weak_tp": 51,
+        "weak_total": 193,
+        "strong_tp": 457,
+        "strong_total": 462,
+        "precision": 0.9479553903345725,
+        "recall": 0.7806122448979592,
+        "f1": 0.8561835478455512,
+        "weak_recall": 0.26424870466321243,
+        "strong_recall": 0.9891774891774892,
+        "localization_median_pixels": 0.3102805355930282
+      },
+      "dials_dispersion": {
+        "tp": 283,
+        "fp": 892,
+        "fn": 697,
+        "weak_tp": 1,
+        "weak_total": 193,
+        "strong_tp": 259,
+        "strong_total": 462,
+        "precision": 0.24085106382978724,
+        "recall": 0.28877551020408165,
+        "f1": 0.26264501160092807,
+        "weak_recall": 0.0051813471502590676,
+        "strong_recall": 0.5606060606060606,
+        "localization_median_pixels": 0.19650687097523648
+      },
+      "dials_dispersion_extended": {
+        "tp": 468,
+        "fp": 9191,
+        "fn": 512,
+        "weak_tp": 19,
+        "weak_total": 193,
+        "strong_tp": 354,
+        "strong_total": 462,
+        "precision": 0.04845222072678331,
+        "recall": 0.4775510204081633,
+        "f1": 0.08797819343923301,
+        "weak_recall": 0.09844559585492228,
+        "strong_recall": 0.7662337662337663,
+        "localization_median_pixels": 0.25630624489555187
+      }
+    },
+    "validation": {
+      "ariadne_legacy_deviance": {
+        "tp": 634,
+        "fp": 1,
+        "fn": 346,
+        "weak_tp": 14,
+        "weak_total": 187,
+        "strong_tp": 424,
+        "strong_total": 426,
+        "precision": 0.9984251968503937,
+        "recall": 0.6469387755102041,
+        "f1": 0.7851393188854489,
+        "weak_recall": 0.0748663101604278,
+        "strong_recall": 0.9953051643192489,
+        "localization_median_pixels": 0.2737144219068535
+      },
+      "ariadne_standardized": {
+        "tp": 742,
+        "fp": 29,
+        "fn": 238,
+        "weak_tp": 39,
+        "weak_total": 187,
+        "strong_tp": 424,
+        "strong_total": 426,
+        "precision": 0.9623865110246433,
+        "recall": 0.7571428571428571,
+        "f1": 0.8475157053112506,
+        "weak_recall": 0.20855614973262032,
+        "strong_recall": 0.9953051643192489,
+        "localization_median_pixels": 0.3250789513759835
+      },
+      "dials_dispersion": {
+        "tp": 239,
+        "fp": 1050,
+        "fn": 741,
+        "weak_tp": 2,
+        "weak_total": 187,
+        "strong_tp": 210,
+        "strong_total": 426,
+        "precision": 0.18541505042668735,
+        "recall": 0.24387755102040817,
+        "f1": 0.21066549140590568,
+        "weak_recall": 0.0106951871657754,
+        "strong_recall": 0.49295774647887325,
+        "localization_median_pixels": 0.1977145295545579
+      },
+      "dials_dispersion_extended": {
+        "tp": 431,
+        "fp": 11068,
+        "fn": 549,
+        "weak_tp": 13,
+        "weak_total": 187,
+        "strong_tp": 309,
+        "strong_total": 426,
+        "precision": 0.037481520132185406,
+        "recall": 0.43979591836734694,
+        "f1": 0.0690760477602372,
+        "weak_recall": 0.06951871657754011,
+        "strong_recall": 0.7253521126760564,
+        "localization_median_pixels": 0.319455483957548
+      }
+    },
+    "final_test": {
+      "ariadne_legacy_deviance": {
+        "tp": 644,
+        "fp": 0,
+        "fn": 336,
+        "weak_tp": 7,
+        "weak_total": 203,
+        "strong_tp": 456,
+        "strong_total": 459,
+        "precision": 1.0,
+        "recall": 0.6571428571428571,
+        "f1": 0.7931034482758621,
+        "weak_recall": 0.034482758620689655,
+        "strong_recall": 0.9934640522875817,
+        "localization_median_pixels": 0.2647022897339993
+      },
+      "ariadne_standardized": {
+        "tp": 747,
+        "fp": 27,
+        "fn": 233,
+        "weak_tp": 37,
+        "weak_total": 203,
+        "strong_tp": 458,
+        "strong_total": 459,
+        "precision": 0.9651162790697675,
+        "recall": 0.7622448979591837,
+        "f1": 0.8517673888255417,
+        "weak_recall": 0.18226600985221675,
+        "strong_recall": 0.9978213507625272,
+        "localization_median_pixels": 0.31134364627545236
+      },
+      "dials_dispersion": {
+        "tp": 259,
+        "fp": 807,
+        "fn": 721,
+        "weak_tp": 1,
+        "weak_total": 203,
+        "strong_tp": 242,
+        "strong_total": 459,
+        "precision": 0.24296435272045028,
+        "recall": 0.2642857142857143,
+        "f1": 0.25317693059628543,
+        "weak_recall": 0.0049261083743842365,
+        "strong_recall": 0.5272331154684096,
+        "localization_median_pixels": 0.2040593844902198
+      },
+      "dials_dispersion_extended": {
+        "tp": 463,
+        "fp": 12703,
+        "fn": 517,
+        "weak_tp": 17,
+        "weak_total": 203,
+        "strong_tp": 350,
+        "strong_total": 459,
+        "precision": 0.03516633753607778,
+        "recall": 0.47244897959183674,
+        "f1": 0.0654602007634667,
+        "weak_recall": 0.08374384236453201,
+        "strong_recall": 0.7625272331154684,
+        "localization_median_pixels": 0.2758510015223469
+      }
+    }
+  },
+  "dials_spot_selection": {
+    "sigma_background": 4.0,
+    "sigma_strong": 4.0,
+    "min_size": 5,
+    "extended": false,
+    "training": {
+      "tp": 283,
+      "fp": 892,
+      "fn": 697,
+      "weak_tp": 1,
+      "weak_total": 193,
+      "strong_tp": 259,
+      "strong_total": 462,
+      "precision": 0.24085106382978724,
+      "recall": 0.28877551020408165,
+      "f1": 0.26264501160092807,
+      "weak_recall": 0.0051813471502590676,
+      "strong_recall": 0.5606060606060606,
+      "localization_median_pixels": 0.19650687097523648
+    }
+  },
+  "profiles": {
+    "trials_per_component_count": 25,
+    "timing_samples": 100,
+    "time_median_seconds": {
+      "dials": 0.00041031251021195203,
+      "ariadne": 0.00025087498943321407
+    },
+    "ariadne_over_dials": 0.6114241783747258,
+    "maximum_scaled_rmse_difference": 8.757439218243235e-13,
+    "maximum_intensity_difference": 1.0163603292312473e-10,
+    "results": [
+      {
+        "components": 1,
+        "ariadne_rmse": 0.008030086090022223,
+        "dials_rmse": 0.0080300860900237,
+        "maximum_intensity_difference": 1.4779288903810084e-12,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.03400766785273686,
+        "dials_rmse": 0.03400766785272572,
+        "maximum_intensity_difference": 1.1141310096718371e-11,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.003214230741826555,
+        "dials_rmse": 0.003214230741817687,
+        "maximum_intensity_difference": 8.86757334228605e-12,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.021294156089621763,
+        "dials_rmse": 0.02129415608962029,
+        "maximum_intensity_difference": 1.4779288903810084e-12,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.011051831440980209,
+        "dials_rmse": 0.011051831440999423,
+        "maximum_intensity_difference": 1.921307557495311e-11,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.01741038491359609,
+        "dials_rmse": 0.01741038491359484,
+        "maximum_intensity_difference": 1.2505552149377763e-12,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.0398734222191631,
+        "dials_rmse": 0.039873422219161736,
+        "maximum_intensity_difference": 1.3642420526593924e-12,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.013297587170944439,
+        "dials_rmse": 0.01329758717093,
+        "maximum_intensity_difference": 1.4438228390645236e-11,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.03143417575017088,
+        "dials_rmse": 0.03143417575015656,
+        "maximum_intensity_difference": 1.432454155292362e-11,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.005119975913979146,
+        "dials_rmse": 0.005119975913998019,
+        "maximum_intensity_difference": 1.887201506178826e-11,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.052858758046404546,
+        "dials_rmse": 0.052858758046396136,
+        "maximum_intensity_difference": 8.412825991399586e-12,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.054176799180770785,
+        "dials_rmse": 0.05417679918077897,
+        "maximum_intensity_difference": 8.185452315956354e-12,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.004343718661259572,
+        "dials_rmse": 0.004343718661265939,
+        "maximum_intensity_difference": 6.366462912410498e-12,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.077646754116588,
+        "dials_rmse": 0.07764675411657913,
+        "maximum_intensity_difference": 8.86757334228605e-12,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.010188938373267205,
+        "dials_rmse": 0.010188938373261293,
+        "maximum_intensity_difference": 5.9117155615240335e-12,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.05855372090923265,
+        "dials_rmse": 0.0585537209092272,
+        "maximum_intensity_difference": 5.4569682106375694e-12,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.0005017632343556215,
+        "dials_rmse": 0.0005017632343716513,
+        "maximum_intensity_difference": 1.602984411874786e-11,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.04337730341066367,
+        "dials_rmse": 0.043377303410682314,
+        "maximum_intensity_difference": 1.864464138634503e-11,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.03781444826441566,
+        "dials_rmse": 0.037814448264429985,
+        "maximum_intensity_difference": 1.432454155292362e-11,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.024450964469614974,
+        "dials_rmse": 0.02445096446962043,
+        "maximum_intensity_difference": 5.4569682106375694e-12,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.026107433062664085,
+        "dials_rmse": 0.02610743306265772,
+        "maximum_intensity_difference": 6.366462912410498e-12,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.03886069826721041,
+        "dials_rmse": 0.03886069826720404,
+        "maximum_intensity_difference": 6.366462912410498e-12,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.06957836771620315,
+        "dials_rmse": 0.0695783677161894,
+        "maximum_intensity_difference": 1.375610736431554e-11,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.05480894978105653,
+        "dials_rmse": 0.054808949781052434,
+        "maximum_intensity_difference": 4.092726157978177e-12,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 1,
+        "ariadne_rmse": 0.012471847821207119,
+        "dials_rmse": 0.01247184782120189,
+        "maximum_intensity_difference": 5.229594535194337e-12,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 2.5859430078227703,
+        "dials_rmse": 2.5859430078227397,
+        "maximum_intensity_difference": 8.668621376273222e-13,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 0.1075397102767131,
+        "dials_rmse": 0.10753971027653729,
+        "maximum_intensity_difference": 2.0236257114447653e-11,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 1.3615936570298706,
+        "dials_rmse": 1.361593657029618,
+        "maximum_intensity_difference": 7.140954494389007e-12,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 1.999319457682496,
+        "dials_rmse": 1.9993194576826225,
+        "maximum_intensity_difference": 3.865352482534945e-12,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 1.141776420675645,
+        "dials_rmse": 1.141776420675392,
+        "maximum_intensity_difference": 1.6257217794191092e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 1.9189827558056762,
+        "dials_rmse": 1.9189827558057688,
+        "maximum_intensity_difference": 9.663381206337363e-12,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 0.9443668457390387,
+        "dials_rmse": 0.9443668457390798,
+        "maximum_intensity_difference": 3.183231456205249e-12,
+        "ariadne_iterations": 5,
+        "dials_iterations": 5
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 1.9884785824469473,
+        "dials_rmse": 1.988478582446525,
+        "maximum_intensity_difference": 1.9326762412674725e-11,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 1.001368505170384,
+        "dials_rmse": 1.0013685051706755,
+        "maximum_intensity_difference": 1.5347723092418164e-11,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 0.9397465055880081,
+        "dials_rmse": 0.9397465055877651,
+        "maximum_intensity_difference": 6.871836433219869e-12,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 1.7629856873369087,
+        "dials_rmse": 1.762985687336586,
+        "maximum_intensity_difference": 1.3642420526593924e-11,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 0.27971113132239256,
+        "dials_rmse": 0.2797111313224059,
+        "maximum_intensity_difference": 9.094947017729282e-13,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 2.912720130233764,
+        "dials_rmse": 2.9127201302335632,
+        "maximum_intensity_difference": 1.1937117960769683e-11,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 0.4591366901704501,
+        "dials_rmse": 0.45913669017017655,
+        "maximum_intensity_difference": 1.2164491636212915e-11,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 0.3327959443072874,
+        "dials_rmse": 0.33279594430754167,
+        "maximum_intensity_difference": 1.375610736431554e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 0.10624911626119324,
+        "dials_rmse": 0.10624911626114446,
+        "maximum_intensity_difference": 2.0463630789890885e-12,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 0.6445744508721238,
+        "dials_rmse": 0.6445744508719968,
+        "maximum_intensity_difference": 1.0345502232667059e-11,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 0.5793583949497226,
+        "dials_rmse": 0.5793583949500261,
+        "maximum_intensity_difference": 1.2278178473934531e-11,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 1.1676962122290768,
+        "dials_rmse": 1.1676962122289667,
+        "maximum_intensity_difference": 3.1175062531474396e-12,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 1.4814176785542683,
+        "dials_rmse": 1.481417678554611,
+        "maximum_intensity_difference": 9.691802915767767e-12,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 1.4524911817075823,
+        "dials_rmse": 1.452491181707761,
+        "maximum_intensity_difference": 8.071765478234738e-12,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 1.9757780450887046,
+        "dials_rmse": 1.9757780450886833,
+        "maximum_intensity_difference": 1.0800249583553523e-11,
+        "ariadne_iterations": 6,
+        "dials_iterations": 6
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 2.8005610317924226,
+        "dials_rmse": 2.800561031792276,
+        "maximum_intensity_difference": 9.663381206337363e-12,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 2.2818011651567964,
+        "dials_rmse": 2.281801165156859,
+        "maximum_intensity_difference": 3.296918293926865e-12,
+        "ariadne_iterations": 10,
+        "dials_iterations": 10
+      },
+      {
+        "components": 2,
+        "ariadne_rmse": 3.469386142728988,
+        "dials_rmse": 3.469386142728838,
+        "maximum_intensity_difference": 1.5575096767861396e-11,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.7722946299537505,
+        "dials_rmse": 1.7722946299536952,
+        "maximum_intensity_difference": 1.807620719773695e-11,
+        "ariadne_iterations": 10,
+        "dials_iterations": 10
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.1655911636159506,
+        "dials_rmse": 1.1655911636158156,
+        "maximum_intensity_difference": 5.002220859751105e-12,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.9163486523918183,
+        "dials_rmse": 1.9163486523915465,
+        "maximum_intensity_difference": 2.091837814077735e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 0.7994671197670168,
+        "dials_rmse": 0.7994671197669327,
+        "maximum_intensity_difference": 3.183231456205249e-12,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.3552016960865956,
+        "dials_rmse": 1.3552016960867883,
+        "maximum_intensity_difference": 2.8961721909581684e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.4016491938220896,
+        "dials_rmse": 1.4016491938222277,
+        "maximum_intensity_difference": 3.0240698833949864e-11,
+        "ariadne_iterations": 10,
+        "dials_iterations": 10
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.6535768180949522,
+        "dials_rmse": 1.6535768180950148,
+        "maximum_intensity_difference": 1.9980461729574017e-11,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 0.5922453306747282,
+        "dials_rmse": 0.5922453306746223,
+        "maximum_intensity_difference": 4.547473508864641e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.1661754492833223,
+        "dials_rmse": 1.1661754492832694,
+        "maximum_intensity_difference": 3.8113512346171774e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 0.6507530219193938,
+        "dials_rmse": 0.6507530219194041,
+        "maximum_intensity_difference": 4.4565240386873484e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 2.369432991010821,
+        "dials_rmse": 2.3694329910108545,
+        "maximum_intensity_difference": 3.319655661471188e-11,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 6.222064691545077,
+        "dials_rmse": 6.2220646915459525,
+        "maximum_intensity_difference": 5.729816621169448e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 0.2315331216084977,
+        "dials_rmse": 0.2315331216084741,
+        "maximum_intensity_difference": 2.880540250771446e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 0.7874808606796289,
+        "dials_rmse": 0.787480860679647,
+        "maximum_intensity_difference": 1.779199010343291e-11,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 0.6196252450688104,
+        "dials_rmse": 0.6196252450690224,
+        "maximum_intensity_difference": 2.205524651799351e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.080989229288361,
+        "dials_rmse": 1.0809892292881054,
+        "maximum_intensity_difference": 1.6825651982799172e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 0.6164660629200898,
+        "dials_rmse": 0.6164660629198656,
+        "maximum_intensity_difference": 2.5920599000528455e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 2.1957229360911272,
+        "dials_rmse": 2.1957229360912764,
+        "maximum_intensity_difference": 1.3528733688872308e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.3734381575822525,
+        "dials_rmse": 1.3734381575822634,
+        "maximum_intensity_difference": 5.7980287238024175e-12,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 2.4161972807431016,
+        "dials_rmse": 2.416197280743205,
+        "maximum_intensity_difference": 2.6403768060845323e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 2.1702270630378555,
+        "dials_rmse": 2.1702270630377196,
+        "maximum_intensity_difference": 8.569145393266808e-12,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.5884668852906927,
+        "dials_rmse": 1.5884668852907478,
+        "maximum_intensity_difference": 2.3511859126301715e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.1653598116979997,
+        "dials_rmse": 1.1653598116979698,
+        "maximum_intensity_difference": 2.029310053330846e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 2.380726426836281,
+        "dials_rmse": 2.380726426836402,
+        "maximum_intensity_difference": 9.094947017729282e-12,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 4,
+        "ariadne_rmse": 1.9308863219788988,
+        "dials_rmse": 1.930886321978769,
+        "maximum_intensity_difference": 7.617018127348274e-12,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 4.250853273294858,
+        "dials_rmse": 4.250853273294702,
+        "maximum_intensity_difference": 3.444711182964966e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 4.111250100697377,
+        "dials_rmse": 4.111250100696746,
+        "maximum_intensity_difference": 6.514255801448599e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 1.7864832628532314,
+        "dials_rmse": 1.7864832628533767,
+        "maximum_intensity_difference": 2.2396307031158358e-11,
+        "ariadne_iterations": 10,
+        "dials_iterations": 10
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 8.74952497204031,
+        "dials_rmse": 8.74952497203989,
+        "maximum_intensity_difference": 3.6266101233195513e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 3.8332088683376653,
+        "dials_rmse": 3.8332088683377443,
+        "maximum_intensity_difference": 1.864464138634503e-11,
+        "ariadne_iterations": 10,
+        "dials_iterations": 10
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 5.989293147293984,
+        "dials_rmse": 5.989293147293678,
+        "maximum_intensity_difference": 3.086597644141875e-11,
+        "ariadne_iterations": 13,
+        "dials_iterations": 13
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 1.853124339915358,
+        "dials_rmse": 1.853124339915548,
+        "maximum_intensity_difference": 5.0590642786119133e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 2.116969187666882,
+        "dials_rmse": 2.1169691876670087,
+        "maximum_intensity_difference": 5.661604518536478e-11,
+        "ariadne_iterations": 11,
+        "dials_iterations": 11
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 2.179702252444704,
+        "dials_rmse": 2.1797022524448026,
+        "maximum_intensity_difference": 2.8990143619012088e-11,
+        "ariadne_iterations": 10,
+        "dials_iterations": 10
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 1.8163869118197469,
+        "dials_rmse": 1.816386911819503,
+        "maximum_intensity_difference": 6.104983185650781e-11,
+        "ariadne_iterations": 15,
+        "dials_iterations": 15
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 3.9776046307570936,
+        "dials_rmse": 3.977604630757086,
+        "maximum_intensity_difference": 1.4097167877480388e-11,
+        "ariadne_iterations": 13,
+        "dials_iterations": 13
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 4.522462098383001,
+        "dials_rmse": 4.5224620983832144,
+        "maximum_intensity_difference": 9.083578333957121e-11,
+        "ariadne_iterations": 7,
+        "dials_iterations": 7
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 6.572663902112571,
+        "dials_rmse": 6.572663902112951,
+        "maximum_intensity_difference": 3.1604940886609256e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 1.8066964535177314,
+        "dials_rmse": 1.8066964535180359,
+        "maximum_intensity_difference": 7.173639460233971e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 1.3580761619076973,
+        "dials_rmse": 1.3580761619078512,
+        "maximum_intensity_difference": 4.320099833421409e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 2.8623961885997433,
+        "dials_rmse": 2.8623961885997615,
+        "maximum_intensity_difference": 1.4665602066088468e-11,
+        "ariadne_iterations": 10,
+        "dials_iterations": 10
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 1.1912414967411435,
+        "dials_rmse": 1.1912414967415645,
+        "maximum_intensity_difference": 1.0163603292312473e-10,
+        "ariadne_iterations": 13,
+        "dials_iterations": 13
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 2.988583740820351,
+        "dials_rmse": 2.9885837408203226,
+        "maximum_intensity_difference": 1.8687273950490635e-11,
+        "ariadne_iterations": 12,
+        "dials_iterations": 12
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 4.359444989933686,
+        "dials_rmse": 4.359444989933542,
+        "maximum_intensity_difference": 4.547473508864641e-11,
+        "ariadne_iterations": 8,
+        "dials_iterations": 8
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 5.431777431337433,
+        "dials_rmse": 5.431777431336788,
+        "maximum_intensity_difference": 4.46789272245951e-11,
+        "ariadne_iterations": 12,
+        "dials_iterations": 12
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 2.3727376041056356,
+        "dials_rmse": 2.3727376041053736,
+        "maximum_intensity_difference": 2.7114310796605423e-11,
+        "ariadne_iterations": 10,
+        "dials_iterations": 10
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 3.335985806193129,
+        "dials_rmse": 3.3359858061937833,
+        "maximum_intensity_difference": 4.149569576838985e-11,
+        "ariadne_iterations": 11,
+        "dials_iterations": 11
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 4.0201439555162235,
+        "dials_rmse": 4.020143955515795,
+        "maximum_intensity_difference": 3.5981884138891473e-11,
+        "ariadne_iterations": 11,
+        "dials_iterations": 11
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 3.233704699673795,
+        "dials_rmse": 3.2337046996738517,
+        "maximum_intensity_difference": 2.5124791136477143e-11,
+        "ariadne_iterations": 9,
+        "dials_iterations": 9
+      },
+      {
+        "components": 8,
+        "ariadne_rmse": 5.655534242065368,
+        "dials_rmse": 5.655534242065156,
+        "maximum_intensity_difference": 1.2505552149377763e-11,
+        "ariadne_iterations": 10,
+        "dials_iterations": 10
+      }
+    ]
+  },
+  "profile_covariance": {
+    "setup": "known heteroscedastic Gaussian variance equal to expected counts; truth is independent of both fits",
+    "results": {
+      "1": {
+        "trials": 200,
+        "component_coverage_95": {
+          "ariadne": 0.955,
+          "dials": 1.0
+        },
+        "total_coverage_95": {
+          "ariadne": 0.955,
+          "dials": 1.0
+        }
+      },
+      "2": {
+        "trials": 200,
+        "component_coverage_95": {
+          "ariadne": 0.95,
+          "dials": 1.0
+        },
+        "total_coverage_95": {
+          "ariadne": 0.95,
+          "dials": 1.0
+        }
+      },
+      "4": {
+        "trials": 200,
+        "component_coverage_95": {
+          "ariadne": 0.95375,
+          "dials": 0.98125
+        },
+        "total_coverage_95": {
+          "ariadne": 0.965,
+          "dials": 1.0
+        }
+      }
+    }
+  },
+  "timing": {
+    "shape": [
+      1024,
+      1024
+    ],
+    "scope": "threshold only; Ariadne includes component pruning, DIALS does not",
+    "measurements": {
+      "ariadne_standardized": {
+        "seconds": [
+          0.025400125014130026,
+          0.02559716600808315,
+          0.023555583000415936,
+          0.024923791002947837,
+          0.025283916998887435
+        ],
+        "median_seconds": 0.025283916998887435
+      },
+      "dials_dispersion": {
+        "seconds": [
+          0.005330500018317252,
+          0.004890625015832484,
+          0.00528120799572207,
+          0.005715625011362135,
+          0.004970457986928523
+        ],
+        "median_seconds": 0.00528120799572207
+      },
+      "dials_dispersion_selected": {
+        "seconds": [
+          0.005397542001446709,
+          0.005098416993860155,
+          0.005181249987799674,
+          0.0047604580176994205,
+          0.004750374995637685
+        ],
+        "median_seconds": 0.005098416993860155
+      }
+    }
+  },
+  "semantics": {
+    "spots": "threshold mask followed by identical 4-connected component extraction and size filtering; not the full DIALS indexing pipeline",
+    "profiles": "same fixed background, profiles, mask and DIALS-compatible IRLS weights; Ariadne additionally reports full conditional covariance"
+  },
+  "limits": [
+    "Synthetic images rather than experimental rotation frames",
+    "DIALS spot result excludes later reciprocal-space filtering and indexing",
+    "Spot operating points were selected on the training split and frozen for validation/test",
+    "No general claim of DIALS algorithm equivalence"
+  ]
+}

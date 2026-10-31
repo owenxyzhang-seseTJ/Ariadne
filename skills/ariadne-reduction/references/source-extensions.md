@@ -25,7 +25,7 @@ ariadne-env dials.find_spots imported.expt \
 
 `CALIBRATED_GAIN` 必须替换为真实标定值，不是可直接运行的示例。CCD/积分型探测器有读出噪声时选择 `poisson_gaussian` 并给出 `readout_variance_adu`；此分支使用 quasi-Gaussian excess approximation，没有声称实现完整 Poisson-Gaussian 卷积似然。多个 panel 当前共用同一配置，噪声不同时应分开配置处理。
 
-mask-aware 环形背景排除最大候选支持，迭代剔除正向背景污染，使用 1/3/5 像素 box-sum 搜索。Poisson 分支计算单侧 deviance `2[n log(n/mu) - n + mu]`；预期计数下限 0.5 是数值正则，不是实测背景。统计只提议候选像素，DIALS 继续三维连通斑点构建与物理指标化。box-sum 的计算复杂度随像素数和尺度数线性增长，实际速度未测。
+mask-aware 环形背景排除最大候选支持，默认使用 1/3/5 像素 box-sum 和跨尺度标准化的超额统计量；旧版 Poisson deviance 仍可显式选择。默认阈值 4、support sigma 0.5、连通域最小 4 像素，背景剪切迭代默认 0。可选迭代只修改背景估计，不改实测像素。C++ summed-area 内核释放 GIL，并只在候选像素处计算多尺度分数。统计只提议候选像素，DIALS 继续三维连通斑点构建与物理指标化；当前合成最终测试不代表完整实验数据或完整 DIALS 指标化流程。
 
 此处有背景估计、迭代排点和多尺度选择，score 不能当已标定的显著性或假阳性概率。弥散散射、粉末环、卫星、非高斯尾部仍可能被提议。以全流程指标化、假阳性、强度不确定性与最终数据质量评价，不能以点数增加判定优劣。没有引入未经训练的深度学习模型。
 
