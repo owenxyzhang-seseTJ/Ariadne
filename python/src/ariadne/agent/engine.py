@@ -10,7 +10,8 @@ import time
 from typing import Any
 import zipfile
 
-from .actions import Context, collect_artifacts, execute
+from .actions import Context, collect_artifacts
+from .action_worker import execute_bounded as execute
 from .backends import ANALYSES, DIALS_OPTIONS, plugin_root
 from .planner import choose
 from .process import Cancelled, NeedsReview
@@ -19,7 +20,7 @@ from .store import Store
 from .util import artifact, artifact_path, atomic_json, dumps, exclusive_lock, pointer, read_json
 
 
-BUILD = '0.7.0-rebuild-20261030'
+BUILD = '0.7.0-integrated-native-20261031'
 
 
 def ref(node: str, path: str = ''):

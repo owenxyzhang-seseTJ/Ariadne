@@ -60,7 +60,7 @@ def _solve_streamed(data, variance, profiles, valid, background, rcond, chunk_ro
     if pixels <= nuisance + components + 2:
         raise ValueError('Too few valid pixels for joint signal/background fit')
     rb = factor[:nuisance, :nuisance]
-    if np.min(np.abs(np.diag(rb))) <= np.max(np.abs(np.diag(rb))) * 1e-12:
+    if rb.size and np.min(np.abs(np.diag(rb))) <= np.max(np.abs(np.diag(rb))) * 1e-12:
         raise ValueError('Background basis is rank deficient')
     # Triangularity has already eliminated the first nuisance columns.
     design = factor[nuisance:, nuisance:-1]
@@ -101,7 +101,7 @@ def _solve_joint_from_qr(y, v, Pw, yw, profiles, valid, background, rcond, Q, R)
     """复用已加权数组与背景 QR，完成投影、信号 SVD 与背景回代。"""
     if len(y) <= Pw.shape[1] + background.shape[1] + 2:
         raise ValueError('Too few valid pixels for joint signal/background fit')
-    if np.min(np.abs(np.diag(R))) <= np.max(np.abs(np.diag(R))) * 1e-12:
+    if R.size and np.min(np.abs(np.diag(R))) <= np.max(np.abs(np.diag(R))) * 1e-12:
         raise ValueError('Background basis is rank deficient')
     design = Pw - Q @ (Q.T @ Pw)
     target = yw - Q @ (Q.T @ yw)

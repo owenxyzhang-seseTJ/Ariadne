@@ -19,7 +19,9 @@ This release builds on the recovered R2 source and reconstructs the 0.7.0 agent 
 
 The complete R2 numerical code and DIALS Python-source patch are retained. New code supplies real Gemmi CIF auditing and X-ray structure factors, block-local/low-rank Gaussian structural feedback, training-only scale calibration, closed data partitions and final-test exposure records. A persistent agent runs typed scientific actions, resumes completed work, discovers actual paired SHELXT candidates, and records the distinction between execution and scientific acceptance.
 
-The agent supports audit, solve, refine, reduce, feedback and explicit custom DAGs. It has 13 registered action types, 8 additional optional MCP session tools, a deterministic policy, and an optional Chat Completions JSON planner. External executables are configured paths, never model-authored shell commands.
+The agent supports audit, solve, refine, reduce, feedback and explicit custom DAGs. It has 13 registered action types, 8 additional optional MCP session tools, a deterministic policy, and an optional Chat Completions JSON planner. External executable paths come only from the operator-owned JSON file selected by `ARIADNE_EXECUTABLES_CONFIG`; task-level overrides are rejected. Native crystal/feedback actions run in supervised subprocesses with deadlines and cancellation.
+
+Installing from `./python` builds an optional C++17 multiscale proposal kernel. It preserves the reference count-excess model, releases the GIL, and fuses summed-area background/scale statistics. A C++ compiler is required for this acceleration. `ARIADNE_REQUIRE_NATIVE=1` makes a missing compiler/build error fatal; `ARIADNE_DISABLE_NATIVE=1` explicitly builds the portable Python fallback. The portable wheel in `dist/` uses that fallback. Current measured comparisons and reproduction commands are in `reports/current_validation/`.
 
 ## Minimal demonstration
 

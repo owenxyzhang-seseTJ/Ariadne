@@ -94,10 +94,6 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
     "hkl": "/absolute/path/to/sample.hkl"
   },
   "settings": {"cycles": 8},
-  "executables": {
-    "shelxt": "/absolute/path/to/shelxt",
-    "shelxl": "/absolute/path/to/shelxl"
-  },
   "budget": {
     "max_actions": 40,
     "max_attempts": 2,
@@ -115,6 +111,10 @@ python -m ariadne.agent.cli run sessions/example
 python -m ariadne.agent.cli status sessions/example
 python -m ariadne.agent.cli export sessions/example delivery.zip --include-inputs
 ```
+
+执行程序由部署者配置：在项目请求之外保存 JSON，例如 `{"shelxt":"/absolute/path/to/shelxt","shelxl":"/absolute/path/to/shelxl"}`，并在启动 CLI/MCP 前设置 `ARIADNE_EXECUTABLES_CONFIG=/absolute/path/to/deployment.json`。请求中的非空 `executables` 被拒绝；模型不能更换执行程序。
+
+原生 CIF 检查、结构预测和反馈计算在独立子进程中运行，整个进程组受动作期限与取消控制。暂停、恢复、输出和科学验收语义保持不变。
 
 SHELXT 候选必须有实际产生的同名 RES/HKL。没有对应 HKL 的候选不会自动借用另一候选或最初输入的 HKL。程序退出成功也不等于结构可信；有效文件、原生解析和科学检查分别记录。
 

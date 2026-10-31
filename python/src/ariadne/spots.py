@@ -10,6 +10,11 @@ import numpy as np
 from scipy.ndimage import uniform_filter
 from scipy.special import xlogy
 
+try:
+    from ._native import spot_proposals as _native_proposals
+except ImportError:
+    _native_proposals = None
+
 
 def box_sum(array, width):
     return uniform_filter(array, size=width, mode="constant", cval=0.) * width**2
@@ -38,6 +43,10 @@ def propose(image, mask, *, gain, offset, readout_variance, noise_model,
     if noise_model == "poisson" and np.any(data[valid] < 0):
         raise ValueError("Negative corrected pixels contradict the selected Poisson model")
     readout = readout_variance / gain**2
+    if _native_proposals is not None:
+        return _native_proposals(data,valid,readout,noise_model=='poisson',background_width,
+                                 exclusion_width,scales,score_threshold,support_sigma,
+                                 min_valid_fraction,background_iterations)
     retained = valid.copy()
     annulus_area = background_width**2 - exclusion_width**2
 

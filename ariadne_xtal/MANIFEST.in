@@ -1,0 +1,10 @@
+include README.md LICENSE API_CONTRACT.md THIRD_PARTY_NOTICES.md shelx_instruction_matrix.json
+recursive-include src *.py
+recursive-include tests *.py
+recursive-include docs *.md *.tex *.pdf *.svg *.json
+recursive-include examples *.py *.json *.cif *.res *.hkl *.html *.svg *.pdf *.npz *.ccp4
+recursive-include validation *.py *.json *.md *.txt *.cif *.hkl *.svg *.pdf *.xml
+recursive-include tools *.py *.md
+prune docs/fonts
+exclude validation/packaging_report.json
+global-exclude __pycache__ *.py[cod] .DS_Store

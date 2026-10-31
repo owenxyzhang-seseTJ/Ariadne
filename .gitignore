@@ -11,7 +11,12 @@ core.*
 *.pem
 *.key
 *.pyc
+*.so
+*.pyd
+*.o
+output/
 python/build/
+ariadne_xtal/build/
 *.egg-info/
 jobs/
 raw_data/
@@ -51,3 +56,7 @@ reports/latex-build/
 *.sfc
 *.fcf
 *.lst
+!ariadne_xtal/examples/*.cif
+!ariadne_xtal/examples/*.hkl
+!ariadne_xtal/validation/**/*.cif
+!ariadne_xtal/validation/**/*.hkl

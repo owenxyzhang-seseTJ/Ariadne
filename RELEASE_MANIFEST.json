@@ -1,7 +1,7 @@
 {
   "schema": "ariadne-release-manifest/2",
-  "build": "0.7.0-rebuild-20261030",
-  "generated_utc": "2026-10-30T06:14:00.484044+00:00",
+  "build": "0.7.0-integrated-native-20261031",
+  "generated_utc": "2026-10-31T06:12:58.568181+00:00",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -13,11 +13,15 @@
     },
     {
       "path": ".github/workflows/core-numerics.yml",
-      "bytes": 1340
+      "bytes": 1391
+    },
+    {
+      "path": ".github/workflows/xtal.yml",
+      "bytes": 719
     },
     {
       "path": ".gitignore",
-      "bytes": 558
+      "bytes": 727
     },
     {
       "path": ".mcp.json",
@@ -25,7 +29,7 @@
     },
     {
       "path": "AGENT_GUIDE.zh-CN.md",
-      "bytes": 11239
+      "bytes": 11648
     },
     {
       "path": "CODE_REVIEW.zh-CN.md",
@@ -53,7 +57,7 @@
     },
     {
       "path": "NOTICE.md",
-      "bytes": 1811
+      "bytes": 1978
     },
     {
       "path": "README.ja.md",
@@ -61,7 +65,7 @@
     },
     {
       "path": "README.md",
-      "bytes": 4893
+      "bytes": 5592
     },
     {
       "path": "README.zh-CN.md",
@@ -74,6 +78,410 @@
     {
       "path": "SECURITY.md",
       "bytes": 1391
+    },
+    {
+      "path": "ariadne_xtal/API_CONTRACT.md",
+      "bytes": 5608
+    },
+    {
+      "path": "ariadne_xtal/DELIVERY_MANIFEST.json",
+      "bytes": 17494
+    },
+    {
+      "path": "ariadne_xtal/LICENSE",
+      "bytes": 1280
+    },
+    {
+      "path": "ariadne_xtal/MANIFEST.in",
+      "bytes": 514
+    },
+    {
+      "path": "ariadne_xtal/README.md",
+      "bytes": 11955
+    },
+    {
+      "path": "ariadne_xtal/THIRD_PARTY_NOTICES.md",
+      "bytes": 2967
+    },
+    {
+      "path": "ariadne_xtal/docs/API.md",
+      "bytes": 21018
+    },
+    {
+      "path": "ariadne_xtal/docs/BUILD.md",
+      "bytes": 2788
+    },
+    {
+      "path": "ariadne_xtal/docs/COMPATIBILITY.md",
+      "bytes": 11259
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/01_scattering.tex",
+      "bytes": 6114
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/02_geometry_symmetry.tex",
+      "bytes": 5429
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/03_statistics.tex",
+      "bytes": 5298
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/04_phasing.tex",
+      "bytes": 8270
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/05_refinement.tex",
+      "bytes": 6280
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/06_constraints.tex",
+      "bytes": 6685
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/07_disorder_twins.tex",
+      "bytes": 6559
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/08_uncertainty.tex",
+      "bytes": 6236
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/09_agent.tex",
+      "bytes": 6273
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/10_feedback.tex",
+      "bytes": 5637
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/11_visualization.tex",
+      "bytes": 5523
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/12_implementation.tex",
+      "bytes": 5429
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/appendix_capabilities.tex",
+      "bytes": 4282
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/appendix_usage.tex",
+      "bytes": 4134
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/appendix_validation.tex",
+      "bytes": 6670
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/density_sections.pdf",
+      "bytes": 22822
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/fen4_density_sections.pdf",
+      "bytes": 19831
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/fen4_refinement_diagnostics.pdf",
+      "bytes": 31132
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/fen4_structure_ellipsoids.pdf",
+      "bytes": 28227
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/parameter_correlation.pdf",
+      "bytes": 16373
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/refinement_diagnostics.pdf",
+      "bytes": 146611
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/structure_ellipsoids.pdf",
+      "bytes": 41071
+    },
+    {
+      "path": "ariadne_xtal/docs/references.tex",
+      "bytes": 3883
+    },
+    {
+      "path": "ariadne_xtal/docs/report.pdf",
+      "bytes": 774996
+    },
+    {
+      "path": "ariadne_xtal/docs/report.tex",
+      "bytes": 7957
+    },
+    {
+      "path": "ariadne_xtal/examples/PROVENANCE.json",
+      "bytes": 466
+    },
+    {
+      "path": "ariadne_xtal/examples/demo_reflections.hkl",
+      "bytes": 146751
+    },
+    {
+      "path": "ariadne_xtal/examples/demo_reflections.json",
+      "bytes": 436087
+    },
+    {
+      "path": "ariadne_xtal/examples/demo_start.cif",
+      "bytes": 2079
+    },
+    {
+      "path": "ariadne_xtal/examples/demo_start.json",
+      "bytes": 4440
+    },
+    {
+      "path": "ariadne_xtal/examples/demo_truth.json",
+      "bytes": 4612
+    },
+    {
+      "path": "ariadne_xtal/examples/generate_examples.py",
+      "bytes": 3638
+    },
+    {
+      "path": "ariadne_xtal/examples/refine_job.json",
+      "bytes": 207
+    },
+    {
+      "path": "ariadne_xtal/pyproject.toml",
+      "bytes": 977
+    },
+    {
+      "path": "ariadne_xtal/shelx_instruction_matrix.json",
+      "bytes": 38968
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/__init__.py",
+      "bytes": 470
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/__main__.py",
+      "bytes": 48
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/absolute.py",
+      "bytes": 3704
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/agent.py",
+      "bytes": 14720
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/capabilities.py",
+      "bytes": 3046
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/cli.py",
+      "bytes": 3794
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/compat.py",
+      "bytes": 11026
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/feedback.py",
+      "bytes": 5335
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/io.py",
+      "bytes": 19626
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/maps.py",
+      "bytes": 9857
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/mcp_server.py",
+      "bytes": 1912
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/model.py",
+      "bytes": 13761
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/phasing.py",
+      "bytes": 9232
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/refinement.py",
+      "bytes": 40734
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/restraints.py",
+      "bytes": 11209
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/scattering.py",
+      "bytes": 7333
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/shelx.py",
+      "bytes": 19782
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/symmetry.py",
+      "bytes": 9392
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/validation.py",
+      "bytes": 3834
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/visualization.py",
+      "bytes": 29665
+    },
+    {
+      "path": "ariadne_xtal/tests/test_agent.py",
+      "bytes": 16438
+    },
+    {
+      "path": "ariadne_xtal/tests/test_core.py",
+      "bytes": 11127
+    },
+    {
+      "path": "ariadne_xtal/tests/test_io.py",
+      "bytes": 13545
+    },
+    {
+      "path": "ariadne_xtal/tests/test_refinement.py",
+      "bytes": 16828
+    },
+    {
+      "path": "ariadne_xtal/tests/test_visualization.py",
+      "bytes": 4700
+    },
+    {
+      "path": "ariadne_xtal/tests/test_workflows_audit.py",
+      "bytes": 13762
+    },
+    {
+      "path": "ariadne_xtal/tools/check_release.py",
+      "bytes": 8848
+    },
+    {
+      "path": "ariadne_xtal/tools/fetch_report_fonts.py",
+      "bytes": 1086
+    },
+    {
+      "path": "ariadne_xtal/validation/packaging_report.json",
+      "bytes": 1512
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/candidate_1.json",
+      "bytes": 1686
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/candidate_2.json",
+      "bytes": 1689
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/candidate_3.json",
+      "bytes": 1688
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/candidate_4.json",
+      "bytes": 1688
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/refined_1.cif",
+      "bytes": 986
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/refined_2.cif",
+      "bytes": 990
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/refined_3.cif",
+      "bytes": 995
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/refined_4.cif",
+      "bytes": 990
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/result.json",
+      "bytes": 635290
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/synthetic_reflections.json",
+      "bytes": 332019
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/truth.json",
+      "bytes": 1532
+    },
+    {
+      "path": "ariadne_xtal/validation/public_data/2242624.cif",
+      "bytes": 13833
+    },
+    {
+      "path": "ariadne_xtal/validation/public_data/2242624.hkl",
+      "bytes": 3328
+    },
+    {
+      "path": "ariadne_xtal/validation/public_data/4003024.cif",
+      "bytes": 36221
+    },
+    {
+      "path": "ariadne_xtal/validation/public_data/README.md",
+      "bytes": 1899
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/density_sections.pdf",
+      "bytes": 19831
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/density_sections.svg",
+      "bytes": 31825
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/refinement_diagnostics.pdf",
+      "bytes": 31132
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/refinement_diagnostics.svg",
+      "bytes": 75324
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/structure_ellipsoids.pdf",
+      "bytes": 28227
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/structure_ellipsoids.svg",
+      "bytes": 204176
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/input_model.json",
+      "bytes": 1276
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/measured_reflections.json",
+      "bytes": 4424
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/refined.cif",
+      "bytes": 976
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/result.json",
+      "bytes": 19595
+    },
+    {
+      "path": "ariadne_xtal/validation/run_phasing_recovery.py",
+      "bytes": 5315
+    },
+    {
+      "path": "ariadne_xtal/validation/run_real_fen4.py",
+      "bytes": 5813
+    },
+    {
+      "path": "benchmarks/ariadne_dials.py",
+      "bytes": 10067
     },
     {
       "path": "benchmarks/baseline-2b9bd04.zip",
@@ -108,6 +516,10 @@
       "bytes": 9552
     },
     {
+      "path": "benchmarks/native_prediction.py",
+      "bytes": 2902
+    },
+    {
       "path": "benchmarks/optimization.py",
       "bytes": 12254
     },
@@ -136,12 +548,16 @@
       "bytes": 5736
     },
     {
+      "path": "benchmarks/xtal_shelx.py",
+      "bytes": 14584
+    },
+    {
       "path": "dist/ariadne-0.7.0-py3-none-any.whl",
-      "bytes": 70255
+      "bytes": 74311
     },
     {
       "path": "dist/ariadne-0.7.0.tar.gz",
-      "bytes": 59179
+      "bytes": 62840
     },
     {
       "path": "docs/R2_README.md",
@@ -193,7 +609,7 @@
     },
     {
       "path": "implementation-status.json",
-      "bytes": 2022
+      "bytes": 2204
     },
     {
       "path": "licenses/DIALS-LICENSE.txt",
@@ -232,20 +648,36 @@
       "bytes": 9354
     },
     {
+      "path": "python/MANIFEST.in",
+      "bytes": 32
+    },
+    {
       "path": "python/pyproject.toml",
-      "bytes": 738
+      "bytes": 761
+    },
+    {
+      "path": "python/setup.py",
+      "bytes": 514
     },
     {
       "path": "python/src/ariadne/__init__.py",
       "bytes": 101
     },
     {
+      "path": "python/src/ariadne/_native.cpp",
+      "bytes": 7246
+    },
+    {
       "path": "python/src/ariadne/agent/__init__.py",
       "bytes": 56
     },
     {
+      "path": "python/src/ariadne/agent/action_worker.py",
+      "bytes": 2388
+    },
+    {
       "path": "python/src/ariadne/agent/actions.py",
-      "bytes": 6619
+      "bytes": 6668
     },
     {
       "path": "python/src/ariadne/agent/backends.py",
@@ -261,7 +693,7 @@
     },
     {
       "path": "python/src/ariadne/agent/engine.py",
-      "bytes": 23980
+      "bytes": 24035
     },
     {
       "path": "python/src/ariadne/agent/loop.py",
@@ -281,11 +713,11 @@
     },
     {
       "path": "python/src/ariadne/agent/process.py",
-      "bytes": 3549
+      "bytes": 4252
     },
     {
       "path": "python/src/ariadne/agent/spec.py",
-      "bytes": 9797
+      "bytes": 9959
     },
     {
       "path": "python/src/ariadne/agent/store.py",
@@ -301,7 +733,7 @@
     },
     {
       "path": "python/src/ariadne/crystal.py",
-      "bytes": 8729
+      "bytes": 8954
     },
     {
       "path": "python/src/ariadne/errors.py",
@@ -333,7 +765,7 @@
     },
     {
       "path": "python/src/ariadne/spots.py",
-      "bytes": 4748
+      "bytes": 5157
     },
     {
       "path": "python/src/ariadne/worker.py",
@@ -366,6 +798,30 @@
     {
       "path": "reports/ariadne_round2.tex",
       "bytes": 38292
+    },
+    {
+      "path": "reports/current_validation/README.zh-CN.md",
+      "bytes": 6698
+    },
+    {
+      "path": "reports/current_validation/ariadne_dials.json",
+      "bytes": 19299
+    },
+    {
+      "path": "reports/current_validation/ariadne_dials_native.json",
+      "bytes": 19318
+    },
+    {
+      "path": "reports/current_validation/native_prediction.json",
+      "bytes": 804
+    },
+    {
+      "path": "reports/current_validation/summary.json",
+      "bytes": 737
+    },
+    {
+      "path": "reports/current_validation/xtal_shelxl.json",
+      "bytes": 12256
     },
     {
       "path": "reports/dials_algorithm_optimization.pdf",
@@ -541,7 +997,7 @@
     },
     {
       "path": "scripts/make_release.py",
-      "bytes": 3140
+      "bytes": 3210
     },
     {
       "path": "scripts/run_numerical_validation.py",
@@ -633,7 +1089,7 @@
     },
     {
       "path": "skills/ariadne-reduction/scripts/correct_overlap_groups.py",
-      "bytes": 9268
+      "bytes": 9959
     },
     {
       "path": "skills/ariadne-reduction/scripts/dials_tools.py",
@@ -685,7 +1141,7 @@
     },
     {
       "path": "skills/ariadne-reduction/scripts/overlap_integrator.py",
-      "bytes": 23777
+      "bytes": 23800
     },
     {
       "path": "skills/ariadne-reduction/scripts/overlap_observability.py",
@@ -816,6 +1272,10 @@
       "bytes": 8113
     },
     {
+      "path": "tests_integration/test_native_crystallography.py",
+      "bytes": 2155
+    },
+    {
       "path": "tests_rebuild/conftest.py",
       "bytes": 236
     },
@@ -832,6 +1292,10 @@
       "bytes": 1691
     },
     {
+      "path": "tests_rebuild/test_correction_covariance.py",
+      "bytes": 2832
+    },
+    {
       "path": "tests_rebuild/test_crystal.py",
       "bytes": 3735
     },
@@ -844,8 +1308,16 @@
       "bytes": 2835
     },
     {
+      "path": "tests_rebuild/test_native_boundaries.py",
+      "bytes": 2726
+    },
+    {
       "path": "tests_rebuild/test_native_protocol.py",
-      "bytes": 4670
+      "bytes": 4892
+    },
+    {
+      "path": "tests_rebuild/test_native_spots.py",
+      "bytes": 2286
     },
     {
       "path": "tests_rebuild/test_planner.py",

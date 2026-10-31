@@ -139,6 +139,8 @@ def validate_request(request: dict[str, Any]) -> dict[str, Any]:
         raise ValueError('unknown executable mapping')
     if any(not isinstance(v, str) or not v or '\x00' in v for v in executable_config.values()):
         raise ValueError('executable values are file paths, not shell commands')
+    if executable_config:
+        raise ValueError('task executable overrides are forbidden; configure ARIADNE_EXECUTABLES_CONFIG in the deployment environment')
     settings = request.get('settings', {})
     if not isinstance(settings, dict) or set(settings)-{'cycles', 'composition', 'dials_options', 'expected_elements', 'seed', 'models', 'absolute_sd', 'relative_sd'}:
         raise ValueError('unknown workflow setting')

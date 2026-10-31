@@ -1,0 +1,85 @@
+\chapter{观测强度与统计模型}
+\section{像素计数和积分强度}
+探测器记录的是像素计数，不是结构因子。若像素 $p$ 的期望计数为 $\lambda_p$，理想光子计数满足
+\begin{equation}
+n_p\sim\operatorname{Poisson}(\lambda_p),\qquad
+\E[n_p]=\Var(n_p)=\lambda_p.
+\end{equation}
+一个含背景和多个重叠反射的局部模型可写为
+\begin{equation}
+\lambda_p=b_p+\sum_{h}P_{ph}I_h,
+\label{eq:pixel_model}
+\end{equation}
+其中 $P_{ph}$ 描述反射 $h$ 的归一化三维轮廓在像素 $p$ 上的贡献。积分计算据此估计 $I_h$ 与误差；吸收、尺度和几何修正再将其转到统一的强度定义。
+
+在校正后的观测层面，常采用近似正态模型
+\begin{equation}
+y_h=\mu_h(\vct p)+\epsilon_h,\qquad
+\vct\epsilon\sim\mathcal N(\vct0,\bm{\Sigma}).
+\label{eq:intensity_gaussian}
+\end{equation}
+若只保留每条反射的标准不确定度，便取 $\bm{\Sigma}=\diag(\sigma_h^2)$。重叠积分、共同尺度和吸收拟合可能产生非对角相关性；仅有 HKL 与逐反射 $\sigma$ 的文件不能恢复这些相关性。因此，逐反射最小二乘得到的是给定输入误差模型下的条件估计。
+
+\section{负强度为什么应保留}
+真实的平均散射强度 $\mu_h$ 非负，但背景扣除后的估计 $y_h$ 可以为负。正态观测模型允许这一事件。若将 $y$ 截断为 $\max(y,0)$，在 $\mu=0$ 时
+\begin{equation}
+\E[\max(y,0)]
+=\int_0^\infty y\frac{e^{-y^2/(2\sigma^2)}}{\sqrt{2\pi}\sigma}\dif y
+=\frac{\sigma}{\sqrt{2\pi}}>0.
+\end{equation}
+因此，截断会人为增加弱反射的平均强度。原生精修直接使用全部工作集的 $y_h$，包括负值。只有在构造常规幅度地图或幅度残差指标时，才显式使用 $\sqrt{\max(y_h,0)}$，且不改写原始强度表。
+
+\section{最小二乘作为极大似然估计}
+式~\eqref{eq:intensity_gaussian} 的负对数似然为
+\begin{equation}
+-\log L=\frac12(\vct y-\vct\mu)^{\mathsf T}\bm{\Sigma}^{-1}(\vct y-\vct\mu)
++\frac12\log\det\bm{\Sigma}+\frac{n}{2}\log(2\pi).
+\end{equation}
+当 $\bm{\Sigma}$ 固定时，最大化似然等价于最小化
+\begin{equation}
+\Phi(\vct p)=\sum_h w_h[y_h-\mu_h(\vct p)]^2,
+\qquad w_h=\sigma_h^{-2}.
+\end{equation}
+如果误差方差还随信号大小变化，可采用经验项，例如
+\begin{equation}
+w_h^{-1}=\sigma_h^2+(aP_h)^2+bP_h,
+\qquad P_h=\frac{\max(y_h,0)+2\mu_h}{3}.
+\label{eq:weight}
+\end{equation}
+这是可选择的误差模型，不能仅凭它使拟合优度接近 1，便认为结构正确。实现采用外层迭代：先固定一组权重求解参数，再根据新模型更新权重。协方差对应最后一次实际优化的冻结权重；报告同时给出下一次权重相对变化，以判断外层迭代是否稳定。
+
+\section{尺度的解析估计}
+固定结构，令 $J_h=|F_h|^2$，强度模型为 $\mu_h=kJ_h$。对
+\begin{equation}
+\Phi(k)=\sum_h w_h(y_h-kJ_h)^2
+\end{equation}
+求导，得
+\begin{equation}
+\widehat k=\frac{\sum_hw_hy_hJ_h}{\sum_hw_hJ_h^2},\qquad
+\Var(\widehat k)=\left(\sum_hw_hJ_h^2\right)^{-1}.
+\label{eq:scaleclosed}
+\end{equation}
+后一式假设输入 $\sigma_h$ 是绝对标准不确定度且结构固定。它为实现提供了独立的闭式检验：有负强度时，优化器仍应恢复同一尺度估计。若尺度被约束为正而闭式解为负，则最优解位于边界，常规对称正态区间不再适用。
+
+\section{合并观测与等价反射}
+对同一反射的独立观测 $y_i$，逆方差加权均值为
+\begin{equation}
+\bar y=\frac{\sum_i y_i/\sigma_i^2}{\sum_i1/\sigma_i^2},\qquad
+\sigma_{\bar y}^2=\frac{1}{\sum_i1/\sigma_i^2}.
+\end{equation}
+它是固定共同均值的极大似然估计。若组内离散显著超过该误差模型，应该检查批次尺度、吸收或离群观测，不能把形式上更小的 $\sigma_{\bar y}$ 解释为更可靠。
+
+当异常散射用于绝对结构分析时，$h$ 与 $-h$ 不是强度等价观测；精修保留二者。实密度相位恢复采用另一个明确的近似，即在求相位阶段合并 Friedel 强度，以满足 Hermitian 条件。两种数据视图应分开保存，不能让地图准备过程改变精修的数据。
+
+\section{归一化结构因子}
+在随机相位近似下，原子间交叉项的平均值趋于零，因此
+\begin{equation}
+\E[|F_h|^2]\simeq\epsilon_h\sum_{j\in\mathrm{cell}}o_j^2|f_j(s)|^2T_j^2(s),
+\end{equation}
+求和覆盖单胞内所有不同的原子位置，$\epsilon_h$ 表示特殊反射的统计重数修正。以下中心与非中心分布关系取非异常散射和相应随机相位近似。归一化量可写为
+\begin{equation}
+E_h=\frac{F_h}{\sqrt{\E[|F_h|^2]}}.
+\end{equation}
+非中心对称情形中，归一化振幅的实部和虚部近似独立高斯，$|E|^2$ 因而近似指数分布，其二阶矩为 $\E[|E|^4]=2$。中心对称结构只剩一个实分量，$|E|^2$ 近似一个自由度的 $\chi^2$ 分布，故 $\E[|E|^4]=3$。这些结果说明强度统计能提供对称性信息，但原子相关性、重原子和伪平移都可破坏随机相位近似。
+
+原生求解器按已知组成的平均原子散射衰减作显式锐化。它不把这种简单的谱均衡宣称为完整的 Wilson 归一化、各向异性归一化或传统程序的所有统计预处理。

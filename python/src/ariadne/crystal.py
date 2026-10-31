@@ -142,6 +142,12 @@ def predict(cif_paths: list[str | Path], reflections: list[dict[str, Any]], *,
         raise ValueError('one block selector is required per CIF')
     if len({r['id'] for r in reflections}) != len(reflections):
         raise ValueError('reflection IDs must be unique')
+    # Index transforms describe observations, independently of each candidate.
+    # Domain/equivalence records may repeat an HKL; calculate it once per CIF.
+    mapped = [tuple(transform_hkl(r['hkl'], r.get('index_transform'))) for r in reflections]
+    if (0, 0, 0) in mapped:
+        raise ValueError('F000 is not an experimental reflection')
+    unique_hkl = dict.fromkeys(mapped)
     all_values, audits = [], []
     for path, block in zip(cif_paths, blocks):
         audit = audit_cif(path, block=block)
@@ -156,17 +162,14 @@ def predict(cif_paths: list[str | Path], reflections: list[dict[str, Any]], *,
         # Explicitly convert CIF chemical occupancy once, on a fresh object.
         st.change_occupancies_to_crystallographic(special_position_tolerance)
         calculator = gemmi.StructureFactorCalculatorX(st.cell)
-        values = []
-        for item in reflections:
-            hkl = transform_hkl(item['hkl'], item.get('index_transform'))
-            if hkl == [0, 0, 0]:
-                raise ValueError('F000 is not an experimental reflection')
+        values = {}
+        for hkl in unique_hkl:
             F = calculator.calculate_sf_from_small_structure(st, hkl)
             value = float(abs(F)**2)
             if not math.isfinite(value):
                 raise ValueError('nonfinite calculated intensity')
-            values.append(value)
-        all_values.append(values)
+            values[hkl] = value
+        all_values.append([values[hkl] for hkl in mapped])
         audits.append(audit)
     return dict(schema='ariadne-structure-predictions/1', ids=[r['id'] for r in reflections],
                 predictions=np.asarray(all_values).T.tolist(), audits=audits,

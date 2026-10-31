@@ -18,6 +18,8 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install package and development dependencies
+        env:
+          ARIADNE_REQUIRE_NATIVE: "1"
         run: python -m pip install -e './python[dev]'
       - name: Check Python source and shell syntax
         run: |

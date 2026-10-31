@@ -43,5 +43,7 @@
   "benchmark": "reports/rebuild_feedback_benchmark.json",
   "demo": "reports/rebuild_demo.json",
   "historical_status": "reports/inherited-implementation-status.json",
-  "publication_review": "CODE_REVIEW.zh-CN.md"
+  "publication_review": "CODE_REVIEW.zh-CN.md",
+  "current_validation": "reports/current_validation/summary.json",
+  "compiled_extensions": "Optional Ariadne C++17 proposal kernel; installed DIALS/cctbx/dxtbx binaries unchanged"
 }

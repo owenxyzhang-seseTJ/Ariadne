@@ -6,6 +6,8 @@ DIALS-derived source portions retain the upstream BSD license reproduced in [pat
 
 Third-party dependencies and referenced publications retain their respective licenses. Official DAFi binaries and proprietary vendor programs are not distributed with this software.
 
+`ariadne_xtal/` is a separate component distributed under its own MIT license in [`ariadne_xtal/LICENSE`](ariadne_xtal/LICENSE). That license governs that directory.
+
 ## Bundled third-party components
 
 The runtime installed by `scripts/install_local.sh` includes the components below. Their license texts are reproduced under [`licenses/`](licenses/).

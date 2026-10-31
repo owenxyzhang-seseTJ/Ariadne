@@ -1,6 +1,7 @@
 """Protocol fixtures, NOT executions of installed SHELXT/SHELXL binaries."""
 import sys
 import time
+import json
 import pytest
 from create_demo import write_model
 from ariadne.agent import engine
@@ -18,7 +19,7 @@ def executable_fixture(path,content):
     return str(path)
 
 
-def solve_fixture(tmp_path,missing_pair=False):
+def solve_fixture(tmp_path,monkeypatch,missing_pair=False):
     cif=tmp_path/'m.cif';write_model(cif);ciftext=cif.read_text()
     solve=executable_fixture(tmp_path/'shelxt_fixture',
         'from pathlib import Path\n'
@@ -33,13 +34,16 @@ def solve_fixture(tmp_path,missing_pair=False):
         +"Path('job.cif').write_text(text+'\\n_refine_ls_R_factor_gt '+r+'\\n')\n")
     ins=tmp_path/'in.ins';ins.write_text(INS)
     hkl=tmp_path/'in.hkl';hkl.write_text('1 0 0 999 9\n')
-    request=dict(mode='solve',inputs={'ins':str(ins),'hkl':str(hkl)},executables={'shelxt':solve,'shelxl':refine})
+    config=tmp_path/'deployment.json'
+    config.write_text(json.dumps({'shelxt':solve,'shelxl':refine}))
+    monkeypatch.setenv('ARIADNE_EXECUTABLES_CONFIG',str(config))
+    request=dict(mode='solve',inputs={'ins':str(ins),'hkl':str(hkl)})
     root=tmp_path/'session';engine.initialize(request,root)
     return root
 
 
-def test_actual_candidate_pairs_drive_dynamic_refinement(tmp_path):
-    root=solve_fixture(tmp_path);result=engine.run(root)
+def test_actual_candidate_pairs_drive_dynamic_refinement(tmp_path,monkeypatch):
+    root=solve_fixture(tmp_path,monkeypatch);result=engine.run(root)
     assert all(x['status']=='succeeded' for x in result['nodes'])
     assert (root/'attempts/refine_00/001/job.hkl').read_text().split()[3]=='111'
     assert (root/'attempts/refine_01/001/job.hkl').read_text().split()[3]=='222'
@@ -49,15 +53,15 @@ def test_actual_candidate_pairs_drive_dynamic_refinement(tmp_path):
     assert comparison['common_effective_observation_model_verified'] is False
 
 
-def test_missing_candidate_hkl_does_not_fallback_to_original(tmp_path):
-    root=solve_fixture(tmp_path,missing_pair=True);result=engine.run(root)
+def test_missing_candidate_hkl_does_not_fallback_to_original(tmp_path,monkeypatch):
+    root=solve_fixture(tmp_path,monkeypatch,missing_pair=True);result=engine.run(root)
     assert 'refine_01' not in [x['id'] for x in result['nodes']]
     store=Store(root);missing=store.node('solve')['result']['candidates'][1];store.close()
     assert not missing['eligible_for_refinement'] and missing['hkl'] is None
 
 
-def test_zero_exit_without_outputs_is_failed(tmp_path):
-    root=solve_fixture(tmp_path)
+def test_zero_exit_without_outputs_is_failed(tmp_path,monkeypatch):
+    root=solve_fixture(tmp_path,monkeypatch)
     exe=tmp_path/'shelxt_fixture';exe.write_text('#!'+sys.executable+'\npass\n');exe.chmod(0o755)
     result=engine.run(root)
     assert result['nodes'][0]['status']=='failed'

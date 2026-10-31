@@ -31,7 +31,8 @@ class Context:
 
     @property
     def executables(self):
-        return self.request['executables']
+        from .process import deployment_executables
+        return deployment_executables()
 
     def remaining(self):
         budget = self.request['budget']

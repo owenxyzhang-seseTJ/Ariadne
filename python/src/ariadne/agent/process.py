@@ -9,7 +9,7 @@ import subprocess
 import time
 from typing import Callable
 
-from .util import atomic_json, now
+from .util import atomic_json, now, read_json
 
 
 class Cancelled(RuntimeError):
@@ -20,11 +20,25 @@ class NeedsReview(RuntimeError):
     pass
 
 
+def deployment_executables() -> dict[str, str]:
+    """Load operator-owned configuration, never a path supplied in a task."""
+    path = os.environ.get('ARIADNE_EXECUTABLES_CONFIG')
+    if not path:
+        return {}
+    value = read_json(Path(path).expanduser())
+    names = {'shelxt', 'shelxl', 'scientific_python'} | {'dials.'+op for op in
+             ('import', 'find_spots', 'index', 'refine', 'integrate', 'scale', 'export', 'predict')}
+    if (not isinstance(value, dict) or set(value)-names
+            or any(not isinstance(v, str) or not v or '\x00' in v for v in value.values())):
+        raise ValueError('invalid deployment executable configuration')
+    return value
+
+
 def executable(name: str, mapping: dict[str, str]) -> str:
     configured = mapping.get(name, name)
     resolved = shutil.which(configured)
     if not resolved:
-        raise RuntimeError(f'Required executable not found: {name}. Configure executables.{name}.')
+        raise RuntimeError(f'Required executable not found: {name}. Configure ARIADNE_EXECUTABLES_CONFIG.')
     return resolved
 
 
