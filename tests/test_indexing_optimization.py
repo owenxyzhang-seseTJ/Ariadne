@@ -14,12 +14,15 @@ sys.path.insert(0, str(ROOT / 'python/src'))
 from ariadne import ranking, spots
 try:
     from dials.algorithms.indexing import model_evaluation
+    from dials.algorithms.integration.fit import ProfileFitter
     from dials.array_family import flex
     from dxtbx.model import Crystal, Scan
     from dxtbx.model.experiment_list import Experiment, ExperimentList
 except ImportError as exc:
     raise unittest.SkipTest('Requires native DIALS/dxtbx runtime') from exc
 from unittest.mock import patch
+sys.path.insert(0, str(ROOT / 'skills/ariadne-reduction/scripts'))
+from overlap_integrator import solve_irls_known_background  # noqa: E402
 
 # 开发目录使用明确的 overlay；已安装插件直接使用安装后模块。
 DIALS_SOURCE = ROOT.parent / 'vendor/dials-3.30.1/src/dials/algorithms/indexing'
@@ -40,6 +43,24 @@ old_spots = baseline('old_spots', 'python/src/ariadne/spots.py')
 
 
 class IndexingOptimizationTests(unittest.TestCase):
+    def test_fused_fixed_background_irls_matches_dials(self):
+        rng = np.random.default_rng(944)
+        profiles = rng.uniform(.1, 1., (800, 4))
+        profiles /= profiles.sum(axis=0)
+        background = np.full(len(profiles), 2.)
+        data = rng.poisson(background+profiles@np.array([900., 90., 9., 2.])).astype(float)
+        valid = rng.random(len(data)) > .02
+        reference = ProfileFitter(
+            flex.double(data), flex.double(background), flex.bool(valid),
+            flex.double(np.ascontiguousarray(profiles.T)), 1e-6, 100)
+        actual = solve_irls_known_background(
+            data, background, profiles, valid, 1e-10,
+            tolerance=1e-12, max_iterations=100)
+        np.testing.assert_allclose(
+            actual['intensities_internal'], np.asarray(reference.intensity()),
+            rtol=1e-8, atol=1e-6)
+        self.assertEqual(actual['iterations'], int(reference.niter())+1)
+
     def test_cached_holdout_preserves_candidate_training(self):
         n = 2400
         reflections = flex.reflection_table()
@@ -105,8 +126,10 @@ class IndexingOptimizationTests(unittest.TestCase):
                                 noise_model=model, background_width=21, exclusion_width=7,
                                 scales=[1, 3, 5], score_threshold=4., support_sigma=1.,
                                 min_valid_fraction=.5, background_iterations=iterations)
-                np.testing.assert_array_equal(spots.propose(image, mask, **settings),
-                                              old_spots.propose(image, mask, **settings))
+                np.testing.assert_array_equal(
+                    spots.propose(image, mask, **settings, statistic='deviance',
+                                  component_min_size=1),
+                    old_spots.propose(image, mask, **settings))
 
     def test_native_candidate_loop_shares_selection_without_mutation(self):
         from dials.algorithms.indexing import lattice_search

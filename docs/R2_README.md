@@ -69,9 +69,18 @@ $$
 X_j=\frac{Y_j-b_0}{g},\qquad v_r=\frac{\sigma_r^2}{g^2}.
 $$
 
-The mask enters every local sum. An annular neighborhood excludes the candidate support, estimates the background from valid pixels, and iteratively removes positive contaminants from the **background estimate**. Measured image values are retained. Insufficient valid background support prevents a proposal.
+The mask enters every local sum. An annular neighborhood excludes the candidate support and estimates the background from valid pixels. Optional clipping can iteratively remove positive contaminants from the **background estimate**; measured image values are always retained. Insufficient valid background support prevents a proposal.
 
-The implementation evaluates box kernels of several sizes. For observed kernel sum $n$ and expected background sum $\mu$, the Poisson branch uses the one-sided deviance score
+The implementation evaluates box kernels of several sizes. The default statistic standardizes the excess by expected count, readout variance, and background-estimation variance:
+
+$$
+Z=\frac{\max(n-\mu,0)}
+{\sqrt{\max(\mu+n_vv_r+W^2\sum v_b,.5)}},
+$$
+
+where $W$ is the square-kernel width, $n_v$ is the valid-pixel count, and $v_b$ is the propagated annular background variance. The $W^2$ multiplier preserves the dominant correlation of a locally shared background estimate and is a conservative effective-variance model, not an exact posterior covariance. This gives all kernel sizes the same decision scale. Connected components smaller than four pixels are removed by default.
+
+The earlier count-excess mode remains available for exact reproduction. For observed kernel sum $n$ and expected background sum $\mu$, its Poisson branch uses the one-sided deviance score
 
 $$
 T(n,\mu)=
@@ -85,7 +94,7 @@ The expected-count floor of 0.5 is numerical regularization for an empty sampled
 
 A pixel is proposed when a scale exceeds the score threshold and the pixel satisfies the local support condition. DIALS subsequently constructs connected spots and carries out crystallographic indexing. The score therefore identifies candidate signal, not an independently verified Bragg reflection. Adaptive background estimation and scale selection mean that it is not a calibrated false-positive probability.
 
-Separable running filters evaluate the box sums in approximately $O(SN)$ work for $N$ pixels and $S$ scales, avoiding a loop over every neighborhood pixel. This computational structure is not a measured speedup claim.
+The C++ kernel uses summed-area statistics, can run without the Python GIL, and evaluates score maps only at candidate pixels. On a fixed synthetic train/validation/final-test split, the standardized default raised final-test F1 from 0.793 to 0.852 and weak-spot recall from 3.4% to 18.2%; the report retains false positives and localization error. This benchmark is threshold plus component extraction, not the complete DIALS indexing pipeline.
 
 Implementation: [`python/src/ariadne/spots.py`](python/src/ariadne/spots.py).
 

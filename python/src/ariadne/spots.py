@@ -1,13 +1,14 @@
-"""Mask-aware multi-scale count excess proposals; not a Bragg classifier.
+"""Mask-aware multi-scale standardized excess proposals; not a Bragg classifier.
 
 Box sums use separable running filters: O(scales * pixels), not window-area
-loops. Poisson deviance is conditional on the estimated background; threshold
-scores are not calibrated p-values after adaptive estimation/multiple scales.
+loops. The standardized statistic is conditional on the estimated background;
+threshold scores are not calibrated p-values after adaptive
+estimation/multiple scales.
 """
 from __future__ import annotations
 
 import numpy as np
-from scipy.ndimage import uniform_filter
+from scipy.ndimage import label, uniform_filter
 from scipy.special import xlogy
 
 try:
@@ -22,7 +23,8 @@ def box_sum(array, width):
 
 def propose(image, mask, *, gain, offset, readout_variance, noise_model,
             background_width, exclusion_width, scales, score_threshold,
-            support_sigma, min_valid_fraction, background_iterations):
+            support_sigma, min_valid_fraction, background_iterations,
+            statistic="standardized", component_min_size=4):
     if gain is None or not np.isfinite(gain) or gain <= 0:
         raise ValueError("Supply calibrated gain_adu_per_photon; gain is never inferred")
     if noise_model not in ("poisson", "poisson_gaussian"):
@@ -36,6 +38,10 @@ def propose(image, mask, *, gain, offset, readout_variance, noise_model,
         raise ValueError("Background annulus must exclude all candidate kernel supports")
     if not 0 < min_valid_fraction <= 1 or background_iterations < 0 or score_threshold <= 0 or support_sigma < 0:
         raise ValueError("Invalid threshold settings")
+    if statistic not in ("standardized", "deviance"):
+        raise ValueError("statistic must be standardized or deviance")
+    if type(component_min_size) is not int or component_min_size < 1:
+        raise ValueError("component_min_size must be a positive integer")
     data = (np.asarray(image, dtype=float) - offset) / gain
     valid = np.asarray(mask, dtype=bool) & np.isfinite(data)
     if data.ndim != 2 or valid.shape != data.shape:
@@ -46,7 +52,8 @@ def propose(image, mask, *, gain, offset, readout_variance, noise_model,
     if _native_proposals is not None:
         return _native_proposals(data,valid,readout,noise_model=='poisson',background_width,
                                  exclusion_width,scales,score_threshold,support_sigma,
-                                 min_valid_fraction,background_iterations)
+                                 min_valid_fraction,background_iterations,
+                                 statistic=='standardized',component_min_size)
     retained = valid.copy()
     annulus_area = background_width**2 - exclusion_width**2
 
@@ -66,7 +73,7 @@ def propose(image, mask, *, gain, offset, readout_variance, noise_model,
         retained &= ~(usable & (data > mean + 4. * np.sqrt(clipping_variance)))
     mean, count, usable = background(retained)
     support = data > mean + support_sigma * np.sqrt(mean + readout)
-    if noise_model == "poisson_gaussian":
+    if statistic == "standardized" or noise_model == "poisson_gaussian":
         background_variance = (mean + readout) / np.maximum(count, 1.)
         np.copyto(background_variance, 0., where=~valid)
     del count, retained
@@ -80,16 +87,25 @@ def propose(image, mask, *, gain, offset, readout_variance, noise_model,
         observed = box_sum(data, width)
         expected = box_sum(mean, width)
         enough = n_valid >= width**2 * min_valid_fraction
-        if noise_model == "poisson":
+        if statistic == "standardized":
+            variance = expected + readout * n_valid
+            variance += box_sum(background_variance, width) * width**2
+            statistic_map = np.maximum(observed - expected, 0.) / np.sqrt(np.maximum(variance, .5))
+        elif noise_model == "poisson":
             # A finite expected-count floor avoids infinity for zero sampled background.
             # This regularization is an algorithm parameter, not a measured variance.
             expected = np.maximum(expected, .5)
             excess = np.maximum(observed, expected)
-            statistic = np.sqrt(np.maximum(2. * (xlogy(excess, excess / expected) - excess + expected), 0.))
+            statistic_map = np.sqrt(np.maximum(2. * (xlogy(excess, excess / expected) - excess + expected), 0.))
         else:
             # Quasi-Gaussian excess with annulus background-estimation uncertainty.
             variance = expected + readout * n_valid
             variance += box_sum(background_variance, width) * width**2
-            statistic = np.maximum(observed - expected, 0.) / np.sqrt(np.maximum(variance, .5))
-        np.maximum(best, statistic, out=best, where=enough & usable)
-    return valid & usable & support & (best >= score_threshold)
+            statistic_map = np.maximum(observed - expected, 0.) / np.sqrt(np.maximum(variance, .5))
+        np.maximum(best, statistic_map, out=best, where=enough & usable)
+    selected = valid & usable & support & (best >= score_threshold)
+    if component_min_size > 1 and np.any(selected):
+        groups, count = label(selected)
+        sizes = np.bincount(groups.ravel(), minlength=count + 1)
+        selected &= sizes[groups] >= component_min_size
+    return selected

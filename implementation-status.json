@@ -1,5 +1,5 @@
 {
-  "build": "0.7.0-rebuild-20261030",
+  "build": "0.7.0-dials-deep-accuracy-20261031",
   "baseline": "Recovered R2 archive, Ariadne 0.5.0, upstream 797ac22ffa9b81da2dd977e013bea8f114b49eb2",
   "source_recovery": "Reimplementation on recovered R2, not a byte-identical recovery of the lost 0.7.0 archive",
   "implemented": [
@@ -14,7 +14,10 @@
     "SHELXL execution contract and CIF audit",
     "Deterministic and chat-completions planners",
     "13 registered scientific actions",
-    "8 additional optional MCP tools"
+    "8 additional optional MCP tools",
+    "Cross-scale standardized spot proposal statistic",
+    "Fused DIALS-compatible fixed-background IRLS",
+    "Held-out Ariadne/DIALS spot and profile comparison"
   ],
   "tested_here": [
     "NumPy/SciPy numerical tests",
@@ -25,11 +28,13 @@
     "Synthetic feedback demonstration",
     "Real MCP 1.30.0 tool registration",
     "Installed-wheel audit outside checkout",
-    "All collectible regression modules and scientific adapter contracts"
+    "All collectible regression modules and scientific adapter contracts",
+    "Actual DIALS 3.30.1 threshold and ProfileFitter C++ calls",
+    "Installed SHELXL-2025/1 and SHELXT executions on the recorded fixtures",
+    "Final-test synthetic spot accuracy after frozen parameter selection",
+    "Profile covariance coverage under known heteroscedastic Gaussian noise"
   ],
   "not_tested_here": [
-    "DIALS native runtime",
-    "SHELXT/SHELXL binaries",
     "Online LLM service",
     "Experimental raw-frame end-to-end accuracy"
   ],
@@ -45,5 +50,6 @@
   "historical_status": "reports/inherited-implementation-status.json",
   "publication_review": "CODE_REVIEW.zh-CN.md",
   "current_validation": "reports/current_validation/summary.json",
-  "compiled_extensions": "Optional Ariadne C++17 proposal and known-background WLS kernel; installed DIALS/cctbx/dxtbx binaries unchanged"
+  "deep_comparison": "reports/current_validation/DIALS_DEEP_DIVE.zh-CN.md",
+  "compiled_extensions": "Optional Ariadne C++17 proposal, fixed-background WLS and fused IRLS kernels; installed DIALS/cctbx/dxtbx binaries unchanged"
 }

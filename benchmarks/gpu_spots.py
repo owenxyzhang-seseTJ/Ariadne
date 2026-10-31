@@ -144,7 +144,7 @@ def main():
     settings = dict(gain=1., offset=0., readout_variance=0., noise_model='poisson',
                     background_width=31, exclusion_width=7, scales=[1, 3, 5],
                     score_threshold=6., support_sigma=1., min_valid_fraction=.5,
-                    background_iterations=2)
+                    background_iterations=2, statistic='deviance', component_min_size=1)
     measurements = []
     for size in args.sizes:
         image, mask, centres = fixture(size)

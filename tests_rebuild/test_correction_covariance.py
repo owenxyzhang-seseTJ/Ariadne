@@ -99,3 +99,25 @@ def test_known_background_near_collinearity_uses_conservative_fallback(monkeypat
     result=overlap_integrator.solve_joint(data,variance,profiles,np.ones(500,bool),
                                            np.empty((500,0)),1e-7)
     assert captured and result['rank']<2
+
+
+@pytest.mark.parametrize('components',[1,2,8])
+def test_fused_irls_matches_python_reference(components):
+    import overlap_integrator
+    rng=np.random.default_rng(941+components)
+    profiles=rng.uniform(.1,1,(1800,components))
+    profiles/=profiles.sum(axis=0)
+    background=np.full(len(profiles),2.)
+    data=rng.poisson(background+profiles@np.geomspace(900.,4.,components)).astype(float)
+    valid=rng.random(len(data))>.03
+    native=overlap_integrator.solve_irls_known_background(
+        data,background,profiles,valid,1e-9,tolerance=1e-12,max_iterations=100)
+    reference=overlap_integrator._solve_irls_python(
+        data,background,profiles,valid,1e-9,1e-12,100)
+    np.testing.assert_allclose(native['intensities_internal'],
+                               reference['intensities_internal'],rtol=2e-12,atol=2e-10)
+    np.testing.assert_allclose(native['covariance_identifiable_subspace'],
+                               reference['covariance_identifiable_subspace'],rtol=3e-11)
+    np.testing.assert_allclose(native['fitted'],reference['fitted'],rtol=2e-12,atol=2e-10)
+    assert native['iterations']==reference['iterations']
+    assert native['chi2']==pytest.approx(reference['chi2'],rel=2e-12)

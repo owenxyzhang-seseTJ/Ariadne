@@ -20,7 +20,7 @@ from .store import Store
 from .util import artifact, artifact_path, atomic_json, dumps, exclusive_lock, pointer, read_json
 
 
-BUILD = '0.7.0-integrated-native-20261031'
+BUILD = '0.7.0-dials-deep-accuracy-20261031'
 
 
 def ref(node: str, path: str = ''):

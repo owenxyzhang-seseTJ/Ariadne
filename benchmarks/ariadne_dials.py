@@ -23,7 +23,7 @@ from dials.array_family import flex
 from dials.algorithms.integration.fit import ProfileFitter
 from dials.algorithms.image.threshold import DispersionThreshold
 from dials.algorithms.indexing import model_evaluation
-from overlap_integrator import solve_joint,contrast
+from overlap_integrator import solve_irls_known_background,solve_joint,contrast
 from ariadne.spots import propose
 
 
@@ -44,14 +44,9 @@ def profile_problem(count):
 
 
 def ariadne_irls(data,background,profiles,valid):
-    old=np.ones(profiles.shape[1])
-    for iteration in range(100):
-        variance=background+profiles@np.maximum(1/len(data),np.abs(old))
-        result=solve_joint(data-background,variance,profiles,valid,np.empty((len(data),0)),1e-10)
-        current=result['intensities_internal']
-        if np.sum((current-old)**2)<1e-12:break
-        old=current
-    return current,result,iteration+1
+    result=solve_irls_known_background(data,background,profiles,valid,1e-10,
+                                       tolerance=1e-12,max_iterations=100)
+    return result['intensities_internal'],result,result['iterations']
 
 
 def detection_quality(selected,centres):
@@ -112,8 +107,9 @@ def worker(kind,size,engine,repeats):
         def native():
             algorithm(image,valid,output);return output.as_numpy_array()
         settings=dict(gain=1.,offset=0.,readout_variance=0.,noise_model='poisson',
-                      background_width=31,exclusion_width=7,scales=[1,3,5],score_threshold=6.,
-                      support_sigma=1.,min_valid_fraction=.5,background_iterations=2)
+                      background_width=31,exclusion_width=7,scales=[1,3,5],score_threshold=4.,
+                      support_sigma=.5,min_valid_fraction=.5,background_iterations=0,
+                      statistic='standardized',component_min_size=4)
         adapted=lambda:propose(data,mask,**settings)
         details=dict(shape=[size,size],noise='Poisson; background 4 photons/pixel; gain=1; 1% mask',
                      flux_levels=[30,100,400,1200],sigma_levels=[.8,1.3,2.],

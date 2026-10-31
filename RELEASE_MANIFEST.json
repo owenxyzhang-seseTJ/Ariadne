@@ -1,7 +1,7 @@
 {
   "schema": "ariadne-release-manifest/2",
-  "build": "0.7.0-integrated-native-20261031",
-  "generated_utc": "2026-10-31T06:38:17.346752+00:00",
+  "build": "0.7.0-dials-deep-accuracy-20261031",
+  "generated_utc": "2026-10-31T07:23:02.061159+00:00",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -61,11 +61,11 @@
     },
     {
       "path": "README.ja.md",
-      "bytes": 25706
+      "bytes": 26620
     },
     {
       "path": "README.md",
-      "bytes": 5945
+      "bytes": 6587
     },
     {
       "path": "README.zh-CN.md",
@@ -481,7 +481,7 @@
     },
     {
       "path": "benchmarks/ariadne_dials.py",
-      "bytes": 10067
+      "bytes": 9994
     },
     {
       "path": "benchmarks/baseline-2b9bd04.zip",
@@ -494,6 +494,10 @@
     {
       "path": "benchmarks/baseline-first-principles.zip",
       "bytes": 186671
+    },
+    {
+      "path": "benchmarks/dials_deep.py",
+      "bytes": 17222
     },
     {
       "path": "benchmarks/export_round2.py",
@@ -509,7 +513,7 @@
     },
     {
       "path": "benchmarks/gpu_spots.py",
-      "bytes": 7664
+      "bytes": 7708
     },
     {
       "path": "benchmarks/lattice_principles.py",
@@ -525,7 +529,7 @@
     },
     {
       "path": "benchmarks/optimization.py",
-      "bytes": 12254
+      "bytes": 12390
     },
     {
       "path": "benchmarks/pixel_principles.py",
@@ -556,20 +560,24 @@
       "bytes": 14584
     },
     {
+      "path": "dist/ariadne-0.7.0-cp312-cp312-macosx_11_0_arm64.whl",
+      "bytes": 102692
+    },
+    {
       "path": "dist/ariadne-0.7.0-py3-none-any.whl",
-      "bytes": 76186
+      "bytes": 77889
     },
     {
       "path": "dist/ariadne-0.7.0.tar.gz",
-      "bytes": 64790
+      "bytes": 66467
     },
     {
       "path": "docs/R2_README.md",
-      "bytes": 24436
+      "bytes": 25385
     },
     {
       "path": "docs/R2_README.zh-CN.md",
-      "bytes": 22198
+      "bytes": 22939
     },
     {
       "path": "environment.yml",
@@ -613,7 +621,7 @@
     },
     {
       "path": "implementation-status.json",
-      "bytes": 2229
+      "bytes": 2734
     },
     {
       "path": "licenses/DIALS-LICENSE.txt",
@@ -649,7 +657,7 @@
     },
     {
       "path": "patches/dials-3.30.1-ariadne.patch",
-      "bytes": 9354
+      "bytes": 9558
     },
     {
       "path": "python/MANIFEST.in",
@@ -669,7 +677,7 @@
     },
     {
       "path": "python/src/ariadne/_native.cpp",
-      "bytes": 15474
+      "bytes": 25135
     },
     {
       "path": "python/src/ariadne/agent/__init__.py",
@@ -685,7 +693,7 @@
     },
     {
       "path": "python/src/ariadne/agent/backends.py",
-      "bytes": 13847
+      "bytes": 14085
     },
     {
       "path": "python/src/ariadne/agent/bundles.py",
@@ -697,7 +705,7 @@
     },
     {
       "path": "python/src/ariadne/agent/engine.py",
-      "bytes": 24035
+      "bytes": 24037
     },
     {
       "path": "python/src/ariadne/agent/loop.py",
@@ -765,11 +773,11 @@
     },
     {
       "path": "python/src/ariadne/server.py",
-      "bytes": 30139
+      "bytes": 30377
     },
     {
       "path": "python/src/ariadne/spots.py",
-      "bytes": 5157
+      "bytes": 6134
     },
     {
       "path": "python/src/ariadne/worker.py",
@@ -804,8 +812,12 @@
       "bytes": 38292
     },
     {
+      "path": "reports/current_validation/DIALS_DEEP_DIVE.zh-CN.md",
+      "bytes": 5902
+    },
+    {
       "path": "reports/current_validation/README.zh-CN.md",
-      "bytes": 7110
+      "bytes": 7367
     },
     {
       "path": "reports/current_validation/ariadne_dials.json",
@@ -813,7 +825,11 @@
     },
     {
       "path": "reports/current_validation/ariadne_dials_native.json",
-      "bytes": 19320
+      "bytes": 19669
+    },
+    {
+      "path": "reports/current_validation/dials_deep.json",
+      "bytes": 35012
     },
     {
       "path": "reports/current_validation/gpu_spots.json",
@@ -825,7 +841,7 @@
     },
     {
       "path": "reports/current_validation/summary.json",
-      "bytes": 967
+      "bytes": 1668
     },
     {
       "path": "reports/current_validation/xtal_shelxl.json",
@@ -1005,7 +1021,7 @@
     },
     {
       "path": "scripts/make_release.py",
-      "bytes": 3210
+      "bytes": 3212
     },
     {
       "path": "scripts/run_numerical_validation.py",
@@ -1065,7 +1081,7 @@
     },
     {
       "path": "skills/ariadne-reduction/references/source-extensions.md",
-      "bytes": 9913
+      "bytes": 10070
     },
     {
       "path": "skills/ariadne-reduction/references/sources.md",
@@ -1149,7 +1165,7 @@
     },
     {
       "path": "skills/ariadne-reduction/scripts/overlap_integrator.py",
-      "bytes": 29391
+      "bytes": 33986
     },
     {
       "path": "skills/ariadne-reduction/scripts/overlap_observability.py",
@@ -1225,7 +1241,7 @@
     },
     {
       "path": "tests/test_indexing_optimization.py",
-      "bytes": 10679
+      "bytes": 11883
     },
     {
       "path": "tests/test_information_modes.py",
@@ -1301,7 +1317,7 @@
     },
     {
       "path": "tests_rebuild/test_correction_covariance.py",
-      "bytes": 5247
+      "bytes": 6460
     },
     {
       "path": "tests_rebuild/test_crystal.py",
@@ -1325,7 +1341,7 @@
     },
     {
       "path": "tests_rebuild/test_native_spots.py",
-      "bytes": 2286
+      "bytes": 2491
     },
     {
       "path": "tests_rebuild/test_planner.py",
@@ -1334,6 +1350,10 @@
     {
       "path": "tests_rebuild/test_review_regressions.py",
       "bytes": 9503
+    },
+    {
+      "path": "tests_rebuild/test_spot_accuracy.py",
+      "bytes": 3465
     },
     {
       "path": "verification/round2_patch_verification.json",

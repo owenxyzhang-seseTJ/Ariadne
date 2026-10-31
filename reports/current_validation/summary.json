@@ -2,7 +2,7 @@
   "schema": "ariadne-combined-validation/1",
   "date": "2026-10-31",
   "ariadne": {
-    "passed": 359,
+    "passed": 369,
     "subtests_passed": 136,
     "failed": 0,
     "errors": 0,
@@ -18,9 +18,11 @@
   "installed_shelxl": "2025/1; actual execution passed",
   "reference_prs": [
     3,
-    4
+    4,
+    5,
+    6
   ],
-  "native_backend": "C++17 fused proposal kernel and fixed-background eigen/Cholesky WLS; native wheel compiled and exercised",
+  "native_backend": "C++17 standardized multiscale proposals, component pruning, fixed-background eigen/Cholesky WLS and fused DIALS-compatible IRLS",
   "python": "3.12.15 (main, Oct 13 2026, 16:47:20) [Clang 21.1.8 ]",
   "platform": "macOS-26.5-arm64-arm-64bit",
   "benchmarks": [
@@ -28,7 +30,22 @@
     "ariadne_dials.json",
     "ariadne_dials_native.json",
     "gpu_spots.json",
+    "dials_deep.json",
     "xtal_shelxl.json"
   ],
-  "gpu_assessment": "Apple M5 Metal/MLX float32 is 1.54-1.68x faster on 512-2048 square spot images but changes 4-11 threshold pixels; experimental only"
+  "gpu_assessment": "Apple M5 Metal/MLX float32 is 1.54-1.68x faster on 512-2048 square spot images but changes 4-11 threshold pixels; experimental only",
+  "dials_deep_dive": "DIALS_DEEP_DIVE.zh-CN.md",
+  "spot_accuracy_final_test": {
+    "legacy_f1": 0.7931034482758621,
+    "standardized_f1": 0.8517673888255417,
+    "legacy_weak_recall": 0.034482758620689655,
+    "standardized_weak_recall": 0.18226600985221675,
+    "standardized_precision": 0.9651162790697675,
+    "scope": "synthetic threshold plus identical component extraction; not full DIALS pipeline"
+  },
+  "profile_comparison": {
+    "maximum_intensity_difference": 1.0163603292312473e-10,
+    "ariadne_over_dials_median_time": 0.6114241783747258,
+    "scope": "same fixed background, profiles, mask and DIALS-compatible IRLS"
+  }
 }
