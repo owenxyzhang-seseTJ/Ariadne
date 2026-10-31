@@ -1,0 +1,112 @@
+\chapter{非线性精修与导数}
+\section{目标函数和独立变量}
+精修从已有原子模型出发，寻找使观测强度与计算强度一致的参数。设全部物理参数为 $\vct p$，约束参数化为 $\vct p=\mathcal P(\vct z)$，$\vct z$ 是独立优化变量。定义标准化衍射残差与限制残差
+\begin{equation}
+r_h(\vct z)=\sqrt{w_h}\,[\mu_h(\mathcal P(\vct z))-y_h],
+\qquad
+r^{(R)}_m(\vct z)=\frac{g_m(\mathcal P(\vct z))-g_m^0}{\sigma_m}.
+\end{equation}
+总目标为
+\begin{equation}
+\Psi(\vct z)=\frac12\lVert\vct r(\vct z)\rVert^2
++\frac12\lVert\vct r^{(R)}(\vct z)\rVert^2.
+\label{eq:objective}
+\end{equation}
+衍射项提供观测证据；限制项表达有容差的结构知识。两项分别报告，才能判断参数是由数据决定还是主要由先验固定。
+
+\section{Gauss--Newton 方程}
+以下把衍射残差与限制残差堆叠后统记为 $\vct r$，其整体 Jacobian 记为 $\mat J$。在当前点 $\vct z$ 作一阶展开，
+\begin{equation}
+\vct r(\vct z+\Delta\vct z)
+\simeq\vct r(\vct z)+\mat J\Delta\vct z,
+\qquad J_{hi}=\frac{\partial r_h}{\partial z_i}.
+\end{equation}
+最小化线性近似得到法方程
+\begin{equation}
+\mat J^{\mathsf T}\mat J\,\Delta\vct z
+=-\mat J^{\mathsf T}\vct r.
+\label{eq:normal}
+\end{equation}
+精确 Hessian 还包含 $\sum_h r_h\nabla^2r_h$。残差较小时该项常可忽略；初始结构较差或模型明显不完整时，它可能重要。直接使用式~\eqref{eq:normal} 的全步长会使坐标或位移参数越出物理范围，因此需要步长控制。
+
+Levenberg--Marquardt 的典型形式为
+\begin{equation}
+(\mat J^{\mathsf T}\mat J+\lambda\mat D)\Delta\vct z
+=-\mat J^{\mathsf T}\vct r,
+\end{equation}
+其中 $\mat D$ 是正对角尺度矩阵。信赖域方法则限制 $\lVert\mat D^{1/2}\Delta\vct z\rVert$，比较实际下降与局部模型预测下降后调整半径。原生实现使用 SciPy 的有界信赖域最小二乘算法~\cite{scipy_lsq}，并通过参数化保证占有率、尺度和位移张量满足其约束。
+
+\section{结构因子的解析导数}
+对原子 $j$ 的某个等价位置定义贡献
+\begin{equation}
+C_{jh}=o_jf_jT_{jh}e^{2\pi\iu h^{\mathsf T}x_j}.
+\end{equation}
+暂略对称展开，对分数坐标、各向同性位移和占有率分别有
+\begin{align}
+\frac{\partial F_h}{\partial x_{j\alpha}}&=2\pi\iu h_\alpha C_{jh},\\
+\frac{\partial F_h}{\partial U_j}&=-8\pi^2s_h^2C_{jh},\\
+\frac{\partial F_h}{\partial o_j}&=f_jT_{jh}e^{2\pi\iu h^{\mathsf T}x_j}.
+\end{align}
+最后一个导数直接计算，不采用 $C_{jh}/o_j$，从而在零占有率处仍有定义。对于对称等价位置 $x_{jm}=R_mx_j+t_m$，坐标导数中的 $h_\alpha$ 应替换为 $(R_m^{\mathsf T}h)_\alpha$，并对不同位置求和。
+
+对笛卡尔对称张量的独立参数 $U_{\alpha\beta}$，若 $\alpha\ne\beta$ 同时代表对称的两项，则
+\begin{equation}
+\frac{\partial F_h}{\partial U_{\alpha\beta}}
+=-2\pi^2(2-\delta_{\alpha\beta})g_\alpha g_\beta C_{jh}.
+\end{equation}
+上述张量公式对应一个未展开的原子贡献。若对不对称单元中的张量求导，第 $m$ 个等价位置应使用 $\mat Q_m^{\mathsf T}\vct g$ 代替 $\vct g$，再求和。把强度写为 $I=F^*F$，对任意实参数 $p$ 求微分，得到
+\begin{equation}
+\frac{\partial|F|^2}{\partial p}
+=\frac{\partial F^*}{\partial p}F+F^*\frac{\partial F}{\partial p}
+=2\Real\left(F^*\frac{\partial F}{\partial p}\right).
+\label{eq:derivativeI}
+\end{equation}
+因此，无孪晶时
+\begin{equation}
+\frac{\partial\mu_h}{\partial p}
+=2k\Real\left(F_h^*\frac{\partial F_h}{\partial p}\right),
+\qquad
+\frac{\partial\mu_h}{\partial\log k}=\mu_h.
+\end{equation}
+这些公式也是验证数值导数与以后加入自动微分后端的依据。
+
+\section{参数化导数与自动微分的边界}
+若 $\vct p=\mathcal P(\vct z)$，链式法则给出
+\begin{equation}
+\frac{\partial\vct r}{\partial\vct z}
+=\frac{\partial\vct r}{\partial\vct p}
+\frac{\partial\mathcal P}{\partial\vct z}.
+\end{equation}
+原生求解采用三点中心差分计算整体残差 Jacobian，
+\begin{equation}
+\frac{\partial r_h}{\partial z_i}
+\simeq\frac{r_h(\vct z+\delta_i\vct e_i)-r_h(\vct z-\delta_i\vct e_i)}{2\delta_i}.
+\end{equation}
+截断误差通常为 $O(\delta_i^2)$，舍入误差约为 $O(\epsilon/\delta_i)$。变量尺度过于悬殊会使固定 $\delta$ 不合理，所以求解器根据变量尺度与边界选择差分步长。
+
+复步长法不能直接替代这一实现：$|F|^2$、复共轭、实部和离散对称轨道去重不构成复解析函数。若采用自动微分，应把实部和虚部分别表示为实计算图，并把离散群、原子类型、特殊位置类型和峰选择放在可微求解之外。对离散假设的改变，应创建新分支而不是让梯度穿过类别变化。
+
+\section{正定各向异性位移张量}
+直接优化六个 $U_{ij}$ 可能产生负特征值，而负特征值会在某些方向放大高角散射。一般位置采用 Cholesky 参数化
+\begin{equation}
+\mat U=\mat L\mat L^{\mathsf T},\qquad
+\mat L=\begin{pmatrix}
+e^{\ell_1}&0&0\\
+\ell_2&e^{\ell_3}&0\\
+\ell_4&\ell_5&e^{\ell_6}
+\end{pmatrix}.
+\end{equation}
+任何有限独立变量都产生正定 $\mat U$。微分为
+\begin{equation}
+\dif\mat U=(\dif\mat L)\mat L^{\mathsf T}+\mat L(\dif\mat L)^{\mathsf T}.
+\end{equation}
+在特殊位置，需要同时满足正定与稳定子不变性。令 $\{\mat S_m\}$ 为对称张量不变子空间的基，使用
+\begin{equation}
+\mat U=\exp\left(\sum_m z_m\mat S_m\right).
+\end{equation}
+对称矩阵的矩阵指数必为正定；因为 $\mat S_m$ 对稳定子不变，其指数也不变。这避免了用六个自由变量再作群平均时引入的冗余。
+
+\section{收敛与结构接受}
+数值收敛可由目标变化、参数步长和梯度判断，但它只说明局部优化停止。结构接受还需满足独立条件：参数可辨识、组成合理、位移张量物理、残余密度可解释、重要反射没有系统性偏差、替代假设没有同等支持。
+
+软件分别返回优化器状态、数据残差、限制残差、Jacobian 秩、边界活动状态和警告。智能体据此作结构判断；它不能把一个 \code{success=true} 当作“晶体已正确解析”的充分条件。

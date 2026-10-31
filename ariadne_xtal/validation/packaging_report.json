@@ -1,0 +1,52 @@
+{
+  "schema": "ariadne_xtal.release_verification/1",
+  "status": "passed",
+  "wheel_verification": {
+    "wheel": "ariadne_xtal-0.1.0-py3-none-any.whl",
+    "wheel_sha256": "7d3a62892cfef0b4c973a77e4a45a30d5008789101eb1914de920f3b4a3e0bae",
+    "wheel_size_bytes": 82199,
+    "module_imported_from_target": true,
+    "module_relative_path": "ariadne_xtal/__init__.py",
+    "version": "0.1.0",
+    "runtime_versions": {
+      "numpy": "2.3.5",
+      "scipy": "1.17.0",
+      "gemmi": "0.7.5",
+      "matplotlib": "3.10.8",
+      "plotly": "7.1.0",
+      "scikit-image": "0.26.0"
+    },
+    "reflection_count": 75,
+    "console_capabilities": "passed",
+    "module_capabilities": "passed",
+    "native_job": {
+      "transport_ok": true,
+      "optimizer_success": true,
+      "scale": 1.8,
+      "r1_gt": 0.0,
+      "n_work": 64,
+      "n_free": 11,
+      "scientific_acceptance": "not_assessed",
+      "output_hashes_verified": 6
+    }
+  },
+  "sdist_verification": {
+    "sdist": "ariadne_xtal-0.1.0.tar.gz",
+    "sdist_sha256": "c6fce9428dbb7b4211b6a346db98258b738ec2490dbf06ace5d190cea6bca46e",
+    "sdist_size_bytes": 4842648,
+    "member_count": 143,
+    "documented_source_paths_present": [
+      "LICENSE",
+      "README.md",
+      "docs/API.md",
+      "docs/COMPATIBILITY.md",
+      "docs/report.tex",
+      "examples/generate_examples.py",
+      "examples/refine_job.json",
+      "pyproject.toml",
+      "shelx_instruction_matrix.json",
+      "validation/run_real_fen4.py"
+    ],
+    "symlinks": 0
+  }
+}

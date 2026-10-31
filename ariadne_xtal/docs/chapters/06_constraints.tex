@@ -1,0 +1,96 @@
+\chapter{约束、限制与化学结构}
+\section{两类信息的数学区别}
+严格约束写成 $\vct c(\vct p)=\vct0$，它缩小可行参数空间。限制则写成标准化偏差 $[g(\vct p)-g_0]/\sigma_g$，它允许有限偏离，并改变目标函数。两者不能互换使用。
+
+例如，两个无序组分的占有率严格相加为 1，可令 $o_1=t$、$o_2=1-t$，只保留一个独立变量。若某一键长被认为约为 $1.40\,\angstrom$、标准偏差为 $0.02\,\angstrom$，应增加限制残差 $(d-1.40)/0.02$，而不固定全部坐标。限制的误差尺度具有统计含义；把它取得很小，就等于声明先验比观测提供更强的信息。
+
+\section{线性约束的消元与 Lagrange 形式}
+对线性约束 $\mat C\vct p=\vct d$，设 $\vct p_0$ 是可行解，$\mat N$ 的列张成 $\ker\mat C$，则
+\begin{equation}
+\vct p=\vct p_0+\mat N\vct z
+\end{equation}
+自动满足约束。精修 Jacobian 变为 $\mat J_z=\mat J_p\mat N$。在小分子结构中，显式消元能直接减少参数数目，且便于追踪每个变量的物理意义。
+
+另一形式是在法方程中引入 Lagrange 乘子：
+\begin{equation}
+\begin{pmatrix}
+\mat H&\mat C^{\mathsf T}\\
+\mat C&\mat0
+\end{pmatrix}
+\begin{pmatrix}\Delta\vct p\\\vct\lambda\end{pmatrix}
+=-
+\begin{pmatrix}\vct g\\\mat C\vct p-\vct d\end{pmatrix}.
+\end{equation}
+对非线性约束还需在每一步重新线性化。配套实现主要采用消元与参数化，不依赖很大的惩罚常数去近似严格等式。
+
+\section{特殊位置的允许位移}
+位置 $\vct x_0$ 被操作 $(\mat R,\vct t)$ 固定。若更新为 $\vct x_0+\Delta\vct x$ 且仍保持同一特殊位置类型，则
+\begin{equation}
+(\mat R-\mat I)\Delta\vct x=\vct0.
+\end{equation}
+对稳定子的全部操作堆叠这些方程，得到允许位移空间
+\begin{equation}
+\mathcal T_j=\bigcap_{g\in H_j}\ker(\mat R_g-\mat I).
+\end{equation}
+反演中心的 $\mathcal T_j$ 为零维，坐标完全由对称性决定；镜面上的位置通常有两个可变方向；旋转轴上的位置通常有一个可变方向。SVD 给出该空间的正交基，原生精修只优化其中的坐标。
+
+有限差分过程不能反复用带容差的“是否位于特殊位置”重新决定自由度，否则参数空间会随步长跳变。实现先根据初始结构确定位置类型，再在该类型的切空间内更新。若科学假设要求原子离开特殊位置，应建立新的结构分支，明确改变多重性和参数数目。
+
+\section{整体原点的规范自由度}
+强度不感知任意整体平移，但在固定空间群设定下，只有保持其操作形式的连续平移仍属于允许的原点自由度。它们满足
+\begin{equation}
+(\mat I-\mat R_g)\vct o=\vct0\quad\text{对全部 }g,
+\end{equation}
+因此连续原点空间为
+\begin{equation}
+\mathcal O=\bigcap_{g\in G}\ker(\mat I-\mat R_g).
+\end{equation}
+$P1$ 的维数为 3，极性空间群可保留一个或多个方向，非极性群通常没有连续原点自由度。若这些方向没有移除，$\mat J$ 必然有零奇异值。
+
+固定一个原子的部分坐标、固定质心或在独立参数中投影掉原点方向，都属于规范选择。它们不增加衍射信息。软件记录被移除的方向，且不把规范固定坐标的零方差作为实验测量精度。相对键长等平移不变量可在相应协方差下计算不确定度。
+
+\section{键长、键角与相似距离}
+设最近周期键向量 $\vct r=\mat A(\vct x_b-\vct x_a-\vct n)$，$d=\lVert\vct r\rVert$。在镜像选择不变的局部区域，
+\begin{equation}
+\frac{\partial d}{\partial\vct x_b}=\frac{\mat A^{\mathsf T}\vct r}{d},
+\qquad
+\frac{\partial d}{\partial\vct x_a}=-\frac{\mat A^{\mathsf T}\vct r}{d}.
+\end{equation}
+键长限制和两个距离的相似性限制分别为
+\begin{equation}
+r_d=\frac{d-d_0}{\sigma_d},\qquad
+r_{\mathrm{sim}}=\frac{d_{ab}-d_{cd}}{\sigma_{\mathrm{sim}}}.
+\end{equation}
+对键角，令两臂为 $\vct u,\vct v$，
+\begin{equation}
+\theta=\arccos\frac{\vct u^{\mathsf T}\vct v}{\lVert\vct u\rVert\lVert\vct v\rVert},
+\qquad r_\theta=\frac{\theta-\theta_0}{\sigma_\theta}.
+\end{equation}
+角度接近 0 或 $\pi$ 时，$\arccos$ 的导数变大，可改用余弦型限制，但必须相应改变误差解释。实现对零长度角臂、零长度刚键方向和共线平面定义明确报错。单独的距离限制在 $d=0$ 仍可计算残差，但此处距离导数不可定义，初始化应避免原子重合。
+
+周期键的镜像是离散选择。软件对当前模型按真实度量选择最近像，适用于局部结构已经接近正确的情况。跨越镜像等距边界时，目标可能不可微；复杂跨胞配位应显式指定拓扑与对称变换，不能单靠最近距离猜测化学键。
+
+\section{平面限制与刚体参数}
+对选中原子的笛卡尔坐标 $\vct r_i$，去质心得矩阵 $\mat X$。最小化
+\begin{equation}
+\sum_i[(\vct r_i-\bar{\vct r})\cdot\vct n]^2,
+\qquad \lVert\vct n\rVert=1
+\end{equation}
+的法向量是 $\mat X^{\mathsf T}\mat X$ 最小特征值对应的单位向量。各原子到最佳平面的有符号距离除以指定误差，就构成平面限制。平面法向量的符号不影响平方目标，但在差分计算中应采用确定的符号选择。
+
+严格刚体可用 $\vct r_i=\mat Q(\vct\omega)\vct r_i^0+\vct t$ 参数化，通常只需三个旋转和三个平移变量。旋转可用 Rodrigues 公式
+\begin{equation}
+\mat Q=\mat I+\frac{\sin\theta}{\theta}[\vct\omega]_\times
++\frac{1-\cos\theta}{\theta^2}[\vct\omega]_\times^2,
+\quad \theta=\lVert\vct\omega\rVert.
+\end{equation}
+骑乘氢模型进一步把氢坐标表达为母原子及邻接几何的函数，氢的位移也可与母原子绑定。这些是严格参数关系，不能通过一次生成坐标就视为完整实现。原生版本接受显式氢原子，但完整 AFIX/HFIX 与刚体指令由兼容路径执行。
+
+\section{位移张量限制}
+对于两个原子，简单张量相似性限制可作用于 $\mat U_a-\mat U_b$ 的独立分量。其物理假设是相邻位置具有近似的位移幅度和方向，不等同于严格刚体运动。
+
+令键方向的单位矢量为 $\vct e$。Hirshfeld 刚键条件要求沿键方向的均方位移相同，残差为
+\begin{equation}
+r_{\mathrm{RB}}=\frac{\vct e^{\mathsf T}(\mat U_a-\mat U_b)\vct e}{\sigma_U}.
+\end{equation}
+增强刚键模型还约束键坐标系中的交叉项，使相对运动满足更强的方向要求~\cite{rigu2012}。配套原生 \code{rigid_bond} 实现的是上述标量条件；它不是 SHELXL RIGU 的全部等价行为。相应差异在功能表中按公式和接口分别列出。

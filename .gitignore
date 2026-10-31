@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 python/build/
+ariadne_xtal/build/
 *.egg-info/
 jobs/
 raw_data/
@@ -35,3 +36,7 @@ delivery.json
 *.sfc
 *.fcf
 *.lst
+!ariadne_xtal/examples/*.cif
+!ariadne_xtal/examples/*.hkl
+!ariadne_xtal/validation/**/*.cif
+!ariadne_xtal/validation/**/*.hkl

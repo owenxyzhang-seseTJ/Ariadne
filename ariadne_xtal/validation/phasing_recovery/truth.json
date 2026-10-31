@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "cell": {
+    "a": 5.2,
+    "b": 5.7,
+    "c": 6.1,
+    "alpha": 90.0,
+    "beta": 90.0,
+    "gamma": 90.0
+  },
+  "atoms": [
+    {
+      "label": "C1",
+      "element": "C",
+      "frac": [
+        0.113,
+        0.239,
+        0.337
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.012,
+      "u_aniso": null,
+      "f_prime": 0.0,
+      "f_double_prime": 0.0,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "C2",
+      "element": "C",
+      "frac": [
+        0.371,
+        0.628,
+        0.793
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.012,
+      "u_aniso": null,
+      "f_prime": 0.0,
+      "f_double_prime": 0.0,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "C3",
+      "element": "C",
+      "frac": [
+        0.725,
+        0.159,
+        0.563
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.012,
+      "u_aniso": null,
+      "f_prime": 0.0,
+      "f_double_prime": 0.0,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "C4",
+      "element": "C",
+      "frac": [
+        0.842,
+        0.771,
+        0.188
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.012,
+      "u_aniso": null,
+      "f_prime": 0.0,
+      "f_double_prime": 0.0,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    }
+  ],
+  "spacegroup": "P 1",
+  "wavelength": 0.71073,
+  "sym_ops": null
+}

@@ -1,0 +1,80 @@
+\chapter{结构模型对衍射积分的反馈}
+\section{从单向流程到联合估计}
+从像素到结构的单向链条依次估计几何、轮廓、积分强度和原子参数。对弱衍射或重叠反射，积分阶段可能留下较大的相关不确定度；结构模型则提供不同反射之间的物理联系。因而可以考虑联合目标
+\begin{equation}
+\mathcal L(\vct p,\vct I,\vct\eta)=
+-\log P(\vct n\mid\vct I,\vct\eta)
+-\log P(\vct I\mid\vct p)
+-\log P(\vct p),
+\end{equation}
+其中 $\vct\eta$ 为几何、背景和轮廓参数。第一项来自探测器观测，第二项表达积分强度与结构因子之间的联系，第三项是独立化学或结构先验。
+
+这一形式允许在积分与结构之间交替求解，但必须避免循环确认：如果某个反射帮助建立了结构，又用同一结构强行改变该反射，最后残差变小并不意味着增加了新的证据。反馈必须同时携带来源、误差和可验证的分组规则。
+
+\section{局部重叠组的高斯模型}
+把式~\eqref{eq:pixel_model} 线性化，令背景已由独立参数给定，得到
+\begin{equation}
+\vct y=\mat A\vct I+\vct\epsilon,\qquad
+\vct\epsilon\sim\mathcal N(\vct0,\bm{\Sigma}_y).
+\end{equation}
+$\mat A$ 的每一列是一个反射的像素轮廓。若两列几乎平行，独立反射强度估计将高度相关。数据的信息矩阵是
+\begin{equation}
+\mat H_D=\mat A^{\mathsf T}\bm{\Sigma}_y^{-1}\mat A.
+\end{equation}
+对某个由别的数据训练得到的结构预测，设其均值和协方差为 $\vct m,\mat C_m$。引入强度先验后，目标为
+\begin{equation}
+\Phi(\vct I)=
+(\vct y-\mat A\vct I)^{\mathsf T}\bm{\Sigma}_y^{-1}(\vct y-\mat A\vct I)
++\lambda(\vct I-\vct m)^{\mathsf T}\mat C_m^{-1}(\vct I-\vct m).
+\label{eq:feedback_objective}
+\end{equation}
+若忽略非负边界，闭式解为
+\begin{equation}
+\widehat{\vct I}=
+(\mat H_D+\lambda\mat C_m^{-1})^{-1}
+\left[\mat A^{\mathsf T}\bm{\Sigma}_y^{-1}\vct y+\lambda\mat C_m^{-1}\vct m\right].
+\end{equation}
+该式说明结构预测能影响轮廓分解，但影响应当与其不确定度相匹配。它没有把模型强度直接替换成观测强度。
+
+实现将两个二次项堆叠为一个有界线性最小二乘问题，约束 $\vct I\ge0$。若最优解落在边界，局部无界高斯协方差只是一种近似；严格区间应通过轮廓似然或受限模拟求得。
+
+\section{先验信息的方向性上限}
+限制先验影响，不能只比较两个矩阵的迹，因为弱信息方向可能被强先验完全主导。对满秩 $\mat H_D$，定义
+\begin{equation}
+\mat M=\mat H_D^{-1/2}\mat C_m^{-1}\mat H_D^{-1/2}.
+\end{equation}
+其最大特征值给出先验相对于数据最强的方向。若预先设定允许比值 $\eta$，选择
+\begin{equation}
+\lambda_{\mathrm{eff}}=
+\min\left(\lambda_{\mathrm{requested}},\frac{\eta}{\lambda_{\max}(\mat M)}\right)
+\end{equation}
+即可保证
+\begin{equation}
+\lambda_{\mathrm{eff}}\mat C_m^{-1}\preceq\eta\mat H_D.
+\label{eq:info_cap}
+\end{equation}
+这里 $\preceq$ 表示半正定序。对任意方向 $\vct v$，先验引入的曲率均不超过预设比例的数据曲率。配套数值工具默认 $\eta=0.25$，这是显式的工程选择，不是普适的晶体学常数；它应在最终评价之前确定，并随结果记录。
+
+如果 $\mat H_D$ 秩亏，则存在数据完全无法区分的强度组合。先验可以在该方向提供一个模型依赖的估计，但不能把它称为已测得的独立反射。当前工具在有先验且数据秩亏时拒绝这种分解；无先验时保留可行的最小二乘结果，同时将完整协方差标为不可估计并报告零空间。
+
+\section{按反射组的交叉拟合}
+设全部观测分成 $K$ 个组 $D_1,\ldots,D_K$。对组 $D_k$，只用其余数据精修得到 $\widehat{\vct p}^{(-k)}$，再预测该组的强度：
+\begin{equation}
+\vct m_k=\vct\mu_k(\widehat{\vct p}^{(-k)}).
+\end{equation}
+近似预测协方差可由
+\begin{equation}
+\mat C_{m,k}\simeq
+\mat J_{\mu,k}\mat C_p^{(-k)}\mat J_{\mu,k}^{\mathsf T}
++\mat C_{\mathrm{model},k}
+\end{equation}
+给出，其中额外项表达模型不完备性。若忽略这一项，仅使用局部精修协方差，往往会高估结构预测的可靠度。
+
+分组必须覆盖对称等价、Friedel、孪晶和共同重叠的关联关系。否则被排除的一条反射仍可能通过另一条相关观测进入模型。整个反馈系统还应保留不参与迭代与调参的最终评价集。
+
+\section{接口、证据与当前实现}
+配套 \code{StructuralPrior} 包含均值、协方差、源运行标识和排除组标识；\code{deblend_profiles} 检查维度、正定性、声明的排除组和式~\eqref{eq:info_cap}。输入观测始终不被改写，返回新的强度估计、局部协方差、信息秩、实际先验强度和边界状态。
+
+源运行和排除组在该低层接口中由调用方声明。函数本身不重新训练结构，也不能凭字符串证明上游确实排除了该组。接入实际积分软件时，上层调度器需要将训练反射的哈希、组分配和预测来源相互核验。当前源码实现的是这一反馈方法的可检验数值部件；探测器图像读取、指标化、轮廓构建、吸收校正和整条交叉拟合调度尚不在本包内。
+
+这一分工使结构信息能够作为有误差的预测进入积分，同时保留观测本身的证据地位。对 MOF 等组成较明确的体系，已知元素和配体可进一步形成结构先验；其强度仍应通过独立数据和模型误差控制，而不能只因化学上合理就获得无限权重。

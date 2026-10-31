@@ -1,0 +1,12 @@
+{
+  "kind": "synthetic demonstration",
+  "seed": 20261030,
+  "description": "A synthetic planar brominated aromatic heavy-atom model; hydrogens omitted by design",
+  "true_intensity_scale": 2.4,
+  "n_reflections": 4446,
+  "n_holdout": 446,
+  "n_negative": 0,
+  "noise_model": "independent Gaussian with sigma=sqrt(4+Icalc)+0.01 Icalc",
+  "holdout_policy": "SHA256 over symmetry/Friedel orbit, seed fixed before refinement",
+  "not_an_experimental_structure": true
+}
