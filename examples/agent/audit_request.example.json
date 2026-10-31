@@ -1,0 +1,30 @@
+{
+  "schema": "ariadne-agent/1",
+  "mode": "audit",
+  "inputs": {
+    "cif": "/absolute/path/to/model.cif"
+  },
+  "settings": {
+    "expected_elements": [
+      "Cu",
+      "C",
+      "H",
+      "N",
+      "O"
+    ]
+  },
+  "budget": {
+    "max_actions": 40,
+    "max_attempts": 2,
+    "wall_seconds": 7200,
+    "action_seconds": 600
+  },
+  "planner": {
+    "kind": "deterministic"
+  },
+  "experts": [
+    "crystallography",
+    "mof",
+    "twinning"
+  ]
+}

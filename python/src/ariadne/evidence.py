@@ -12,7 +12,7 @@ import uuid
 def append_event(job, kind, payload):
     record = {'schema': 'ariadne-event/1', 'id': uuid.uuid4().hex,
               'created': datetime.now(timezone.utc).isoformat(), 'kind': kind,
-              'host': socket.gethostname(), 'software': 'Ariadne 0.5.0 / DIALS 3.30.1', 'payload': payload}
+              'host': socket.gethostname(), 'software': 'Ariadne 0.7.0-rebuild-20261030 / target DIALS 3.30.1', 'payload': payload}
     with (Path(job) / 'events.jsonl').open('a') as handle:
         fcntl.flock(handle, fcntl.LOCK_EX)
         handle.write(json.dumps(record, ensure_ascii=False, allow_nan=False) + '\n')

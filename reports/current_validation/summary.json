@@ -1,0 +1,32 @@
+{
+  "schema": "ariadne-combined-validation/1",
+  "date": "2026-10-31",
+  "ariadne": {
+    "passed": 355,
+    "subtests_passed": 136,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "xtal_and_integration": {
+    "passed": 143,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "mcp_stdio": "passed",
+  "installed_shelxl": "2025/1; actual execution passed",
+  "reference_prs": [
+    3,
+    4
+  ],
+  "native_backend": "C++17 fused proposal kernel; compiled and exercised",
+  "python": "3.12.15 (main, Oct 13 2026, 16:47:20) [Clang 21.1.8 ]",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "benchmarks": [
+    "native_prediction.json",
+    "ariadne_dials.json",
+    "ariadne_dials_native.json",
+    "xtal_shelxl.json"
+  ]
+}

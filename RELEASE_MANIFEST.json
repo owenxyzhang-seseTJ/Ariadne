@@ -1,0 +1,1335 @@
+{
+  "schema": "ariadne-release-manifest/2",
+  "build": "0.7.0-integrated-native-20261031",
+  "generated_utc": "2026-10-31T06:12:58.568181+00:00",
+  "files": [
+    {
+      "path": ".agents/plugins/marketplace.json",
+      "bytes": 298
+    },
+    {
+      "path": ".codex-plugin/plugin.json",
+      "bytes": 1325
+    },
+    {
+      "path": ".github/workflows/core-numerics.yml",
+      "bytes": 1391
+    },
+    {
+      "path": ".github/workflows/xtal.yml",
+      "bytes": 719
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 727
+    },
+    {
+      "path": ".mcp.json",
+      "bytes": 162
+    },
+    {
+      "path": "AGENT_GUIDE.zh-CN.md",
+      "bytes": 11648
+    },
+    {
+      "path": "CODE_REVIEW.zh-CN.md",
+      "bytes": 5196
+    },
+    {
+      "path": "DELIVERY.json",
+      "bytes": 983
+    },
+    {
+      "path": "FIRST_PRINCIPLES_UPDATE.md",
+      "bytes": 9499
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1471
+    },
+    {
+      "path": "LICENSE-MIT",
+      "bytes": 1335
+    },
+    {
+      "path": "LICENSING.md",
+      "bytes": 1961
+    },
+    {
+      "path": "NOTICE.md",
+      "bytes": 1978
+    },
+    {
+      "path": "README.ja.md",
+      "bytes": 25706
+    },
+    {
+      "path": "README.md",
+      "bytes": 5592
+    },
+    {
+      "path": "README.zh-CN.md",
+      "bytes": 3377
+    },
+    {
+      "path": "ROUND2_OPTIMIZATION.md",
+      "bytes": 13644
+    },
+    {
+      "path": "SECURITY.md",
+      "bytes": 1391
+    },
+    {
+      "path": "ariadne_xtal/API_CONTRACT.md",
+      "bytes": 5608
+    },
+    {
+      "path": "ariadne_xtal/DELIVERY_MANIFEST.json",
+      "bytes": 17494
+    },
+    {
+      "path": "ariadne_xtal/LICENSE",
+      "bytes": 1280
+    },
+    {
+      "path": "ariadne_xtal/MANIFEST.in",
+      "bytes": 514
+    },
+    {
+      "path": "ariadne_xtal/README.md",
+      "bytes": 11955
+    },
+    {
+      "path": "ariadne_xtal/THIRD_PARTY_NOTICES.md",
+      "bytes": 2967
+    },
+    {
+      "path": "ariadne_xtal/docs/API.md",
+      "bytes": 21018
+    },
+    {
+      "path": "ariadne_xtal/docs/BUILD.md",
+      "bytes": 2788
+    },
+    {
+      "path": "ariadne_xtal/docs/COMPATIBILITY.md",
+      "bytes": 11259
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/01_scattering.tex",
+      "bytes": 6114
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/02_geometry_symmetry.tex",
+      "bytes": 5429
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/03_statistics.tex",
+      "bytes": 5298
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/04_phasing.tex",
+      "bytes": 8270
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/05_refinement.tex",
+      "bytes": 6280
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/06_constraints.tex",
+      "bytes": 6685
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/07_disorder_twins.tex",
+      "bytes": 6559
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/08_uncertainty.tex",
+      "bytes": 6236
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/09_agent.tex",
+      "bytes": 6273
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/10_feedback.tex",
+      "bytes": 5637
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/11_visualization.tex",
+      "bytes": 5523
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/12_implementation.tex",
+      "bytes": 5429
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/appendix_capabilities.tex",
+      "bytes": 4282
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/appendix_usage.tex",
+      "bytes": 4134
+    },
+    {
+      "path": "ariadne_xtal/docs/chapters/appendix_validation.tex",
+      "bytes": 6670
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/density_sections.pdf",
+      "bytes": 22822
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/fen4_density_sections.pdf",
+      "bytes": 19831
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/fen4_refinement_diagnostics.pdf",
+      "bytes": 31132
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/fen4_structure_ellipsoids.pdf",
+      "bytes": 28227
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/parameter_correlation.pdf",
+      "bytes": 16373
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/refinement_diagnostics.pdf",
+      "bytes": 146611
+    },
+    {
+      "path": "ariadne_xtal/docs/figures/structure_ellipsoids.pdf",
+      "bytes": 41071
+    },
+    {
+      "path": "ariadne_xtal/docs/references.tex",
+      "bytes": 3883
+    },
+    {
+      "path": "ariadne_xtal/docs/report.pdf",
+      "bytes": 774996
+    },
+    {
+      "path": "ariadne_xtal/docs/report.tex",
+      "bytes": 7957
+    },
+    {
+      "path": "ariadne_xtal/examples/PROVENANCE.json",
+      "bytes": 466
+    },
+    {
+      "path": "ariadne_xtal/examples/demo_reflections.hkl",
+      "bytes": 146751
+    },
+    {
+      "path": "ariadne_xtal/examples/demo_reflections.json",
+      "bytes": 436087
+    },
+    {
+      "path": "ariadne_xtal/examples/demo_start.cif",
+      "bytes": 2079
+    },
+    {
+      "path": "ariadne_xtal/examples/demo_start.json",
+      "bytes": 4440
+    },
+    {
+      "path": "ariadne_xtal/examples/demo_truth.json",
+      "bytes": 4612
+    },
+    {
+      "path": "ariadne_xtal/examples/generate_examples.py",
+      "bytes": 3638
+    },
+    {
+      "path": "ariadne_xtal/examples/refine_job.json",
+      "bytes": 207
+    },
+    {
+      "path": "ariadne_xtal/pyproject.toml",
+      "bytes": 977
+    },
+    {
+      "path": "ariadne_xtal/shelx_instruction_matrix.json",
+      "bytes": 38968
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/__init__.py",
+      "bytes": 470
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/__main__.py",
+      "bytes": 48
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/absolute.py",
+      "bytes": 3704
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/agent.py",
+      "bytes": 14720
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/capabilities.py",
+      "bytes": 3046
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/cli.py",
+      "bytes": 3794
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/compat.py",
+      "bytes": 11026
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/feedback.py",
+      "bytes": 5335
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/io.py",
+      "bytes": 19626
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/maps.py",
+      "bytes": 9857
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/mcp_server.py",
+      "bytes": 1912
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/model.py",
+      "bytes": 13761
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/phasing.py",
+      "bytes": 9232
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/refinement.py",
+      "bytes": 40734
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/restraints.py",
+      "bytes": 11209
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/scattering.py",
+      "bytes": 7333
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/shelx.py",
+      "bytes": 19782
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/symmetry.py",
+      "bytes": 9392
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/validation.py",
+      "bytes": 3834
+    },
+    {
+      "path": "ariadne_xtal/src/ariadne_xtal/visualization.py",
+      "bytes": 29665
+    },
+    {
+      "path": "ariadne_xtal/tests/test_agent.py",
+      "bytes": 16438
+    },
+    {
+      "path": "ariadne_xtal/tests/test_core.py",
+      "bytes": 11127
+    },
+    {
+      "path": "ariadne_xtal/tests/test_io.py",
+      "bytes": 13545
+    },
+    {
+      "path": "ariadne_xtal/tests/test_refinement.py",
+      "bytes": 16828
+    },
+    {
+      "path": "ariadne_xtal/tests/test_visualization.py",
+      "bytes": 4700
+    },
+    {
+      "path": "ariadne_xtal/tests/test_workflows_audit.py",
+      "bytes": 13762
+    },
+    {
+      "path": "ariadne_xtal/tools/check_release.py",
+      "bytes": 8848
+    },
+    {
+      "path": "ariadne_xtal/tools/fetch_report_fonts.py",
+      "bytes": 1086
+    },
+    {
+      "path": "ariadne_xtal/validation/packaging_report.json",
+      "bytes": 1512
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/candidate_1.json",
+      "bytes": 1686
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/candidate_2.json",
+      "bytes": 1689
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/candidate_3.json",
+      "bytes": 1688
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/candidate_4.json",
+      "bytes": 1688
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/refined_1.cif",
+      "bytes": 986
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/refined_2.cif",
+      "bytes": 990
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/refined_3.cif",
+      "bytes": 995
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/refined_4.cif",
+      "bytes": 990
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/result.json",
+      "bytes": 635290
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/synthetic_reflections.json",
+      "bytes": 332019
+    },
+    {
+      "path": "ariadne_xtal/validation/phasing_recovery/truth.json",
+      "bytes": 1532
+    },
+    {
+      "path": "ariadne_xtal/validation/public_data/2242624.cif",
+      "bytes": 13833
+    },
+    {
+      "path": "ariadne_xtal/validation/public_data/2242624.hkl",
+      "bytes": 3328
+    },
+    {
+      "path": "ariadne_xtal/validation/public_data/4003024.cif",
+      "bytes": 36221
+    },
+    {
+      "path": "ariadne_xtal/validation/public_data/README.md",
+      "bytes": 1899
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/density_sections.pdf",
+      "bytes": 19831
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/density_sections.svg",
+      "bytes": 31825
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/refinement_diagnostics.pdf",
+      "bytes": 31132
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/refinement_diagnostics.svg",
+      "bytes": 75324
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/structure_ellipsoids.pdf",
+      "bytes": 28227
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/figures/structure_ellipsoids.svg",
+      "bytes": 204176
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/input_model.json",
+      "bytes": 1276
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/measured_reflections.json",
+      "bytes": 4424
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/refined.cif",
+      "bytes": 976
+    },
+    {
+      "path": "ariadne_xtal/validation/real_fen4/result.json",
+      "bytes": 19595
+    },
+    {
+      "path": "ariadne_xtal/validation/run_phasing_recovery.py",
+      "bytes": 5315
+    },
+    {
+      "path": "ariadne_xtal/validation/run_real_fen4.py",
+      "bytes": 5813
+    },
+    {
+      "path": "benchmarks/ariadne_dials.py",
+      "bytes": 10067
+    },
+    {
+      "path": "benchmarks/baseline-2b9bd04.zip",
+      "bytes": 33492
+    },
+    {
+      "path": "benchmarks/baseline-797ac22.zip",
+      "bytes": 716419
+    },
+    {
+      "path": "benchmarks/baseline-first-principles.zip",
+      "bytes": 186671
+    },
+    {
+      "path": "benchmarks/export_round2.py",
+      "bytes": 3355
+    },
+    {
+      "path": "benchmarks/feedback_rebuild.py",
+      "bytes": 3812
+    },
+    {
+      "path": "benchmarks/geometry_round2.py",
+      "bytes": 8066
+    },
+    {
+      "path": "benchmarks/lattice_principles.py",
+      "bytes": 5695
+    },
+    {
+      "path": "benchmarks/likelihood_round2.py",
+      "bytes": 9552
+    },
+    {
+      "path": "benchmarks/native_prediction.py",
+      "bytes": 2902
+    },
+    {
+      "path": "benchmarks/optimization.py",
+      "bytes": 12254
+    },
+    {
+      "path": "benchmarks/pixel_principles.py",
+      "bytes": 5743
+    },
+    {
+      "path": "benchmarks/profiles_round2.py",
+      "bytes": 10969
+    },
+    {
+      "path": "benchmarks/scaling_principles.py",
+      "bytes": 4675
+    },
+    {
+      "path": "benchmarks/streamed_wls.py",
+      "bytes": 3529
+    },
+    {
+      "path": "benchmarks/twin_information.py",
+      "bytes": 5772
+    },
+    {
+      "path": "benchmarks/variable_projection.py",
+      "bytes": 5736
+    },
+    {
+      "path": "benchmarks/xtal_shelx.py",
+      "bytes": 14584
+    },
+    {
+      "path": "dist/ariadne-0.7.0-py3-none-any.whl",
+      "bytes": 74311
+    },
+    {
+      "path": "dist/ariadne-0.7.0.tar.gz",
+      "bytes": 62840
+    },
+    {
+      "path": "docs/R2_README.md",
+      "bytes": 24436
+    },
+    {
+      "path": "docs/R2_README.zh-CN.md",
+      "bytes": 22198
+    },
+    {
+      "path": "environment.yml",
+      "bytes": 216
+    },
+    {
+      "path": "examples/agent/audit_request.example.json",
+      "bytes": 456
+    },
+    {
+      "path": "examples/agent/create_demo.py",
+      "bytes": 5879
+    },
+    {
+      "path": "examples/agent/refine_request.example.json",
+      "bytes": 435
+    },
+    {
+      "path": "examples/agent/solve_request.example.json",
+      "bytes": 428
+    },
+    {
+      "path": "examples/overlap_design.json",
+      "bytes": 588
+    },
+    {
+      "path": "examples/overlap_design_expected.json",
+      "bytes": 1779
+    },
+    {
+      "path": "experts/crystallography.json",
+      "bytes": 516
+    },
+    {
+      "path": "experts/mof.json",
+      "bytes": 445
+    },
+    {
+      "path": "experts/twinning.json",
+      "bytes": 557
+    },
+    {
+      "path": "implementation-status.json",
+      "bytes": 2204
+    },
+    {
+      "path": "licenses/DIALS-LICENSE.txt",
+      "bytes": 1578
+    },
+    {
+      "path": "licenses/NumPy-LICENSE.txt",
+      "bytes": 1543
+    },
+    {
+      "path": "licenses/SciPy-LICENSE.txt",
+      "bytes": 1531
+    },
+    {
+      "path": "licenses/cctbx-LICENSE.txt",
+      "bytes": 2431
+    },
+    {
+      "path": "licenses/dxtbx-LICENSE.txt",
+      "bytes": 1570
+    },
+    {
+      "path": "patches/DIALS-LICENSE",
+      "bytes": 1578
+    },
+    {
+      "path": "patches/ariadne-first-principles.patch",
+      "bytes": 1765458
+    },
+    {
+      "path": "patches/ariadne-round2.patch",
+      "bytes": 570425
+    },
+    {
+      "path": "patches/dials-3.30.1-ariadne.patch",
+      "bytes": 9354
+    },
+    {
+      "path": "python/MANIFEST.in",
+      "bytes": 32
+    },
+    {
+      "path": "python/pyproject.toml",
+      "bytes": 761
+    },
+    {
+      "path": "python/setup.py",
+      "bytes": 514
+    },
+    {
+      "path": "python/src/ariadne/__init__.py",
+      "bytes": 101
+    },
+    {
+      "path": "python/src/ariadne/_native.cpp",
+      "bytes": 7246
+    },
+    {
+      "path": "python/src/ariadne/agent/__init__.py",
+      "bytes": 56
+    },
+    {
+      "path": "python/src/ariadne/agent/action_worker.py",
+      "bytes": 2388
+    },
+    {
+      "path": "python/src/ariadne/agent/actions.py",
+      "bytes": 6668
+    },
+    {
+      "path": "python/src/ariadne/agent/backends.py",
+      "bytes": 13847
+    },
+    {
+      "path": "python/src/ariadne/agent/bundles.py",
+      "bytes": 3262
+    },
+    {
+      "path": "python/src/ariadne/agent/cli.py",
+      "bytes": 4386
+    },
+    {
+      "path": "python/src/ariadne/agent/engine.py",
+      "bytes": 24035
+    },
+    {
+      "path": "python/src/ariadne/agent/loop.py",
+      "bytes": 8597
+    },
+    {
+      "path": "python/src/ariadne/agent/mcp_tools.py",
+      "bytes": 1476
+    },
+    {
+      "path": "python/src/ariadne/agent/native_inspect.py",
+      "bytes": 1157
+    },
+    {
+      "path": "python/src/ariadne/agent/planner.py",
+      "bytes": 4099
+    },
+    {
+      "path": "python/src/ariadne/agent/process.py",
+      "bytes": 4252
+    },
+    {
+      "path": "python/src/ariadne/agent/spec.py",
+      "bytes": 9959
+    },
+    {
+      "path": "python/src/ariadne/agent/store.py",
+      "bytes": 11153
+    },
+    {
+      "path": "python/src/ariadne/agent/util.py",
+      "bytes": 3589
+    },
+    {
+      "path": "python/src/ariadne/contracts.py",
+      "bytes": 8483
+    },
+    {
+      "path": "python/src/ariadne/crystal.py",
+      "bytes": 8954
+    },
+    {
+      "path": "python/src/ariadne/errors.py",
+      "bytes": 1676
+    },
+    {
+      "path": "python/src/ariadne/evidence.py",
+      "bytes": 1713
+    },
+    {
+      "path": "python/src/ariadne/feedback.py",
+      "bytes": 16692
+    },
+    {
+      "path": "python/src/ariadne/feedback_bridge.py",
+      "bytes": 5434
+    },
+    {
+      "path": "python/src/ariadne/lattice_math.py",
+      "bytes": 14809
+    },
+    {
+      "path": "python/src/ariadne/ranking.py",
+      "bytes": 7829
+    },
+    {
+      "path": "python/src/ariadne/server.py",
+      "bytes": 30139
+    },
+    {
+      "path": "python/src/ariadne/spots.py",
+      "bytes": 5157
+    },
+    {
+      "path": "python/src/ariadne/worker.py",
+      "bytes": 2073
+    },
+    {
+      "path": "reports/Ariadne_0_7_0_Technical_Report.pdf",
+      "bytes": 491594
+    },
+    {
+      "path": "reports/Ariadne_0_7_0_Technical_Report.tex",
+      "bytes": 38997
+    },
+    {
+      "path": "reports/README.md",
+      "bytes": 1353
+    },
+    {
+      "path": "reports/ariadne_first_principles.pdf",
+      "bytes": 549255
+    },
+    {
+      "path": "reports/ariadne_first_principles.tex",
+      "bytes": 47823
+    },
+    {
+      "path": "reports/ariadne_round2.pdf",
+      "bytes": 510745
+    },
+    {
+      "path": "reports/ariadne_round2.tex",
+      "bytes": 38292
+    },
+    {
+      "path": "reports/current_validation/README.zh-CN.md",
+      "bytes": 6698
+    },
+    {
+      "path": "reports/current_validation/ariadne_dials.json",
+      "bytes": 19299
+    },
+    {
+      "path": "reports/current_validation/ariadne_dials_native.json",
+      "bytes": 19318
+    },
+    {
+      "path": "reports/current_validation/native_prediction.json",
+      "bytes": 804
+    },
+    {
+      "path": "reports/current_validation/summary.json",
+      "bytes": 737
+    },
+    {
+      "path": "reports/current_validation/xtal_shelxl.json",
+      "bytes": 12256
+    },
+    {
+      "path": "reports/dials_algorithm_optimization.pdf",
+      "bytes": 415062
+    },
+    {
+      "path": "reports/dials_algorithm_optimization.tex",
+      "bytes": 26768
+    },
+    {
+      "path": "reports/export_round2_measurements.json",
+      "bytes": 994
+    },
+    {
+      "path": "reports/first_principles_validation.json",
+      "bytes": 1518
+    },
+    {
+      "path": "reports/geometry_round2_measurements.json",
+      "bytes": 5528
+    },
+    {
+      "path": "reports/github_review_validation.json",
+      "bytes": 6980
+    },
+    {
+      "path": "reports/inherited-delivery.json",
+      "bytes": 1485
+    },
+    {
+      "path": "reports/inherited-implementation-status.json",
+      "bytes": 2454
+    },
+    {
+      "path": "reports/lattice_principles_measurements.json",
+      "bytes": 8703
+    },
+    {
+      "path": "reports/likelihood_round2_measurements.json",
+      "bytes": 12122
+    },
+    {
+      "path": "reports/optimization_measurements.json",
+      "bytes": 12949
+    },
+    {
+      "path": "reports/pixel_principles_measurements.json",
+      "bytes": 3279
+    },
+    {
+      "path": "reports/profiles_round2_measurements.json",
+      "bytes": 7462
+    },
+    {
+      "path": "reports/rebuild/agent_tests.log",
+      "bytes": 180
+    },
+    {
+      "path": "reports/rebuild/agent_tests.xml",
+      "bytes": 13369
+    },
+    {
+      "path": "reports/rebuild/r2_tests.log",
+      "bytes": 23796
+    },
+    {
+      "path": "reports/rebuild/r2_validation.json",
+      "bytes": 3077
+    },
+    {
+      "path": "reports/rebuild_archive_smoke.json",
+      "bytes": 692
+    },
+    {
+      "path": "reports/rebuild_demo.json",
+      "bytes": 1920
+    },
+    {
+      "path": "reports/rebuild_feedback_benchmark.json",
+      "bytes": 1093
+    },
+    {
+      "path": "reports/rebuild_r2_validation.json",
+      "bytes": 3029
+    },
+    {
+      "path": "reports/rebuild_release_checks.json",
+      "bytes": 472
+    },
+    {
+      "path": "reports/rebuild_validation.json",
+      "bytes": 2486
+    },
+    {
+      "path": "reports/review_build.log",
+      "bytes": 13149
+    },
+    {
+      "path": "reports/review_demo.log",
+      "bytes": 2079
+    },
+    {
+      "path": "reports/review_dependencies.log",
+      "bytes": 270
+    },
+    {
+      "path": "reports/review_lint.log",
+      "bytes": 19
+    },
+    {
+      "path": "reports/review_shell.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/review_tests.log",
+      "bytes": 3914
+    },
+    {
+      "path": "reports/review_wheel_audit.log",
+      "bytes": 862
+    },
+    {
+      "path": "reports/review_wheel_capabilities.log",
+      "bytes": 2503
+    },
+    {
+      "path": "reports/review_wheel_import.log",
+      "bytes": 0
+    },
+    {
+      "path": "reports/review_wheel_init.log",
+      "bytes": 547
+    },
+    {
+      "path": "reports/review_wheel_install.log",
+      "bytes": 608
+    },
+    {
+      "path": "reports/round2_validation.json",
+      "bytes": 1638
+    },
+    {
+      "path": "reports/scaling_principles_measurements.json",
+      "bytes": 3403
+    },
+    {
+      "path": "reports/streamed_wls_measurements.json",
+      "bytes": 1445
+    },
+    {
+      "path": "reports/twin_information_experiment.json",
+      "bytes": 1889
+    },
+    {
+      "path": "reports/validation.json",
+      "bytes": 433
+    },
+    {
+      "path": "reports/validation.log",
+      "bytes": 10801
+    },
+    {
+      "path": "reports/variable_projection_measurements.json",
+      "bytes": 2502
+    },
+    {
+      "path": "scripts/apply_numerical_update.py",
+      "bytes": 3374
+    },
+    {
+      "path": "scripts/install_local.sh",
+      "bytes": 4374
+    },
+    {
+      "path": "scripts/make_release.py",
+      "bytes": 3210
+    },
+    {
+      "path": "scripts/run_numerical_validation.py",
+      "bytes": 5074
+    },
+    {
+      "path": "scripts/run_rebuild_validation.py",
+      "bytes": 3201
+    },
+    {
+      "path": "scripts/run_review_validation.py",
+      "bytes": 5522
+    },
+    {
+      "path": "scripts/verify_release.py",
+      "bytes": 2613
+    },
+    {
+      "path": "skills/ariadne-reduction/SKILL.md",
+      "bytes": 11543
+    },
+    {
+      "path": "skills/ariadne-reduction/agents/openai.yaml",
+      "bytes": 375
+    },
+    {
+      "path": "skills/ariadne-reduction/assets/native-overlap.phil",
+      "bytes": 382
+    },
+    {
+      "path": "skills/ariadne-reduction/references/algorithm-upgrades.md",
+      "bytes": 10785
+    },
+    {
+      "path": "skills/ariadne-reduction/references/backends.md",
+      "bytes": 5511
+    },
+    {
+      "path": "skills/ariadne-reduction/references/domain-finder.md",
+      "bytes": 6639
+    },
+    {
+      "path": "skills/ariadne-reduction/references/global-scaling.md",
+      "bytes": 4359
+    },
+    {
+      "path": "skills/ariadne-reduction/references/handoff.md",
+      "bytes": 2841
+    },
+    {
+      "path": "skills/ariadne-reduction/references/overlap-integration.md",
+      "bytes": 9555
+    },
+    {
+      "path": "skills/ariadne-reduction/references/probabilistic-multilattice.md",
+      "bytes": 10282
+    },
+    {
+      "path": "skills/ariadne-reduction/references/source-extensions.md",
+      "bytes": 9913
+    },
+    {
+      "path": "skills/ariadne-reduction/references/sources.md",
+      "bytes": 4827
+    },
+    {
+      "path": "skills/ariadne-reduction/references/twins.md",
+      "bytes": 4224
+    },
+    {
+      "path": "skills/ariadne-reduction/references/workflow.md",
+      "bytes": 4726
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/centroid_em.py",
+      "bytes": 38464
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/compare_hypotheses.py",
+      "bytes": 4048
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/composite_scaling.py",
+      "bytes": 36362
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/constrained_pixels.py",
+      "bytes": 32925
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/correct_overlap_groups.py",
+      "bytes": 9959
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/dials_tools.py",
+      "bytes": 24379
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/domain_finder.py",
+      "bytes": 19605
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/domain_manager.py",
+      "bytes": 9359
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/export_hklf5.py",
+      "bytes": 687
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/geometry_diagnostics.py",
+      "bytes": 4015
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/global_scale.py",
+      "bytes": 19392
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/hklf5_stream.py",
+      "bytes": 9390
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/information_modes.py",
+      "bytes": 4535
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/joint_geometry_refine.py",
+      "bytes": 8457
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/learn_profile_library.py",
+      "bytes": 8495
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/local_profiles.py",
+      "bytes": 1856
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/orthogonal_compression.py",
+      "bytes": 2237
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/overlap_integrator.py",
+      "bytes": 23800
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/overlap_observability.py",
+      "bytes": 13855
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/overlap_prepare.py",
+      "bytes": 19889
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/poisson_gaussian.py",
+      "bytes": 13526
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/profile_geometry.py",
+      "bytes": 12688
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/profile_learning.py",
+      "bytes": 8592
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/rotation_geometry.py",
+      "bytes": 3883
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/scaling_geometry.py",
+      "bytes": 4977
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/search_domains.py",
+      "bytes": 8459
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/soft_multi_indexer.py",
+      "bytes": 11245
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/variable_projection.py",
+      "bytes": 9100
+    },
+    {
+      "path": "skills/ariadne-reduction/scripts/workflow.py",
+      "bytes": 16009
+    },
+    {
+      "path": "tests/test_centroid_em.py",
+      "bytes": 18389
+    },
+    {
+      "path": "tests/test_composite_scaling.py",
+      "bytes": 15513
+    },
+    {
+      "path": "tests/test_conditional_gaussian.py",
+      "bytes": 8100
+    },
+    {
+      "path": "tests/test_constrained_pixels.py",
+      "bytes": 16056
+    },
+    {
+      "path": "tests/test_export_round2.py",
+      "bytes": 4491
+    },
+    {
+      "path": "tests/test_geometry_round2.py",
+      "bytes": 10189
+    },
+    {
+      "path": "tests/test_global_scale.py",
+      "bytes": 8964
+    },
+    {
+      "path": "tests/test_indexing_optimization.py",
+      "bytes": 10679
+    },
+    {
+      "path": "tests/test_information_modes.py",
+      "bytes": 8529
+    },
+    {
+      "path": "tests/test_lattice_principles.py",
+      "bytes": 9450
+    },
+    {
+      "path": "tests/test_likelihood_round2.py",
+      "bytes": 10429
+    },
+    {
+      "path": "tests/test_numeric_optimization.py",
+      "bytes": 11156
+    },
+    {
+      "path": "tests/test_overlap_observability.py",
+      "bytes": 8581
+    },
+    {
+      "path": "tests/test_pixel_principles.py",
+      "bytes": 10731
+    },
+    {
+      "path": "tests/test_profile_positions.py",
+      "bytes": 3979
+    },
+    {
+      "path": "tests/test_profiles_round2.py",
+      "bytes": 15252
+    },
+    {
+      "path": "tests/test_scaling_principles.py",
+      "bytes": 21313
+    },
+    {
+      "path": "tests/test_streamed_wls.py",
+      "bytes": 5042
+    },
+    {
+      "path": "tests/test_tool_contracts.py",
+      "bytes": 6872
+    },
+    {
+      "path": "tests/test_tool_lifecycle.py",
+      "bytes": 7468
+    },
+    {
+      "path": "tests/test_variable_projection.py",
+      "bytes": 8113
+    },
+    {
+      "path": "tests_integration/test_native_crystallography.py",
+      "bytes": 2155
+    },
+    {
+      "path": "tests_rebuild/conftest.py",
+      "bytes": 236
+    },
+    {
+      "path": "tests_rebuild/test_agent.py",
+      "bytes": 7625
+    },
+    {
+      "path": "tests_rebuild/test_bridge.py",
+      "bytes": 2016
+    },
+    {
+      "path": "tests_rebuild/test_bundles.py",
+      "bytes": 1691
+    },
+    {
+      "path": "tests_rebuild/test_correction_covariance.py",
+      "bytes": 2832
+    },
+    {
+      "path": "tests_rebuild/test_crystal.py",
+      "bytes": 3735
+    },
+    {
+      "path": "tests_rebuild/test_feedback.py",
+      "bytes": 7818
+    },
+    {
+      "path": "tests_rebuild/test_loop.py",
+      "bytes": 2835
+    },
+    {
+      "path": "tests_rebuild/test_native_boundaries.py",
+      "bytes": 2726
+    },
+    {
+      "path": "tests_rebuild/test_native_protocol.py",
+      "bytes": 4892
+    },
+    {
+      "path": "tests_rebuild/test_native_spots.py",
+      "bytes": 2286
+    },
+    {
+      "path": "tests_rebuild/test_planner.py",
+      "bytes": 5285
+    },
+    {
+      "path": "tests_rebuild/test_review_regressions.py",
+      "bytes": 9503
+    },
+    {
+      "path": "verification/round2_patch_verification.json",
+      "bytes": 821
+    }
+  ]
+}

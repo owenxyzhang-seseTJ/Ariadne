@@ -1,0 +1,347 @@
+{
+  "baseline": "first-principles delivery, frozen before this round",
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39"
+  },
+  "scope": "complete synthetic constrained fit plus all conditional component/total profile intervals; no raw-image I/O",
+  "memory_scope": "separate tracemalloc run, input arrays already constructed; incremental tracked Python/NumPy allocations, not process RSS",
+  "timing_scope": "paired alternating before/after wall time and process CPU time; CPU time distinguishes shared-host descheduling",
+  "repeats": 5,
+  "measurements": [
+    {
+      "name": "poisson_disjoint_4096",
+      "valid_pixels": 4104,
+      "components": 4,
+      "before": {
+        "seconds": [
+          0.20966640999995434,
+          0.20189744600020276,
+          0.1805253749998883,
+          0.2118674190001002,
+          0.21736293200001455
+        ],
+        "median_seconds": 0.20966640999995434,
+        "cpu_seconds": [
+          0.20949862900000005,
+          0.20189476000000006,
+          0.18020756699999962,
+          0.21186696700000018,
+          0.21731219899999976
+        ],
+        "median_cpu_seconds": 0.20949862900000005,
+        "peak_incremental_traced_bytes": 1644021,
+        "fit_converged": true,
+        "interval_statuses": [
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok"
+        ],
+        "profile_evaluations": 113,
+        "analytic_poisson_nuisance_solutions": 0,
+        "convolution_evaluations": null,
+        "likelihood_factorization": null
+      },
+      "after": {
+        "seconds": [
+          0.037004589999924065,
+          0.035284252999645105,
+          0.048837339999863616,
+          0.03704297400008727,
+          0.03799721099994713
+        ],
+        "median_seconds": 0.03704297400008727,
+        "cpu_seconds": [
+          0.03700168200000009,
+          0.03528271900000002,
+          0.04882790700000017,
+          0.03704136999999985,
+          0.03797354399999975
+        ],
+        "median_cpu_seconds": 0.03704136999999985,
+        "peak_incremental_traced_bytes": 1332047,
+        "fit_converged": true,
+        "interval_statuses": [
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok"
+        ],
+        "profile_evaluations": 116,
+        "analytic_poisson_nuisance_solutions": 116,
+        "convolution_evaluations": null,
+        "likelihood_factorization": {
+          "valid_pixels": 4104,
+          "parameter_dependent_pixels": 4096,
+          "parameter_independent_pixels": 8,
+          "optimization_observations": 4,
+          "poisson_sufficient_statistics_rows_removed": 4092,
+          "scope": "exact zero-profile factor separation; exact equal-contributor zero-background Poisson sums; no weak-pixel threshold"
+        }
+      },
+      "same_completed_fit_and_interval_tolerances": true,
+      "equivalent_completion_speedup": 5.660085769556742,
+      "equivalent_completion_cpu_speedup": 5.655801310804673,
+      "incremental_traced_memory_ratio": 1.234206450673287,
+      "max_intensity_difference": 0.0,
+      "max_interval_endpoint_difference": 4.1734438127605245e-08
+    },
+    {
+      "name": "pg_background_halo_32768",
+      "valid_pixels": 32799,
+      "components": 2,
+      "before": {
+        "seconds": [
+          1.0590500520006572,
+          1.0218612520002353,
+          0.5908806739998909,
+          0.5576801630004411,
+          0.5327841510006692
+        ],
+        "median_seconds": 0.5908806739998909,
+        "cpu_seconds": [
+          1.0567489339999998,
+          1.0214196189999996,
+          0.5908645429999995,
+          0.557517206,
+          0.532621386999999
+        ],
+        "median_cpu_seconds": 0.5908645429999995,
+        "peak_incremental_traced_bytes": 11620802,
+        "fit_converged": true,
+        "interval_statuses": [
+          "ok",
+          "ok",
+          "ok"
+        ],
+        "profile_evaluations": 41,
+        "analytic_poisson_nuisance_solutions": 0,
+        "convolution_evaluations": 236,
+        "likelihood_factorization": null
+      },
+      "after": {
+        "seconds": [
+          0.22816316399985226,
+          0.21191268300026422,
+          0.20445988400024362,
+          0.1930208270005096,
+          0.27183124399925873
+        ],
+        "median_seconds": 0.21191268300026422,
+        "cpu_seconds": [
+          0.2281514119999999,
+          0.21191124800000072,
+          0.20440020700000083,
+          0.19092572799999985,
+          0.2717968339999999
+        ],
+        "median_cpu_seconds": 0.21191124800000072,
+        "peak_incremental_traced_bytes": 8014767,
+        "fit_converged": true,
+        "interval_statuses": [
+          "ok",
+          "ok",
+          "ok"
+        ],
+        "profile_evaluations": 41,
+        "analytic_poisson_nuisance_solutions": 0,
+        "convolution_evaluations": 189,
+        "likelihood_factorization": {
+          "valid_pixels": 32799,
+          "parameter_dependent_pixels": 31,
+          "parameter_independent_pixels": 32768,
+          "optimization_observations": 31,
+          "poisson_sufficient_statistics_rows_removed": 0,
+          "scope": "exact zero-profile factor separation; exact equal-contributor zero-background Poisson sums; no weak-pixel threshold"
+        }
+      },
+      "same_completed_fit_and_interval_tolerances": true,
+      "equivalent_completion_speedup": 2.7883214238722753,
+      "equivalent_completion_cpu_speedup": 2.788264184070104,
+      "incremental_traced_memory_ratio": 1.4499238717731906,
+      "max_intensity_difference": 0.0,
+      "max_interval_endpoint_difference": 2.383160335739376e-11
+    },
+    {
+      "name": "pg_1000_to_1_overlap",
+      "valid_pixels": 49,
+      "components": 2,
+      "before": {
+        "seconds": [
+          0.4618113189999349,
+          0.31600256500041723,
+          0.3266112869996505,
+          0.3005345320007109,
+          0.28597441100009746
+        ],
+        "median_seconds": 0.31600256500041723,
+        "cpu_seconds": [
+          0.4617866149999994,
+          0.31596858500000025,
+          0.3266109300000011,
+          0.30053419299999895,
+          0.28595578899999907
+        ],
+        "median_cpu_seconds": 0.31596858500000025,
+        "peak_incremental_traced_bytes": 164967,
+        "fit_converged": true,
+        "interval_statuses": [
+          "ok",
+          "ok",
+          "ok"
+        ],
+        "profile_evaluations": 54,
+        "analytic_poisson_nuisance_solutions": 0,
+        "convolution_evaluations": 308,
+        "likelihood_factorization": null
+      },
+      "after": {
+        "seconds": [
+          0.3450804419999258,
+          0.2989360729998225,
+          0.29786733200035087,
+          0.3162384989991551,
+          0.3111800280003081
+        ],
+        "median_seconds": 0.3111800280003081,
+        "cpu_seconds": [
+          0.3450490350000006,
+          0.2989359710000006,
+          0.297856844,
+          0.31621048400000085,
+          0.3108345359999998
+        ],
+        "median_cpu_seconds": 0.3108345359999998,
+        "peak_incremental_traced_bytes": 162581,
+        "fit_converged": true,
+        "interval_statuses": [
+          "ok",
+          "ok",
+          "ok"
+        ],
+        "profile_evaluations": 56,
+        "analytic_poisson_nuisance_solutions": 0,
+        "convolution_evaluations": 285,
+        "likelihood_factorization": {
+          "valid_pixels": 49,
+          "parameter_dependent_pixels": 41,
+          "parameter_independent_pixels": 8,
+          "optimization_observations": 41,
+          "poisson_sufficient_statistics_rows_removed": 0,
+          "scope": "exact zero-profile factor separation; exact equal-contributor zero-background Poisson sums; no weak-pixel threshold"
+        }
+      },
+      "same_completed_fit_and_interval_tolerances": true,
+      "equivalent_completion_speedup": 1.0154975787845368,
+      "equivalent_completion_cpu_speedup": 1.016516983814181,
+      "incremental_traced_memory_ratio": 1.0146757616203614,
+      "max_intensity_difference": 0.0,
+      "max_interval_endpoint_difference": 1.4900479072821327e-08
+    }
+  ],
+  "stability_counterexample": {
+    "name": "large_parameter_independent_chi_square",
+    "chi2": 1.6e+17,
+    "independent_analytic_interval": [
+      1.6400359796971593,
+      5.559963948777267
+    ],
+    "before": {
+      "identifiable": true,
+      "nullspace_fraction": 0.0,
+      "estimate": 3.599999964237213,
+      "lower": 0.0,
+      "upper": 7.472983308093982,
+      "confidence_level": 0.95,
+      "likelihood_ratio_threshold": 3.841458820694124,
+      "calibration": "chi-square(1) asymptotic; not exact, including at boundary",
+      "unit": "calibrated_adu",
+      "scope": "conditional on frozen WLS-estimated background, supplied profiles, geometry and noise calibration; background-estimation uncertainty excluded",
+      "status": "ok",
+      "lower_at_nonnegative_boundary": true,
+      "lower_likelihood_ratio": 0.0,
+      "upper_likelihood_ratio": 0.0
+    },
+    "after": {
+      "identifiable": true,
+      "nullspace_fraction": 0.0,
+      "estimate": 3.599999964237213,
+      "lower": 1.6400359796979753,
+      "upper": 5.559963948777267,
+      "confidence_level": 0.95,
+      "likelihood_ratio_threshold": 3.841458820694124,
+      "calibration": "chi-square(1) asymptotic; not exact, including at boundary",
+      "unit": "calibrated_adu",
+      "scope": "conditional on frozen WLS-estimated background, supplied profiles, geometry and noise calibration; background-estimation uncertainty excluded",
+      "status": "ok",
+      "lower_at_nonnegative_boundary": false,
+      "lower_likelihood_ratio": 3.8414588206909257,
+      "upper_likelihood_ratio": 3.8414588206941254
+    }
+  },
+  "unit_counterexample": {
+    "name": "same_PG_model_with_small_ADU_unit",
+    "adu_multiplier": 1e-12,
+    "reference_original_adu": {
+      "identifiable": true,
+      "nullspace_fraction": 0.0,
+      "estimate": 0.0,
+      "lower": 0.0,
+      "upper": 5.7866976813736395,
+      "confidence_level": 0.95,
+      "likelihood_ratio_threshold": 3.841458820694124,
+      "calibration": "chi-square(1) asymptotic; not exact, including at boundary",
+      "unit": "calibrated_adu",
+      "scope": "conditional on frozen WLS-estimated background, supplied profiles, geometry and noise calibration; background-estimation uncertainty excluded",
+      "status": "ok",
+      "lower_at_nonnegative_boundary": true,
+      "lower_likelihood_ratio": 0.0,
+      "upper_likelihood_ratio": 3.841458820694123
+    },
+    "before": {
+      "identifiable": true,
+      "nullspace_fraction": 0.0,
+      "estimate": 0.0,
+      "lower": 0.0,
+      "upper": 0.0,
+      "confidence_level": 0.95,
+      "likelihood_ratio_threshold": 3.841458820694124,
+      "calibration": "chi-square(1) asymptotic; not exact, including at boundary",
+      "unit": "calibrated_adu",
+      "scope": "conditional on frozen WLS-estimated background, supplied profiles, geometry and noise calibration; background-estimation uncertainty excluded",
+      "status": "ok",
+      "lower_at_nonnegative_boundary": true,
+      "lower_likelihood_ratio": 0.0,
+      "upper_likelihood_ratio": 0.0
+    },
+    "after": {
+      "identifiable": true,
+      "nullspace_fraction": 0.0,
+      "estimate": 0.0,
+      "lower": 0.0,
+      "upper": 5.786697681373648e-12,
+      "confidence_level": 0.95,
+      "likelihood_ratio_threshold": 3.841458820694124,
+      "calibration": "chi-square(1) asymptotic; not exact, including at boundary",
+      "unit": "calibrated_adu",
+      "scope": "conditional on frozen WLS-estimated background, supplied profiles, geometry and noise calibration; background-estimation uncertainty excluded",
+      "status": "ok",
+      "lower_at_nonnegative_boundary": true,
+      "lower_likelihood_ratio": 0.0,
+      "upper_likelihood_ratio": 3.841458820694129
+    },
+    "before_endpoints_in_original_adu": {
+      "lower": 0.0,
+      "upper": 0.0
+    },
+    "after_endpoints_in_original_adu": {
+      "lower": 0.0,
+      "upper": 5.786697681373648
+    }
+  }
+}

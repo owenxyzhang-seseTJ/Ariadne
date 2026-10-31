@@ -1,10 +1,7 @@
 """MCP tool contracts: published schemas must match what the tools actually return."""
 from __future__ import annotations
 
-import argparse
 import asyncio
-import inspect
-import json
 import os
 from pathlib import Path
 import sys

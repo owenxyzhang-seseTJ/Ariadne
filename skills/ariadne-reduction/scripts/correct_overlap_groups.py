@@ -13,6 +13,17 @@ import sys
 import numpy as np
 
 
+def checked_covariance(value, size, label):
+    covariance = np.asarray(value, dtype=float)
+    if (covariance.shape != (size, size) or not np.all(np.isfinite(covariance))
+            or not np.allclose(covariance, covariance.T, rtol=1e-10, atol=1e-14)):
+        raise ValueError(label + ' covariance must be finite, symmetric and match its components')
+    scale = max(float(np.max(np.abs(covariance))), np.finfo(float).tiny)
+    if np.min(np.linalg.eigvalsh(covariance)) < -1e-10 * scale:
+        raise ValueError(label + ' covariance must be positive semidefinite')
+    return covariance
+
+
 def correct(args):
     records = [json.loads(line) for line in args.integrated.read_text().splitlines() if line.strip()]
     corrections = json.loads(args.corrections.read_text())
@@ -49,14 +60,14 @@ def correct(args):
         factors = np.asarray(correction['factors'], dtype=float)
         if factors.shape != (n,) or not np.all(np.isfinite(factors)) or np.any(factors <= 0):
             raise ValueError('Invalid correction factors for ' + group_id)
-        Cf = np.asarray(correction.get('factor_covariance', np.zeros((n, n))), dtype=float)
-        if Cf.shape != (n, n) or not np.all(np.isfinite(Cf)) or not np.allclose(Cf, Cf.T) or np.min(np.linalg.eigvalsh(Cf)) < -1e-12:
-            raise ValueError('Correction covariance must be positive semidefinite')
+        Cf = checked_covariance(correction.get('factor_covariance', np.zeros((n, n))), n, 'Correction-factor')
         if 'factor_covariance' not in correction and correction.get('factor_uncertainty') != 'treated_as_fixed':
             raise ValueError('Explicitly provide factor covariance or state treated_as_fixed')
         if record['status'] == 'joint_components':
-            intensity = np.asarray([c['intensity'] for c in record['components']])
-            covariance = np.asarray(record['covariance_identifiable_subspace'])
+            intensity = np.asarray([c['intensity'] for c in record['components']], dtype=float)
+            if intensity.shape != (n,) or not np.all(np.isfinite(intensity)):
+                raise ValueError('Component intensities must be finite and match their contributors')
+            covariance = checked_covariance(record['covariance_identifiable_subspace'], n, 'Intensity')
             value = float(factors @ intensity)
             # Independent intensity/factor errors; cross-covariance must be supplied if jointly estimated.
             variance = float(factors @ covariance @ factors + intensity @ Cf @ intensity)
@@ -68,6 +79,7 @@ def correct(args):
                     raise ValueError('Jointly estimated corrections require intensity-factor cross covariance')
                 variance += float(2 * factors @ cross @ intensity)
                 corrected_covariance += factors[:, None] * cross * intensity[None, :] + intensity[:, None] * cross.T * factors[None, :]
+            checked_covariance(corrected_covariance, n, 'Propagated component')
         else:
             corrected_covariance, corrected_components = None, None
             if not np.allclose(factors, factors[0], rtol=1e-8, atol=0):

@@ -13,7 +13,7 @@ def build(args):
     from dials.array_family import flex
     from dxtbx.model.experiment_list import ExperimentListFactory
     from soft_multi_indexer import raw_key
-    from global_scale import write_json
+    from global_scale import write_json, information_observation
     records = [json.loads(line) for line in args.integrated.read_text().splitlines() if line.strip()]
     models = ExperimentListFactory.from_json_file(str(args.models), check_format=False)
     pred = flex.reflection_table.from_file(str(args.predictions))
@@ -29,7 +29,10 @@ def build(args):
     keys = sorted(set(raw_key(e) for e in models))
     groups = {}
     for record in records:
-        if record.get('status') not in ('joint_components', 'total_only') or record.get('quality_flags'):
+        if record.get('quality_flags'):
+            continue
+        modes = information_observation(record) if record.get('information_modes') else None
+        if modes is None and record.get('status') not in ('joint_components', 'total_only'):
             continue
         entries = []
         for contributor in record['contributors']:

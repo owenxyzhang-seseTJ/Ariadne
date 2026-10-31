@@ -1,0 +1,125 @@
+{
+  "baseline_commit": "797ac22ffa9b81da2dd977e013bea8f114b49eb2",
+  "repeats": 3,
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39"
+  },
+  "scope": "Synthetic small dense composite-scaling kernels; excludes raw-frame DIALS processing and I/O",
+  "timing_semantics": "A ratio is labelled a speedup only when both fits report converged under the same tolerances.",
+  "measurements": [
+    {
+      "name": "correlated_composites_exact",
+      "blocks": 72,
+      "measurements": 144,
+      "before": {
+        "seconds": [
+          0.11294879299975946,
+          0.09132725200015557,
+          0.08352964000005159
+        ],
+        "median_seconds": 0.09132725200015557,
+        "status": "converged",
+        "reason": "converged",
+        "chi2": 1.7155443183886472e-28,
+        "gradient_norm": 2.7533089385213394e-15,
+        "trace_states": 7
+      },
+      "after": {
+        "seconds": [
+          0.0964682020003238,
+          0.061016233999907854,
+          0.06032816400011143
+        ],
+        "median_seconds": 0.061016233999907854,
+        "status": "converged",
+        "reason": "converged",
+        "chi2": 1.6244371671730804e-28,
+        "gradient_norm": 4.4426505108921374e-15,
+        "trace_states": 7
+      },
+      "elapsed_ratio": 1.4967697285331227,
+      "equivalent_completion_speedup": 1.4967697285331227,
+      "max_absolute_differences": {
+        "I": 8.881784197001252e-16,
+        "beta": 1.1102230246251565e-16,
+        "joint_covariance": 6.245004513516506e-17,
+        "parameter_response": 4.419208055050916e-16
+      }
+    },
+    {
+      "name": "correlated_composites_noisy",
+      "blocks": 72,
+      "measurements": 144,
+      "before": {
+        "seconds": [
+          5.848065318999943,
+          5.0938523429999805,
+          5.198439978999886
+        ],
+        "median_seconds": 5.198439978999886,
+        "status": "unresolved",
+        "reason": "iteration_budget_exceeded",
+        "chi2": 1.3934461739562107,
+        "gradient_norm": 1.2462019723321516e-08,
+        "trace_states": 401
+      },
+      "after": {
+        "seconds": [
+          0.06562824000002365,
+          0.06941466299986132,
+          0.05388903899984143
+        ],
+        "median_seconds": 0.06562824000002365,
+        "status": "converged",
+        "reason": "converged",
+        "chi2": 1.3934461739562078,
+        "gradient_norm": 6.497840013640901e-11,
+        "trace_states": 7
+      },
+      "elapsed_ratio": 79.21041275825792,
+      "equivalent_completion_speedup": null,
+      "max_absolute_differences": {
+        "I": 1.4896670563757652e-09,
+        "beta": 3.720390662209638e-11,
+        "joint_covariance": 1.3465513426513809e-12,
+        "parameter_response": 2.451733260855349e-12
+      }
+    }
+  ],
+  "unit_invariance": {
+    "name": "intensity_unit_invariance_24_orders",
+    "true_intensity": [
+      4000000000000.0,
+      -3e-12
+    ],
+    "before": {
+      "rank": 1,
+      "status": "unresolved",
+      "I": [
+        0.0,
+        -3e-12
+      ]
+    },
+    "after": {
+      "rank": 2,
+      "status": "converged",
+      "I": [
+        4000000000000.0,
+        -3e-12
+      ],
+      "covariance": [
+        [
+          1e+24,
+          0.0
+        ],
+        [
+          0.0,
+          1e-24
+        ]
+      ]
+    }
+  }
+}

@@ -1,0 +1,72 @@
+\chapter{面向智能体的计算组织}
+\section{结构假设与数值状态}
+一个可计算的结构状态可写为
+\begin{equation}
+\mathcal S=(D,G,\mathcal A,\vct p,\mathcal C,\mathcal R,\mathcal W),
+\end{equation}
+其中 $D$ 是观测与元数据，$G$ 是对称性假设，$\mathcal A$ 是原子与元素集合，$\vct p$ 是连续参数，$\mathcal C$ 与 $\mathcal R$ 分别是约束和限制，$\mathcal W$ 是权重与数据分组。连续精修只在给定离散假设下更新参数。空间群、元素类型、无序组分数目和孪晶律的改变都产生新的 $\mathcal S$。
+
+智能体的作用是组织假设、选择计算和解释结果。语言模型提出“增加一个氧位点”时，执行层应收到一个明确的原子对象、依据和目标文件，而不是一段待执行的自然语言代码。坐标、误差、指标和接受判据由数值模块生成。这样，数值结论可以在更换语言模型后独立复现。
+
+\section{四种状态不能混为一个成功标记}
+实际运行需要区分以下事件：任务完成了文件读写；数值优化器满足停止条件；连续参数在给定模型内可辨识；结构假设得到充分支持。它们具有不同的判据。
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabularx}{\textwidth}{p{29mm}X}
+\toprule 状态 & 判据\\\midrule
+执行完成 & 输入读取、计算与输出归档没有发生执行错误\\
+数值收敛 & 优化器满足目标、步长或梯度停止条件\\
+局部可辨识 & 去除规范自由度后，相关 Jacobian 满秩\\
+科学接受 & 残差、化学、对称性、独立检验与替代模型共同支持结论\\
+\bottomrule
+\end{tabularx}
+\caption{运行、数值与结构判断的不同层级。当前 agent 接口不自动授予科学接受状态。}
+\end{table}
+运行记录中的 \code{scientific_acceptance} 初始为 \code{not_assessed}。即使优化器已收敛，也保留这一状态，供上层工作流按明确规则处理。
+
+\section{工具接口与请求模式}
+所有计算从一个显式动作开始。原生动作包含 \code{inspect}、\code{solve}、\code{refine}、\code{maps} 和 \code{absolute}；兼容动作是 \code{legacy}。\code{capabilities} 返回机器可读能力边界。每个动作有独立的字段集合，不适用的字段会被拒绝。例如，精修尺度应放在精修选项中，不能把另一个动作的同名参数传入后被忽略。
+
+三种入口共享同一执行核心：Python 函数适于数值工作流；JSONL 适于简单进程调用；MCP 通过官方 Python SDK 向宿主 agent 暴露工具~\cite{mcp_sdk}。MCP 适配层只转换请求和返回值，不复制一套精修逻辑。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=9mm and 8mm, every node/.style={font=\small},
+box/.style={draw=black!50,rounded corners=2pt,minimum height=11mm,text width=34mm,align=center,fill=papergray},
+arr/.style={-{Latex[length=2mm]},thick,draw=black!65}]
+\node[box] (host) {宿主智能体\\提出明确假设};
+\node[box,below=of host] (schema) {请求模式检查\\输入与资源边界};
+\node[box,below left=12mm and 16mm of schema] (native) {原生数值模块\\求解、精修、地图};
+\node[box,below right=12mm and 16mm of schema] (legacy) {显式官方后端\\原始指令与文件};
+\node[box,below=32mm of schema] (archive) {运行快照与诊断\\指标、秩、文件哈希};
+\draw[arr] (host)--(schema);
+\draw[arr] (schema)--(native);
+\draw[arr] (schema)--(legacy);
+\draw[arr] (native)--(archive);
+\draw[arr] (legacy)--(archive);
+\draw[arr] (archive.west)--++(-30mm,0)|-(host.west);
+\end{tikzpicture}
+\caption{同一结构工作流中的两种明确执行路径。数值结果先归档，再用于下一步假设；不存在原生计算失败后自动改用官方程序的隐藏切换。}
+\end{figure}
+
+\section{输入快照与可追溯性}
+每次运行创建独立目录，保存请求、输入文件快照、参数、程序依赖版本和输出清单。对文件 $B$ 计算
+\begin{equation}
+H(B)=\operatorname{SHA256}(B).
+\end{equation}
+哈希用于检验某个结果对应哪一组输入字节。它不证明数据真实，也不防止一个拥有写权限的人同时修改文件与清单。其作用是给日常复现和分支比较提供精确标识。
+
+原始输入不被优化器覆写。一次精修产生新的 JSON、CIF、诊断和可选 RES 结构导出。RES 的原子名、设定或其他格式限制若不能表达一个有效的原生模型，JSON 与 CIF 结果仍被保留，导出问题单独记入结果。完整原始指令文件的保存与原生结构导出是不同操作。
+
+\section{工具边界与可控计算}
+请求中的文件必须位于指定工作区，路径规范化后再检查边界。外部程序的路径在启动时由使用者显式配置，单个 agent 请求不能随意替换。调用使用参数数组，不经过 shell。程序不提供执行任意 Python、命令字符串或联网提交结构的工具。
+
+原生请求设有原子数、反射数、网格体素和迭代预算。相位恢复在 agent 层限制总试验迭代数；精修的 \code{max_nfev} 指优化器目标评估预算，而三点差分还会增加结构因子调用次数。官方进程单独有超时与进程组终止机制。
+
+工作目录边界和运行隔离不等同于操作系统安全沙箱。若部署环境执行不可信第三方程序，还需在操作系统或容器层设置资源、文件和网络权限。这是部署层职责，不能仅靠晶体学工具中的路径检查完成。
+
+\section{结构改进的分支工作流}
+一种可重复的自动解析流程是：先检查数据和对称性，生成多个原子候选，再在同一预先约定的工作集上精修；随后比较残余密度、几何和可辨识性，并将必要的模型改变作为新分支执行。候选排序应保存所有使用的指标和参数数目，而不只保留一个总分。
+
+候选中若出现无法区分的元素、极弱无序组分或同等支持的空间群，工作流应保留歧义。agent 可以提出需要额外实验的信息，例如增加 Friedel 覆盖、改变波长或收集温度序列。计算自动化的目标是把这一判断过程变得可检查，而不是强迫所有数据产生唯一结论。

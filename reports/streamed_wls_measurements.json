@@ -1,0 +1,47 @@
+{
+  "baseline": "first-principles delivery 20261029",
+  "rows": 120000,
+  "components": 16,
+  "repeats": 5,
+  "scope": "synthetic fixed-profile signed WLS; inputs allocated before tracemalloc; additional NumPy/Python allocations, not total process RSS",
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39"
+  },
+  "measurements": {
+    "before": {
+      "seconds": [
+        0.2544919319998371,
+        0.20723856799986606,
+        0.2047198689997458,
+        0.2868383999998514,
+        0.15040940700009742
+      ],
+      "median_seconds": 0.20723856799986606,
+      "traced_peak_additional_bytes": 87489662,
+      "traced_retained_bytes": 981778
+    },
+    "after": {
+      "seconds": [
+        0.06840392999993128,
+        0.04608949899966319,
+        0.057806364000043686,
+        0.045333587000186526,
+        0.055390761000126076
+      ],
+      "median_seconds": 0.055390761000126076,
+      "traced_peak_additional_bytes": 2406420,
+      "traced_retained_bytes": 981548
+    },
+    "speedup": 3.741392323521144,
+    "peak_workspace_ratio": 36.35677146965202,
+    "maximum_absolute_differences": {
+      "intensities_internal": 1.546140993013978e-11,
+      "covariance_identifiable_subspace": 1.3969838619232178e-09,
+      "chi2": 9.094947017729282e-13,
+      "fitted": 2.1760371282653068e-14
+    }
+  }
+}

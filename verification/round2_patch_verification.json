@@ -1,0 +1,26 @@
+{
+  "schema": "ariadne-round2-patch-verification/1",
+  "baseline_commit": "797ac22ffa9b81da2dd977e013bea8f114b49eb2",
+  "paths": [
+    {
+      "path": "original",
+      "applied": true,
+      "changed_files": 69,
+      "all_delivered_source_files_compared": 136,
+      "all_compared_bytes_equal": true,
+      "repeat_apply_recognized": true,
+      "patch_bytes": 1765458
+    },
+    {
+      "path": "first_delivery",
+      "applied": true,
+      "changed_files": 45,
+      "all_delivered_source_files_compared": 136,
+      "all_compared_bytes_equal": true,
+      "repeat_apply_recognized": true,
+      "patch_bytes": 570425
+    }
+  ],
+  "comparison": "direct file-byte equality; generated patches and compiled PDFs excluded",
+  "native_validation": "reports/round2_validation.json; verified source is the tested source"
+}

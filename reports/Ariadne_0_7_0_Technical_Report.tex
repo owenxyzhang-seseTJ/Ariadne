@@ -1,0 +1,563 @@
+% !TeX program = xelatex
+% Self-contained report: compile twice with XeLaTeX.
+\documentclass[UTF8,11pt,a4paper,fontset=fandol]{ctexart}
+\usepackage[left=24mm,right=24mm,top=23mm,bottom=24mm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,bm,mathtools,booktabs,tabularx,longtable,array}
+\usepackage{xcolor,hyperref,fancyhdr,listings,enumitem,microtype}
+\definecolor{ink}{HTML}{202A35}
+\definecolor{accent}{HTML}{334D66}
+\definecolor{codebg}{HTML}{F3F4F5}
+\hypersetup{colorlinks=true,linkcolor=accent,citecolor=accent,urlcolor=accent,
+ pdftitle={Ariadne 0.7.0：自动晶体结构解析的原理与实现},pdfauthor={Ariadne technical reconstruction}}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{3em}
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.22}
+\setlist{itemsep=2pt,topsep=4pt}
+\ctexset{section={format=\Large\bfseries\color{ink}},subsection={format=\large\bfseries\color{ink}},subsubsection={format=\normalsize\bfseries\color{ink}}}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small Ariadne 0.7.0\quad 原理与实现}
+\fancyhead[R]{\small 重建版技术报告}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,
+ keepspaces=true,showstringspaces=false,backgroundcolor=\color{codebg},
+ frame=single,rulecolor=\color{codebg},framesep=5pt,xleftmargin=5pt,xrightmargin=5pt}
+\newcommand{\T}{^{\mathsf T}}
+\newcommand{\Id}{\mathrm{Id}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\begin{document}
+\thispagestyle{empty}
+\begingroup\setlength{\parindent}{0pt}
+{\sffamily\large\color{accent}ARIADNE / TECHNICAL REPORT\par}
+\vspace{8mm}
+{\LARGE\bfseries Ariadne 0.7.0\par}
+\vspace{3mm}
+{\huge\bfseries 自动晶体结构解析的\\[3pt]原理与实现\par}
+\vspace{5mm}
+{\large 从衍射信息、结构反馈到可恢复的 agent\par}
+\vspace{6mm}
+\noindent\rule{\textwidth}{0.6pt}
+\begin{tabularx}{\textwidth}{@{}lY@{}}
+构建 & \code{0.7.0-rebuild-20261030}\\
+日期 & 2026 年 10 月 30 日\\
+基线 & 已恢复的 R2 完整源码，版本 0.5.0\\
+新增内容 & 结构反馈求解器、原生 CIF 计算、持久化 agent、验证与归档\\
+本轮测试 & 279 项通过；7 项因缺少运行库跳过；0 项失败或错误
+\end{tabularx}
+\vspace{5mm}
+\noindent\textbf{本报告讨论什么}
+
+Ariadne 把衍射数据处理看作一系列有物理含义的推断：先从像素得到反射信息，再由这些信息求结构，最后用带不确定度的结构预测检验尚未解决的反射。Agent 负责组织这些计算、检查产物并保存过程；它不代替衍射方程，也不把语言模型的判断当成实验结果。
+
+本版保留 R2 的数值算法，在可恢复源码上重新实现了结构反馈与 agent。它不是此前丢失的 0.7.0 文件的逐字节恢复件。本报告中的新增代码、测试和性能数据均对应这次重建；包内旧报告仅作为历史记录。
+
+\noindent\textbf{阅读路线}
+
+第 1--2 节说明数据模型及其计算基础；第 3--5 节推导结构反馈；第 6 节解释 agent 如何执行和恢复任务；第 7--9 节给出源码接口、实测结果与使用方法。读者可先运行第 9 节的合成示例，再对照公式查看代码。
+
+\endgroup
+\clearpage
+\begingroup
+\small\linespread{1}\selectfont\setlength{\parskip}{0pt}
+\makeatletter
+\renewcommand{\l@section}{\@dottedtocline{1}{0em}{1.8em}}
+\makeatother
+\tableofcontents
+\endgroup
+\clearpage
+
+\section{任务边界与系统结构}
+\subsection{从图像到结构，程序需要回答哪些问题}
+
+单晶衍射处理依次回答四个问题：哪些像素含有衍射信号，信号属于哪个倒易点，各反射的强度是多少，以及哪些原子模型能解释这些强度。弱衍射与孪晶使这些问题相互耦合。一个弱信号是否值得保留，可能取决于几何预测；两个重叠贡献如何分配，可能取决于其他曝光或结构信息。
+
+DIALS 提供图像、仪器、晶体模型和数据还原的基础设施\cite{dials,geometry}。Ariadne 保留这些接口，并增加联合估计和流程控制。当前系统分为三层：底层执行物理和统计计算，中层保存有类型的输入输出与证据，上层决定下一步执行哪个已注册工具。层间传递的是文件、数值、状态和来源记录，而不是一段无法检查的自然语言结论。
+
+\begin{table}[htbp]
+\centering\caption{本次交付中各层的职责}
+\begin{tabularx}{\textwidth}{@{}p{25mm}YY@{}}
+\toprule
+层级 & 主要内容 & 本轮状态\\\midrule
+既有数值层 & 预测几何、体素轮廓、WLS、计数似然、缩放和导出 & 保留 R2 源码；重跑可用数学测试\\
+结构反馈层 & CIF 预测、训练尺度、相关先验、条件后验与留出检验 & 重新实现，真实 Gemmi 和合成数据已运行\\
+Agent 执行层 & 任务图、产物引用、预算、恢复、候选展开与归档 & 重新实现；本地执行和协议测试已运行\\
+外部科学程序 & DIALS、SHELXT、SHELXL & 接口已实现；本轮环境未安装实际程序\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{自动化的含义}
+
+默认计划器是确定性的，不依赖语言模型。它沿依赖关系执行任务，并根据实际产物扩展后续工作。例如，SHELXT 确实产生了两个完整候选，系统才建立两个精修任务；只有一个完整候选，就只建立一个。
+
+可选的语言模型计划器能够阅读限长的诊断，选择就绪节点，或建议一个有类型的计算分支。它不能直接执行任意 shell，也不能自行填写“计算成功”。因此，原生 agent 的核心是\textbf{可执行、可恢复、可检查的闭环}，而非必须调用某一种大模型。
+
+本版的原始图像自动路线限定单晶模型。复杂孪晶仍需显式选择 R2 联合积分和缩放路径。代码不会因为用户希望自动完成，就把复杂孪晶按单晶导出。结构反馈目前条件于固定的观测模型，并非同时优化全部像素、仪器参数和原子坐标的统一求解器。
+
+\section{衍射计算的基本对象}
+\subsection{反射预测与仪器几何}
+
+设 $A$ 为倒易基矩阵，$h$ 为整数 Miller 指标，$F$、$S$ 为固定和设置旋转，$R_e(\varphi)$ 为绕扫描轴的转动。散射向量与出射波矢为
+\begin{equation}
+ r=S R_e(\varphi)F A h,\qquad s_1=s_0+r.
+\end{equation}
+反射出现时满足 Ewald 条件 $\norm{s_1}^2=\norm{s_0}^2$。原生预测器负责选择真实的扫描分支、面板与角度圈数；局部导数可以直接由该约束求出\cite{geometry}。
+
+对晶体参数 $\theta$，记 $v_\theta=S R_e F(\partial A/\partial\theta)h$，以及 $t=(Se)\times r$。隐式求导给出
+\begin{equation}
+ \frac{\partial\varphi}{\partial\theta}
+ =-\frac{s_1\T v_\theta}{s_0\T t},\qquad
+ \frac{\partial s_1}{\partial\theta}
+ =v_\theta+t\frac{\partial\varphi}{\partial\theta}.
+\end{equation}
+面板位置随后通过射线与探测器平面的交点求导。这样，无须为每个参数扰动重复枚举所有反射。接近 Ewald 相切时，分母趋近零，灵敏度本来就很大；程序应报告导数不可靠，而不是随意给分母加一个常数。
+
+\subsection{体素轮廓是概率质量，不是中心点高度}
+
+三维 shoebox 的一个体素 $V$ 对应有限的像素与转角范围。若归一化轮廓密度为 $\phi(x;\mu,\Sigma)$，体素系数为
+\begin{equation}
+ p_V=\int_V\phi(x;\mu,\Sigma)\,\mathrm dx.
+\end{equation}
+这里的积分决定完整反射有多少信号落在该体素中。裁剪支持区后，不能把剩余体素重新归一化成 1，否则会把盒外的信号补回盒内，改变强度的物理定义。
+
+对平移中心，$\partial\phi/\partial\mu_j=-\partial\phi/\partial x_j$，因而
+\begin{equation}
+ \frac{\partial p_V}{\partial\mu_j}
+ =\int_{\partial V_{j,-}}\phi\,\mathrm dS
+ -\int_{\partial V_{j,+}}\phi\,\mathrm dS.
+\end{equation}
+位置导数等于两侧表面的概率通量之差。相邻体素的内部表面相互抵消，整个盒子的导数只由外边界决定。R2 已用这一结构减少重复积分，并共享相邻体素的 CDF 边界；本次保留该实现。
+
+\subsection{有符号 WLS 与非负计数模型各司其职}
+
+固定轮廓和方差后，像素模型可写为
+\begin{equation}
+ y=PI+B\beta+\epsilon,\qquad \Cov(\epsilon)=W^{-1}.
+\end{equation}
+$I$ 是完整轮廓幅度，$B\beta$ 是背景。WLS 最小化 $\norm{W^{1/2}(y-PI-B\beta)}^2$，其测量估计允许为负。物理期望非负，不等于扣背景后的每一次估计都必须非负。
+
+例如，若真实信号为零且 $\widehat I\sim N(0,\sigma^2)$，截零后的均值为
+\begin{equation}
+ \mathbb E[\max(\widehat I,0)]=\frac{\sigma}{\sqrt{2\pi}}>0.
+\end{equation}
+对弱反射普遍截零会造成正偏差。因此，实验 WLS、非负计数估计和结构辅助后验必须使用不同的结果语义。
+
+光子计数与读出噪声并存时，可用
+\begin{equation}
+ N_p\sim\mathrm{Poisson}(\lambda_p),\qquad
+ Y_p=o_p+g_pN_p+\varepsilon_p,\quad
+ \varepsilon_p\sim N(0,v_{r,p}).
+\end{equation}
+相应密度是 Poisson 与 Gaussian 的混合求和，期望计数必须非负。R2 保留该似然、非负约束和条件剖面区间。\textbf{本轮结构反馈不把这个低计数模型偷偷替换成 Gaussian}；它只接收明确定义的 Gaussian 信息模式，计数路径继续独立使用。
+
+\subsection{用小型正交因子保存完整 WLS 目标}
+
+令 $C=W^{1/2}[B\ P\ y]$，对其进行分块 QR，得到小型上三角因子 $R_C$。对任意参数向量 $a=(-\beta\T,-I\T,1)\T$，都有
+\begin{equation}
+ \norm{Ca}^2=\norm{R_Ca}^2.
+\end{equation}
+因此，可以逐块读入像素，把附加工作内存限制在块大小和参数维数上。数据列也必须一起压缩，否则会遗漏不可拟合的常数残差，导致错误的拟合优度。后续在小因子上消去背景并做 SVD，不必构造会平方条件数的正规方程。
+
+固定权重下，消去背景后的设计若为 $D=U_r\Sigma_rV_r\T$，局部信息可表示为
+\begin{equation}
+ z=U_r\T t,\qquad z=H I+\eta,\quad H=\Sigma_rV_r\T,
+ \quad\Cov(\eta)=\Id.
+\end{equation}
+需要保留被投影出去的常数残差和原始自由度。数值秩以下的方向不再携带可分辨信息，也不能通过正则化变成新的实验约束。
+
+\subsection{缩放、吸收和导出要保持同一强度定义}
+
+不同观测可以通过已知几何校正、域系数和待估尺度联系到同一潜在强度。R2 的全局缩放写成 $y=A(\beta)I+\epsilon$，每个尺度 $\beta$ 下先求解线性强度，再更新少量非线性参数。吸收和尺度基函数必须由明确的几何及实验约定提供；本轮没有新增晶体形状射线追踪吸收算法。
+
+导出前应区分已校正强度、未校正完整轮廓幅度与模型辅助分量。HKLF4 适合相应的独立反射表示，HKLF5 能表示带域标记的重叠组，但都不能承载任意完整协方差。相关性应在伴随 JSON 中保留。DIALS 的 SHELX 导出接口及最小 INS 组成参数按官方定义使用\cite{dials-export}。任何流程都不能因为反射很弱而重复除以 partiality，或把结构辅助值冒充为新的实验观测。
+
+\section{结构为什么能够反哺衍射处理}
+\subsection{结构因子提供的是预测，不是第二次测量}
+
+对于普通运动学 X 射线模型，结构因子为
+\begin{equation}
+ F_h(\theta)=\sum_j o_j f_j(s)
+ \exp(-2\pi^2 h\T U_j^*h)\,
+ \exp(2\pi i h\T x_j),\qquad J_h=|F_h|^2.
+\end{equation}
+求和应包含正确对称展开和特殊位置占有率约定。Gemmi 的原生散射计算及 CIF 读取为本次实现提供接口\cite{gemmi-scattering,gemmi-api}。
+
+对于宏观非相干孪晶，来自不同域的强度相加；它们的复振幅通常不作相干叠加。已知几何时，一个像素的期望计数可以示意写为
+\begin{equation}
+ \lambda_p=b_p+\sum_{d,h}a_{pdh}\,q\alpha_d
+ \left|F_{M_dh}(\theta)\right|^2.
+\end{equation}
+其中 $M_d$ 是域指标变换，$a_{pdh}$ 包含轮廓与当前约定中的已知前向因子，$q$ 是共同尺度，$\alpha_d$ 是条件混合权重。这个方程说明结构信息与衍射处理可以通过同一个前向模型联系起来。
+
+\subsection{组成已知的 MOF 仍需要模型误差}
+
+已知金属节点、配体种类和连接方式，能够排除大量不合理结构，但不能唯一确定所有弱反射。弱反射可能来自多项复振幅的相消。连接体扭转、客体、占有率和位移参数的小变化，都可能破坏这种相消。
+
+一阶变化为
+\begin{equation}
+ \delta J_h\simeq 2\operatorname{Re}(F_h^*\delta F_h).
+\end{equation}
+当 $F_h$ 很小时，相对误差可能很大；严格相消处还需二阶项。所以，理想模型预测接近零，不应使实验弱反射获得几乎为零的先验方差。
+
+本版以一组化学合理的候选表达模型不确定性。它没有自动生成所有 MOF 拓扑、识别任意无序或替用户补全客体；这些工作需要相应结构工具和明确的科学假设。专家知识包提供检查原则，不能代替原子模型计算。
+
+\subsection{用对角项和低秩因子表达相关误差}
+
+令 $J_{he}$ 为第 $e$ 个候选对反射 $h$ 的预测，$w_e\geq0$ 且 $\sum_e w_e=1$。定义
+\begin{align}
+ m_h&=\sum_e w_eJ_{he},\\
+ U_{he}&=\sqrt{w_e}(J_{he}-m_h),\\
+ d_h&=\sigma_a^2+\sigma_r^2\sum_e w_eJ_{he}^2,\qquad
+ K=\diag(d)+UU\T.
+\end{align}
+$U$ 保存同一个结构变化同时作用于多个反射的相关性；正的绝对误差 $\sigma_a$ 避免弱预测被赋予不合理的确定性。$\sigma_a$ 与 $\sigma_r$ 应由外部知识或训练数据确定，不能看过最终测试后再调整。
+
+这里的候选集合是对未知结构的认识不确定性。它不是微观无序的相干平均，也不是额外的孪晶体积分数。预测均值 $m$ 和协方差 $K$ 只是一个可检验的结构模型。
+
+当前原生路径使用实数 IT92 X 射线散射因子；没有加入异常散射、溶剂掩膜或未建模客体。不同候选必须先转换到一致的晶胞和指标系。对电子衍射、强异常散射或溶剂主导反射，不能直接把此模型当作完备前向模型。
+
+\subsection{先把结构预测与实验单位接起来}
+
+结构预测和积分幅度不一定具有相同单位。对域 $d$ 定义 $c_d=q\alpha_d$，在训练观测上建立白化设计 $X$，求解
+\begin{equation}
+ \widehat c=\argmin_{c\geq0}\norm{Xc-y_w}^2,\qquad
+ q=\sum_dc_d,\quad\alpha_d=c_d/q.
+\end{equation}
+代码检查列尺度、秩和边界。某个域没有训练信息、系数不可分辨或最优解落在非正边界时，不继续给出虚假的内部 Gaussian 误差条。
+
+令 $S=\diag(c_{d(h)})$，则均值和误差必须同步变换：
+\begin{equation}
+ m_c=Sm,\qquad D_c=SDS\T,\qquad
+ U_c=[\,SU\quad J_cL_c\,],\quad C_c=L_cL_c\T.
+\end{equation}
+$J_c$ 是均值对域系数的导数，$C_c$ 是条件校准协方差。只缩放均值而不缩放方差，会破坏单位一致性。
+
+当前 $C_c$ 使用固定结构、内部解的局部 Gaussian 近似，未估计结构误差与校准误差的完整交叉协方差。$\alpha_d$ 首先解释为条件混合权重；只有同相结构、照射和校正等前提成立时，才进一步讨论物理孪晶体积分数。
+
+\section{固定观测模型上的结构反馈}
+\subsection{后验与实验可辨识性}
+
+设实验保留的信息为
+\begin{equation}
+ y=HI+\epsilon,\quad \epsilon\sim N(0,R),\qquad
+ I\sim N(m,K).
+\end{equation}
+这里 $H$、$R$ 及预处理方式在候选比较期间固定。Gaussian 条件公式给出
+\begin{align}
+ S_y&=R+HKH\T,\\
+ m_+&=m+KH\T S_y^{-1}(y-Hm),\\
+ K_+&=K-KH\T S_y^{-1}HK.
+\end{align}
+这是定义计算目标的公式，不是推荐通过两个大矩阵相减来实现协方差。下一节给出实际采用的平方根算法。
+
+实验信息矩阵为 $H\T R^{-1}H$。加入先验可以使后验方差有限，却不会改变 $H$ 的数据秩。代码分别输出数据秩、标量可辨识性、后验均值与协方差因子。相关先验可能让一个未直接观测的分量发生变化，这仍然是模型条件推断。
+
+\subsection{例：完全重叠的两个反射}
+
+设实验只测得 $y=I_1+I_2+\epsilon$，其中 $\operatorname{Var}(\epsilon)=1$；结构先验均值为 $(4,6)$，两分量先验方差均为 1，且独立。若 $y=12$，则
+\begin{equation}
+ m_+=\begin{pmatrix}4+2/3\\6+2/3\end{pmatrix},\qquad
+ K_+=\begin{pmatrix}2/3&-1/3\\-1/3&2/3\end{pmatrix}.
+\end{equation}
+总和方差从 2 降为 $2/3$，差值 $I_1-I_2$ 的方差仍为 2。实验确定了总和，却没有新增差值信息。两个分量都被调整，是因为先验规定了如何分配总和的修正。
+
+这个例子解释了结构反馈的用途和界限：它能给出更完整的条件估计，但不能把完全重叠分量变成两次独立测量。若不同曝光提供不同混合关系，联合设计的秩可能上升；信息来自新观测，而不是来自重复施加先验。
+
+\subsection{同一强度的先验只能施加一次}
+
+若同一反射被测量十次，联合似然可包含十份独立测量信息，但潜在强度 $I_h$ 仍只有一个。不能给每次曝光各套一遍相同结构先验，否则重复曝光会人为增强模型权重。
+
+因此，R2 桥接器要求明确的唯一强度 ID。相同潜变量的贡献合并到同一设计列，不把它们拆成多个独立参数。实验域/HKL、模型 HKL、已知前向乘数和原始像素身份也必须显式给出。相同像素出现在多个独立观测块时会被拒绝，必须先构造正确的联合噪声模型。
+
+\subsection{训练、验证和最终测试分别做什么}
+
+训练数据用于尺度校准以及允许的模型选择步骤；验证数据比较候选；最终测试只评价冻结后的候选。划分不能简单随机抽取 JSONL 行。共享潜在强度以及声明的等价或孪晶轨道关系，必须放在同一个闭合组。若不足三个独立组，程序报告无法建立这次三分划分。
+
+候选在观测空间的联合预测负对数密度为
+\begin{equation}
+ \mathcal L=\tfrac12\left[(y-Hm)\T S_y^{-1}(y-Hm)
+ +\log|S_y|+M\log(2\pi)\right].
+\end{equation}
+$\log|S_y|$ 惩罚无依据的过宽预测。只比较标准化残差，会使一个无限放大误差的模型看起来很好。评分发生在使用目标观测更新后验之前；后验不能回填成新的独立数据再评分。
+
+选定候选后，系统保存其实际参数、输入标识和划分，再在计算最终测试之前登记暴露。重新打开同一会话不会重复查看最终测试。登记库位于会话父目录，作用域是本地项目；它不是跨机器、不可删除的认证服务。来源记录也无法从 CIF 内容自动证明，因此外部或训练专用模型的声明必须真实。
+
+多次围绕同一验证集修改方案会逐渐适配验证集。当前控制器禁止重复最终测试，但不声称彻底消除了所有自适应选择偏差。需要持续研发时，应保留新的独立实验批次，而不是删除旧登记。
+
+\section{低内存结构反馈的计算方法}
+\subsection{先消去局部独立误差，再求共享因子}
+
+把先验写为 $I=m+Uf+\xi$，其中 $f\sim N(0,\Id)$，$\xi\sim N(0,D)$。将共享强度连接起来的观测归入局部组 $g$，定义
+\begin{equation}
+ Q_g=R_g+H_gD_gH_g\T,\qquad B_g=H_gU_g.
+\end{equation}
+$Q_g$ 只涉及该局部重叠组。取 Cholesky 因子 $Q_g=L_gL_g\T$，白化后有
+\begin{equation}
+ z_g=L_g^{-1}(y_g-H_gm_g),\qquad W_g=L_g^{-1}B_g.
+\end{equation}
+共享因子的后验只需解
+\begin{equation}
+ A_f=\Id+\sum_g W_g\T W_g,\qquad
+ b_f=\sum_g W_g\T z_g,\qquad
+ \widehat f=A_f^{-1}b_f.
+\end{equation}
+$A_f$ 的维数是结构误差因子数 $r$，不是反射总数 $N$。局部数据通过这一小矩阵交换相关信息。
+
+\subsection{用平方根形式恢复局部协方差}
+
+令 $s_g=D_g^{1/2}$，并记 $L_{R,g}L_{R,g}\T=R_g$、$T_g=L_{R,g}^{-1}H_gs_g$。对增广矩阵做 QR：
+\begin{equation}
+ \begin{bmatrix}\Id\\T_g\end{bmatrix}=Q_g'R_g'.
+\end{equation}
+这里 $Q_g'$ 与上一节的边缘协方差 $Q_g$ 含义不同。局部条件协方差平方根为
+\begin{equation}
+ C_g=s_g(R_g')^{-1},\qquad
+ C_gC_g\T=(D_g^{-1}+H_g\T R_g^{-1}H_g)^{-1}.
+\end{equation}
+它直接生成正定协方差因子，避免先验协方差减去一个几乎相等的矩阵。代码通过三角求解使用 $(R_g')^{-1}$，不计算通用稠密逆。
+
+设 $V_g$ 为在给定 $f$ 后局部均值对 $f$ 的线性响应，则最终协方差可写为
+\begin{equation}
+ K_+=\operatorname{blockdiag}(C_gC_g\T)+VA_f^{-1}V\T.
+\end{equation}
+输出保留局部平方根和全局因子，只有显式要求调试用稠密矩阵时才展开。该表示在声明的固定 Gaussian 模型内与稠密条件公式等价，没有删除组间相关性。
+
+\subsection{稳定计算预测分数}
+
+直接使用 $\sum_g\norm{z_g}^2-b_f\T A_f^{-1}b_f$，可能相减两个很大的数。实现改用等价的非负平方和：
+\begin{equation}
+ q=\norm{\widehat f}^2+\sum_g\norm{z_g-W_g\widehat f}^2,
+ \qquad
+ \log|S_y|=\sum_g\log|Q_g|+\log|A_f|.
+\end{equation}
+这同时保留完整联合预测密度和数值稳定性。候选预测极强、残差较小时，该处理尤为重要。
+
+\subsection{复杂度和内存边界}
+
+若局部组的最大强度数为 $k$、观测数为 $p$，全局因子数为 $r$，计算由局部 QR/Cholesky、小型 $r\times r$ 求解和 $N\times r$ 因子存储组成。它不要求 $N^2$ 级完整输出。
+
+优势取决于连接结构：局部重叠组小、全局因子少时最明显；若所有反射形成一个巨大连通组，局部分解也可能很大。代码在分配局部矩阵前检查预算并拒绝超限，没有把这个预算宣称为操作系统级的总内存上限。未来可以进一步引入稀疏平方根求解，但那不是本次已实现的能力。
+
+\section{原生 agent 怎样执行科学任务}
+\subsection{任务图、状态与产物引用}
+
+每个节点包含工具名、参数、直接依赖和失败处理规则。输入先复制成不可变快照，并记录快照标识与字节数；输出也以会话内路径、大小和角色描述。后续节点引用真实生产者的结果，例如：
+\begin{lstlisting}
+{"$ref": {"node": "solve", "pointer": "/candidates/0/hkl"}}
+\end{lstlisting}
+引用必须来自声明的直接依赖。模型不能手写一个带路径和大小的“成功产物”混入证据。比较、评审、归档只能消费前序结果引用；普通参数和科学结果因此有明确的边界。
+
+节点经过待执行、运行、成功或失败等状态。SQLite WAL 保存任务、尝试、事件及结果状态，每次尝试写入独立目录。执行前检查依赖，执行后检查实际产物，再提交结果。退出码只是必要信息，不是充分的成功证据。
+
+\subsection{恢复不等于盲目重跑}
+
+正常暂停后，已成功节点不重复执行。恢复时复核输入、产物和记录一致性，防止文件改变后仍沿用旧结论。每次动作、每次规划和累计运行时间都计入预算。
+
+若进程崩溃，外部程序可能仍在运行；数据库中的 running 状态不说明它已经停止。系统要求操作者检查并显式恢复这类任务，不声称外部程序具有严格的“恰好执行一次”保证。取消和超时通过进程组终止原生任务，日志写入文件而非无限积存在内存。
+
+本版是单会话、单本地执行器；没有分布式调度或自动硬件控制。Python 数值动作采用协作式检查和矩阵预算，不能像外部子进程一样在任意指令处硬中断。
+
+\subsection{候选 RES 与 HKL 必须配对}
+
+SHELXT 进行空间群与结构求解，SHELXL 对候选模型精修\cite{shelxt,shelxl,shelxl-manual}。候选可能改变晶胞或指标设置。若直接基变为 $A'=AM$，保持物理位置和相位不变需要
+\begin{equation}
+ x'=M^{-1}x,\qquad h'=M\T h,\qquad (h')\T x'=h\T x.
+\end{equation}
+因此，模型文件与反射文件必须一致变换。代码只把实际产生的同名 RES/HKL 配对送入精修；缺少配对 HKL 的候选不自动使用原始 HKL。
+
+精修封装保留 TWIN、BASF、约束和约束性指令等模型内容，只设置有限轮次和明确输出。未提供关联文件的外部包含或 ABIN 路径会被阻止。程序产出的 CIF 再由 Gemmi 原生读取，检查晶胞、显式对称操作、元素、占有率和位移参数。
+
+候选 R1 可用于描述性比较，但不同空间群、权重、反射子集和自由度的拟合不一定等价。较小的 R1 不自动决定空间群或结构正确性。当前审查也不替代 checkCIF、完整键连通性分析、差值电子密度解释或专家的无序建模。
+
+\subsection{可选模型计划器与工具边界}
+
+默认策略取下一个就绪节点。可选 Chat Completions 计划器只返回三类决策：运行某个就绪节点、暂停，或提出一个注册工具节点。节点仍需通过模式、参数和依赖校验。
+
+计划器读取小型科学摘要，需要更多细节时可使用 \code{artifact.inspect} 读取限长文本或指定 JSON 字段。大日志留在文件中，不全部塞进每次模型请求。专家知识包是声明式建议，不会自动加载任意可执行代码。
+
+密钥从环境变量读取，不写入请求；在线模型会接收状态和选定摘要，应由用户决定是否允许外发。固定工具注册表、无 shell 执行和产物校验减少错误执行路径，但不构成对所有恶意模型输出的安全证明。用户选择的本地可执行文件仍是可信配置。
+
+\subsection{计算完成与科学接受分别记录}
+
+一个动作成功，表示它按契约产生并通过了规定检查的结果。一个 CIF 可读，表示存在可解析的原子模型。一个候选较好，表示它在当前可比范围内的某项指标较优。这三者都不自动等于结构已被科学接受。
+
+本版把这些事实保存在具体结果中，并将最终科学接受保持为 \code{not_established}。任务包包含原始输入、计算参数、模型来源、日志和诊断，让使用者能够继续判断，而不是只获得一句“解析完成”。
+
+\section{代码组织与接口}
+\subsection{文件与算法的对应关系}
+
+下表路径均相对于源码根目录。新增执行模块位于 \path{python/src/ariadne/agent/}；原有算法脚本仍在 \path{skills/ariadne-reduction/scripts/}。
+
+\begin{longtable}{@{}p{60mm}p{93mm}@{}}
+\caption{主要实现位置}\\
+\toprule 文件或模块 & 职责\\\midrule\endfirsthead
+\toprule 文件或模块 & 职责\\\midrule\endhead
+\path{feedback.py} & 固定 Gaussian 条件推断、低秩结构先验、闭合划分和训练校准\\
+\path{crystal.py} & 真实 Gemmi CIF 审查、特殊位置占有率处理、精确指标变换、结构因子\\
+\path{feedback_bridge.py} & 将带显式身份与校正约定的 R2 实验信息模式转换为反馈输入\\
+\path{agent/engine.py}、\path{store.py} & 任务图、持久化、真实候选展开、恢复与预算\\
+\path{agent/spec.py}、\path{util.py} & 类型约束、产物引用、字节数与路径检查、原子写入\\
+\path{agent/backends.py} & DIALS、R2 分析脚本、SHELXT/SHELXL 的固定接口\\
+\path{agent/process.py}、\path{bundles.py} & 子进程取消/超时、输入 ZIP 安全解包及侧文件布局\\
+\path{agent/loop.py} & 候选来源、训练校准、验证比较、冻结与测试暴露登记\\
+\path{agent/planner.py}、\path{actions.py} & 确定性/模型决策、注册动作执行、有限诊断与证据汇总\\
+\path{agent/cli.py}、\path{mcp_tools.py} & 命令行与八个新增 MCP 会话工具\\
+\path{tests_rebuild/} & 数学、原生 Gemmi、执行器、外部协议和数据契约测试\\
+\bottomrule
+\end{longtable}
+
+\subsection{六种工作模式}
+
+\begin{table}[htbp]
+\centering\caption{运行模式与输入}
+\begin{tabularx}{\textwidth}{@{}p{22mm}p{36mm}Y@{}}
+\toprule 模式 & 输入 & 路径\\\midrule
+\code{audit} & CIF & 原生结构检查、评审和归档\\
+\code{solve} & INS/HKL & SHELXT、实际候选配对、SHELXL、比较和归档\\
+\code{refine} & RES/HKL & 有限精修、实际产物和结构检查\\
+\code{reduce} & 图像、组成 & 单晶 DIALS 路线、SHELX 导出和解结构\\
+\code{feedback} & 信息模式、候选来源 & 校准、验证、冻结、一次最终测试\\
+\code{custom} & 明确的计算图 & 组合注册联合分析、反馈及检查动作\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+当前注册 13 类科学动作，其中 \code{analysis.run} 包装 9 项 R2 分析入口。八个新增 MCP 工具负责能力查询、初始化、单步、状态、取消、继续、重试和导出。MCP 的单步是一次同步、受预算限制的执行，不是后台完成承诺。
+
+复杂孪晶流程应先明确多晶格几何、贡献身份、联合像素组和尺度模型，再调用联合积分与全局估计。\code{custom} 提供组合能力，但不会自动证明任何拼接图在物理上正确。
+
+\section{本轮实际验证}
+\subsection{测试结果与环境}
+
+本轮环境为 Linux、Python 3.13.5、NumPy 2.3.5、SciPy 1.17.0、Gemmi 0.7.4 和 pytest 9.0.2。完整记录位于 \path{reports/rebuild_validation.json}。
+
+\begin{table}[htbp]
+\centering\caption{本轮实际运行的回归测试}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule 测试集合 & 总数 & 通过 & 跳过 & 失败/错误\\\midrule
+保留的 R2 数学测试 & 173 & 167 & 6 & 0/0\\
+新增重建测试 & 113 & 112 & 1 & 0/0\\\midrule
+合计 & 286 & 279 & 7 & 0/0\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+六项跳过需要 DIALS/dxtbx 原生环境；一项跳过需要 MCP 运行库。新增测试检查了稠密公式等价性、尺度单位变换、完全重叠、弱负观测、来源泄漏、CIF 对称性、特殊位置占有率、候选文件配对、超时、取消、恢复和产物篡改。
+
+SHELXT/SHELXL 接口通过明确标记的协议测试程序运行；它们产生可区分的候选文件，用于检查实际送入精修的 HKL 是否正确。语言模型接口通过本地 HTTP 服务测试，包括提出新节点的路径。这两类测试验证程序契约，不能代替真实 SHELX 解结构或在线模型服务验证。
+
+\subsection{结构反馈的时间和内存}
+
+基准包含 2048 个强度、1024 个观测坐标、512 个局部组和 6 个共享因子。固定随机种子为 20261030，限制单 BLAS 线程，计时三次取中位数；内存测量与计时分开。
+
+\begin{table}[htbp]
+\centering\caption{固定 Gaussian 问题的实测比较}
+\begin{tabularx}{\textwidth}{@{}Yrr@{}}
+\toprule 指标 & 稠密参考 & 局部块＋低秩\\\midrule
+中位时间 / s & 0.7362 & 0.2028\\
+额外追踪分配峰值 / MiB & 152.03 & 2.41\\
+后验输出 & 完整协方差 & 等价协方差因子\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+同一问题下，时间比约为 3.63，额外追踪内存约为稠密参考的 1.58\%。均值最大绝对差为 $7.11\times10^{-15}$，协方差最大差为 $2.33\times10^{-15}$，预测 NLL 差为 $2.27\times10^{-13}$。
+
+这里的内存是调用期间的 \code{tracemalloc} 峰值，排除了预先分配的输入，不是整个进程 RSS。比较也包含输出表示差别：稠密参考显式生成完整协方差，新算法输出可恢复它的因子。这是一个固定模型上的实测优势，不是整套原始衍射处理的加速倍数。原始重复记录见 \path{reports/rebuild_feedback_benchmark.json}。
+
+\subsection{五节点原生计算示例}
+
+示例使用两个合成 P1 CIF，真实调用 Gemmi 生成结构因子，再构造 24 个观测组、48 个潜在强度。真实域系数为 $(2.1,0.9)$，对应比例 $(0.7,0.3)$。部分组完全重叠，数据中保留 2 个负的有符号观测。
+
+任务图依次执行两个 CIF 审查、反馈、评审与归档。在第二个任务后暂停，再继续完成；再次运行后，动作数仍为 5，原始观测未变。训练校准得到比例 $(0.70591,0.29409)$；验证 NLL 分别为 33.700 和 138.657，选择了与生成模型一致的候选。最终测试 NLL 为 28.055，测试设计的数据秩为 9；它不意味着全部 48 个潜变量都已由测试数据单独确定。
+
+这个例子证明了真实结构因子调用、统计计算和恢复机制能协同工作。它没有从未知原始图像求出结构，也不能作为真实 MOF、弱衍射召回率或复杂孪晶解算成功率的证据。完整参数和结果见 \path{reports/rebuild_demo.json}。
+
+\section{安装、复现与实际使用}
+\subsection{先运行可复现示例}
+
+在源码根目录，配置 Python 3.12 或更新环境以及 NumPy、SciPy、Gemmi 后，可直接运行，无须先安装 DIALS：
+\begin{lstlisting}
+export PYTHONPATH="$PWD/python/src${PYTHONPATH:+:$PYTHONPATH}"
+python -m ariadne.agent.cli capabilities
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+  python examples/agent/create_demo.py /absolute/path/to/NEW-DEMO
+\end{lstlisting}
+输出目录必须是新目录。脚本写出 CIF、信息模式、请求、会话、结果包和摘要。需要测试工具时再安装 pytest。需要控制台入口与 MCP 时可安装 \code{./python}；交付 wheel 不包含外部科学程序。
+
+\subsection{解结构请求与恢复}
+
+最小解结构请求如下。路径和执行器应替换为本机真实文件：
+\begin{lstlisting}
+{
+  "schema": "ariadne-agent/1",
+  "mode": "solve",
+  "inputs": {
+    "ins": "/path/to/sample.ins",
+    "hkl": "/path/to/sample.hkl"
+  },
+  "settings": {"cycles": 8},
+  "executables": {
+    "shelxt": "/path/to/shelxt",
+    "shelxl": "/path/to/shelxl"
+  },
+  "planner": {"kind": "deterministic"}
+}
+\end{lstlisting}
+\begin{lstlisting}
+python -m ariadne.agent.cli init solve.json sessions/example
+python -m ariadne.agent.cli run sessions/example --steps 2
+python -m ariadne.agent.cli run sessions/example
+python -m ariadne.agent.cli status sessions/example
+python -m ariadne.agent.cli export sessions/example result.zip \
+  --include-inputs
+\end{lstlisting}
+用户取消后，\code{resume} 仅清除取消标记，\code{run} 才继续执行。崩溃遗留的 running 节点需要确认外部进程停止后使用 \code{recover}。反馈最终测试节点禁止普通重试，以免同一测试被反复使用。
+
+\subsection{DIALS 与原始帧}
+
+本版保留目标为 DIALS 3.30.1 的 Python 源码补丁及原安装器。应在独立的匹配环境中部署，不要把新数值测试环境与原生二进制兼容性混为一谈。SHELXT、SHELXL 按各自许可单独安装。
+
+\code{request-from-images} 可生成单晶自动请求。输入带有 master/data、清单/NPZ 等侧文件时，应使用完整输入包和 \code{files.unpack} 保留目录关系，而不是只快照主文件。ZIP 解包检查路径穿越、重复名、符号链接、文件数和解压大小；它不改变用户源文件。
+
+\subsection{重跑验证与文件校验}
+\begin{lstlisting}
+python scripts/verify_release.py
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+  python scripts/run_rebuild_validation.py
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+  python benchmarks/feedback_rebuild.py
+\end{lstlisting}
+\code{RELEASE_MANIFEST.json} 记录交付文件的路径和字节数。它用于确认文件集合与大小，不替代科学正确性测试。重跑测试会更新日志和验证结果，之后这些文件自然可能与原始交付清单不同。
+
+详细请求字段、MCP 接入、模型服务配置及故障处理见 \path{AGENT_GUIDE.zh-CN.md}。源包中的旧验证 JSON 和旧 PDF 均是历史记录；本轮结果以带 \code{rebuild} 的记录和本报告为准。
+
+\section{当前能力与下一步验证}
+
+本次已经实现的是：保留 R2 的物理与统计计算，新增可实际运行的结构反馈，以及能够保存、恢复、检查真实产物的 agent。局部块与低秩算法解决了固定 Gaussian 条件推断中的大协方差问题；身份映射、配对候选和测试登记解决了自动流程中常见的数据语义问题。
+
+下一步应优先使用有对照答案的真实数据，而不是继续扩大功能名称。对单晶原始数据，比较传统路线与 agent 路线的同源产物；对复杂孪晶，检查重叠组、域身份和可辨识方向；对弱衍射，检查误差校准、负测量保留及独立观测上的预测表现。改变几何或轮廓的候选需要回到共同原始像素空间比较，不能直接比较维数和常数项已改变的信息模式分数。
+
+完整的原子坐标、背景、仪器几何和像素联合优化，自动无序建模，以及异常散射与溶剂的完备结构反馈，仍属于后续工作。当前版本应被使用为\textbf{可审查的自动计算与联合推断工具}：让可靠的计算尽量自动完成，让信息不足或假设不成立的位置明确停下来。
+
+\clearpage
+\begin{thebibliography}{9}
+\small
+\bibitem{dials} Winter G, Waterman DG, Parkhurst JM, et al. DIALS: implementation and evaluation of a new integration package. \textit{Acta Cryst. D}, 2018, 74: 85--97. DOI: \href{https://doi.org/10.1107/S2059798317017235}{10.1107/S2059798317017235}.
+\bibitem{geometry} Waterman DG, Winter G, Gildea RJ, et al. Diffraction-geometry refinement in the DIALS framework. \textit{Acta Cryst. D}, 2016, 72: 558--575. DOI: \href{https://doi.org/10.1107/S2059798316002187}{10.1107/S2059798316002187}.
+\bibitem{shelxt} Sheldrick GM. SHELXT---Integrated space-group and crystal-structure determination. \textit{Acta Cryst. A}, 2015, 71: 3--8. DOI: \href{https://doi.org/10.1107/S2053273314026370}{10.1107/S2053273314026370}.
+\bibitem{shelxl} Sheldrick GM. Crystal structure refinement with SHELXL. \textit{Acta Cryst. C}, 2015, 71: 3--8. DOI: \href{https://doi.org/10.1107/S2053229614024218}{10.1107/S2053229614024218}.
+\bibitem{dials-export} DIALS developers. \textit{dials.export documentation}. \url{https://dials.github.io/documentation/programs/dials_export.html}. 查阅日期：2026-10-30；部署目标以源码包固定版本为准。
+\bibitem{gemmi-scattering} Gemmi developers. \textit{Scattering}. \url{https://gemmi.readthedocs.io/en/latest/scattering.html}. 查阅日期：2026-10-30；本轮实际运行版本为 0.7.4。
+\bibitem{gemmi-api} Gemmi developers. \textit{API documentation: small structures and crystallographic occupancies}. \url{https://gemmi.readthedocs.io/en/latest/api.html}. 查阅日期：2026-10-30。
+\bibitem{shelxl-manual} Sheldrick GM. \textit{SHELXL instructions}. \url{https://shelx.uni-goettingen.de/shelxl_html.php}. 查阅日期：2026-10-30。
+\end{thebibliography}
+\end{document}

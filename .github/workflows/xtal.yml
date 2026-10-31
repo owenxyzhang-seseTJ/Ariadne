@@ -1,0 +1,29 @@
+name: ariadne xtal
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Ariadne-Xtal and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e "./python[dev]" -e "./ariadne_xtal[dev,mcp]"
+      - name: Run Ariadne-Xtal tests
+        env:
+          ARIADNE_MCP_STDIO_TEST: "1"
+          OPENBLAS_NUM_THREADS: "1"
+          OMP_NUM_THREADS: "1"
+        run: python -m pytest ariadne_xtal/tests tests_integration -q

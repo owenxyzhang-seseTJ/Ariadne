@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ariadne-xtal"
+version = "0.1.0"
+description = "Auditable crystallographic computation and agent tools from diffraction amplitudes to refined models"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Ariadne-Xtal contributors"}]
+dependencies = ["numpy>=1.24,<3", "scipy>=1.10,<2", "gemmi>=0.7.0,<0.8", "matplotlib>=3.7,<4", "plotly>=5.20,<8", "scikit-image>=0.22,<1"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "build>=1", "ruff>=0.9"]
+mcp = ["mcp>=1.8,<3"]
+
+[project.scripts]
+ariadne-xtal = "ariadne_xtal.cli:main"
+ariadne-xtal-mcp = "ariadne_xtal.mcp_server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82"]
+

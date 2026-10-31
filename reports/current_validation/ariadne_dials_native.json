@@ -1,0 +1,641 @@
+{
+  "schema": "ariadne-dials-comparison/1",
+  "machine": "arm64",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "python": "3.12.15 (main, Oct 13 2026, 16:47:20) [Clang 21.1.8 ]",
+  "dials": "3.30",
+  "numpy": "2.5.4",
+  "blas_threads": 1,
+  "baseline": "installed, unmodified stock DIALS; no source overlay; actual C++ calls",
+  "measurements": [
+    {
+      "dials": {
+        "kind": "profiles",
+        "engine": "dials",
+        "size": 1,
+        "repeats": 5,
+        "batch": 20,
+        "seconds": [
+          7.271250069607049e-05,
+          7.526874978793784e-05,
+          6.867295014671982e-05,
+          7.439789915224538e-05,
+          7.797294965712353e-05
+        ],
+        "median_seconds": 7.439789915224538e-05,
+        "peak_process_rss_bytes": 246480896,
+        "details": {
+          "pixels": 1521,
+          "components": 1,
+          "truth": [
+            1000.0
+          ],
+          "dials_intensity": [
+            982.1662147260247
+          ],
+          "ariadne_intensity": [
+            982.166214726024
+          ],
+          "maximum_intensity_difference": 6.821210263296962e-13,
+          "ariadne_rank": 1,
+          "dials_iterations": 6,
+          "ariadne_iterations": 6,
+          "root_mean_square_error": 17.83378527397599,
+          "covariance_semantics": "Ariadne returns the full conditional WLS covariance; DIALS ProfileFitter reports its separate heuristic variances; these are not asserted equal"
+        }
+      },
+      "ariadne": {
+        "kind": "profiles",
+        "engine": "ariadne",
+        "size": 1,
+        "repeats": 5,
+        "batch": 20,
+        "seconds": [
+          0.0004474020504858345,
+          0.0004227375000482425,
+          0.0004168270999798551,
+          0.0004142270496231504,
+          0.00042900209955405445
+        ],
+        "median_seconds": 0.0004227375000482425,
+        "peak_process_rss_bytes": 245661696,
+        "details": {
+          "pixels": 1521,
+          "components": 1,
+          "truth": [
+            1000.0
+          ],
+          "dials_intensity": [
+            982.1662147260247
+          ],
+          "ariadne_intensity": [
+            982.166214726024
+          ],
+          "maximum_intensity_difference": 6.821210263296962e-13,
+          "ariadne_rank": 1,
+          "dials_iterations": 6,
+          "ariadne_iterations": 6,
+          "root_mean_square_error": 17.83378527397599,
+          "covariance_semantics": "Ariadne returns the full conditional WLS covariance; DIALS ProfileFitter reports its separate heuristic variances; these are not asserted equal"
+        }
+      },
+      "ariadne_over_dials_time": 5.682116092863948
+    },
+    {
+      "dials": {
+        "kind": "profiles",
+        "engine": "dials",
+        "size": 2,
+        "repeats": 5,
+        "batch": 20,
+        "seconds": [
+          0.00010221459961030632,
+          0.00011922080011572689,
+          0.00011487709998618812,
+          0.00010123124957317486,
+          0.00011494789941934869
+        ],
+        "median_seconds": 0.00011487709998618812,
+        "peak_process_rss_bytes": 246661120,
+        "details": {
+          "pixels": 1521,
+          "components": 2,
+          "truth": [
+            1000.0,
+            20.0
+          ],
+          "dials_intensity": [
+            1022.0850391134503,
+            9.94947157520504
+          ],
+          "ariadne_intensity": [
+            1022.0850391134476,
+            9.949471575205017
+          ],
+          "maximum_intensity_difference": 2.7284841053187847e-12,
+          "ariadne_rank": 2,
+          "dials_iterations": 8,
+          "ariadne_iterations": 8,
+          "root_mean_square_error": 17.157535869991957,
+          "covariance_semantics": "Ariadne returns the full conditional WLS covariance; DIALS ProfileFitter reports its separate heuristic variances; these are not asserted equal"
+        }
+      },
+      "ariadne": {
+        "kind": "profiles",
+        "engine": "ariadne",
+        "size": 2,
+        "repeats": 5,
+        "batch": 20,
+        "seconds": [
+          0.0009566375010763295,
+          0.0009185603994410485,
+          0.0009196604500175454,
+          0.00091342289961176,
+          0.0009171187499305234
+        ],
+        "median_seconds": 0.0009185603994410485,
+        "peak_process_rss_bytes": 246431744,
+        "details": {
+          "pixels": 1521,
+          "components": 2,
+          "truth": [
+            1000.0,
+            20.0
+          ],
+          "dials_intensity": [
+            1022.0850391134503,
+            9.94947157520504
+          ],
+          "ariadne_intensity": [
+            1022.0850391134476,
+            9.949471575205017
+          ],
+          "maximum_intensity_difference": 2.7284841053187847e-12,
+          "ariadne_rank": 2,
+          "dials_iterations": 8,
+          "ariadne_iterations": 8,
+          "root_mean_square_error": 17.157535869991957,
+          "covariance_semantics": "Ariadne returns the full conditional WLS covariance; DIALS ProfileFitter reports its separate heuristic variances; these are not asserted equal"
+        }
+      },
+      "ariadne_over_dials_time": 7.996027054578229
+    },
+    {
+      "dials": {
+        "kind": "profiles",
+        "engine": "dials",
+        "size": 8,
+        "repeats": 5,
+        "batch": 20,
+        "seconds": [
+          0.0004747582992422394,
+          0.0004559583496302366,
+          0.0004699125012848526,
+          0.0004862125002546236,
+          0.00046330205077538267
+        ],
+        "median_seconds": 0.0004699125012848526,
+        "peak_process_rss_bytes": 246726656,
+        "details": {
+          "pixels": 1521,
+          "components": 8,
+          "truth": [
+            1000.0,
+            571.8603679678212,
+            327.02428045229215,
+            187.01222535385972,
+            106.94488000533931,
+            61.15753843212785,
+            34.973572431802815,
+            20.0
+          ],
+          "dials_intensity": [
+            1009.2418728600252,
+            540.2631949824765,
+            296.635897943345,
+            159.7418039514205,
+            117.44987068246674,
+            79.30118944888729,
+            26.51374088248549,
+            34.44312207005399
+          ],
+          "ariadne_intensity": [
+            1009.2418728600255,
+            540.2631949824784,
+            296.63589794334615,
+            159.7418039514205,
+            117.44987068246643,
+            79.30118944888666,
+            26.513740882485475,
+            34.44312207005396
+          ],
+          "maximum_intensity_difference": 1.8189894035458565e-12,
+          "ariadne_rank": 8,
+          "dials_iterations": 8,
+          "ariadne_iterations": 8,
+          "root_mean_square_error": 20.828594095380478,
+          "covariance_semantics": "Ariadne returns the full conditional WLS covariance; DIALS ProfileFitter reports its separate heuristic variances; these are not asserted equal"
+        }
+      },
+      "ariadne": {
+        "kind": "profiles",
+        "engine": "ariadne",
+        "size": 8,
+        "repeats": 5,
+        "batch": 20,
+        "seconds": [
+          0.0014813229499850422,
+          0.0014761124999495222,
+          0.001473316698684357,
+          0.0014632312508183532,
+          0.0014747458495548925
+        ],
+        "median_seconds": 0.0014747458495548925,
+        "peak_process_rss_bytes": 246513664,
+        "details": {
+          "pixels": 1521,
+          "components": 8,
+          "truth": [
+            1000.0,
+            571.8603679678212,
+            327.02428045229215,
+            187.01222535385972,
+            106.94488000533931,
+            61.15753843212785,
+            34.973572431802815,
+            20.0
+          ],
+          "dials_intensity": [
+            1009.2418728600252,
+            540.2631949824765,
+            296.635897943345,
+            159.7418039514205,
+            117.44987068246674,
+            79.30118944888729,
+            26.51374088248549,
+            34.44312207005399
+          ],
+          "ariadne_intensity": [
+            1009.2418728600255,
+            540.2631949824784,
+            296.63589794334615,
+            159.7418039514205,
+            117.44987068246643,
+            79.30118944888666,
+            26.513740882485475,
+            34.44312207005396
+          ],
+          "maximum_intensity_difference": 1.8189894035458565e-12,
+          "ariadne_rank": 8,
+          "dials_iterations": 8,
+          "ariadne_iterations": 8,
+          "root_mean_square_error": 20.828594095380478,
+          "covariance_semantics": "Ariadne returns the full conditional WLS covariance; DIALS ProfileFitter reports its separate heuristic variances; these are not asserted equal"
+        }
+      },
+      "ariadne_over_dials_time": 3.1383413838163197
+    },
+    {
+      "dials": {
+        "kind": "spots",
+        "engine": "dials",
+        "size": 512,
+        "repeats": 5,
+        "batch": 3,
+        "seconds": [
+          0.0007358333289933702,
+          0.0007689723279327154,
+          0.0007458193382869164,
+          0.0007292083270537356,
+          0.000729389003633211
+        ],
+        "median_seconds": 0.0007358333289933702,
+        "peak_process_rss_bytes": 301465600,
+        "details": {
+          "shape": [
+            512,
+            512
+          ],
+          "noise": "Poisson; background 4 photons/pixel; gain=1; 1% mask",
+          "flux_levels": [
+            30,
+            100,
+            400,
+            1200
+          ],
+          "sigma_levels": [
+            0.8,
+            1.3,
+            2.0
+          ],
+          "dials_settings": {
+            "kernel": [
+              3,
+              3
+            ],
+            "sigma_background": 6.0,
+            "sigma_strong": 3.0,
+            "global_threshold": 0.0,
+            "min_count": 2
+          },
+          "ariadne_settings": {
+            "gain": 1.0,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "noise_model": "poisson",
+            "background_width": 31,
+            "exclusion_width": 7,
+            "scales": [
+              1,
+              3,
+              5
+            ],
+            "score_threshold": 6.0,
+            "support_sigma": 1.0,
+            "min_valid_fraction": 0.5,
+            "background_iterations": 2
+          },
+          "dials_quality": {
+            "true_spots": 64,
+            "detected_components": 36,
+            "true_positive": 36,
+            "false_positive": 0,
+            "recall": 0.5625,
+            "precision": 1.0,
+            "matching": "connected components >=3 pixels; centroid within 3 pixels; one match per truth"
+          },
+          "ariadne_quality": {
+            "true_spots": 64,
+            "detected_components": 45,
+            "true_positive": 44,
+            "false_positive": 1,
+            "recall": 0.6875,
+            "precision": 0.9777777777777777,
+            "matching": "connected components >=3 pixels; centroid within 3 pixels; one match per truth"
+          }
+        }
+      },
+      "ariadne": {
+        "kind": "spots",
+        "engine": "ariadne",
+        "size": 512,
+        "repeats": 5,
+        "batch": 3,
+        "seconds": [
+          0.00928940266991655,
+          0.008413486008066684,
+          0.007906263994906718,
+          0.007590124994749203,
+          0.007571194340319683
+        ],
+        "median_seconds": 0.007906263994906718,
+        "peak_process_rss_bytes": 358449152,
+        "details": {
+          "shape": [
+            512,
+            512
+          ],
+          "noise": "Poisson; background 4 photons/pixel; gain=1; 1% mask",
+          "flux_levels": [
+            30,
+            100,
+            400,
+            1200
+          ],
+          "sigma_levels": [
+            0.8,
+            1.3,
+            2.0
+          ],
+          "dials_settings": {
+            "kernel": [
+              3,
+              3
+            ],
+            "sigma_background": 6.0,
+            "sigma_strong": 3.0,
+            "global_threshold": 0.0,
+            "min_count": 2
+          },
+          "ariadne_settings": {
+            "gain": 1.0,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "noise_model": "poisson",
+            "background_width": 31,
+            "exclusion_width": 7,
+            "scales": [
+              1,
+              3,
+              5
+            ],
+            "score_threshold": 6.0,
+            "support_sigma": 1.0,
+            "min_valid_fraction": 0.5,
+            "background_iterations": 2
+          },
+          "dials_quality": {
+            "true_spots": 64,
+            "detected_components": 36,
+            "true_positive": 36,
+            "false_positive": 0,
+            "recall": 0.5625,
+            "precision": 1.0,
+            "matching": "connected components >=3 pixels; centroid within 3 pixels; one match per truth"
+          },
+          "ariadne_quality": {
+            "true_spots": 64,
+            "detected_components": 45,
+            "true_positive": 44,
+            "false_positive": 1,
+            "recall": 0.6875,
+            "precision": 0.9777777777777777,
+            "matching": "connected components >=3 pixels; centroid within 3 pixels; one match per truth"
+          }
+        }
+      },
+      "ariadne_over_dials_time": 10.744639694049457
+    },
+    {
+      "dials": {
+        "kind": "spots",
+        "engine": "dials",
+        "size": 1024,
+        "repeats": 5,
+        "batch": 3,
+        "seconds": [
+          0.0029802500018073865,
+          0.0030829166741265603,
+          0.002981458334640289,
+          0.0029728056688327342,
+          0.002982597342149044
+        ],
+        "median_seconds": 0.002981458334640289,
+        "peak_process_rss_bytes": 460128256,
+        "details": {
+          "shape": [
+            1024,
+            1024
+          ],
+          "noise": "Poisson; background 4 photons/pixel; gain=1; 1% mask",
+          "flux_levels": [
+            30,
+            100,
+            400,
+            1200
+          ],
+          "sigma_levels": [
+            0.8,
+            1.3,
+            2.0
+          ],
+          "dials_settings": {
+            "kernel": [
+              3,
+              3
+            ],
+            "sigma_background": 6.0,
+            "sigma_strong": 3.0,
+            "global_threshold": 0.0,
+            "min_count": 2
+          },
+          "ariadne_settings": {
+            "gain": 1.0,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "noise_model": "poisson",
+            "background_width": 31,
+            "exclusion_width": 7,
+            "scales": [
+              1,
+              3,
+              5
+            ],
+            "score_threshold": 6.0,
+            "support_sigma": 1.0,
+            "min_valid_fraction": 0.5,
+            "background_iterations": 2
+          },
+          "dials_quality": {
+            "true_spots": 64,
+            "detected_components": 38,
+            "true_positive": 38,
+            "false_positive": 0,
+            "recall": 0.59375,
+            "precision": 1.0,
+            "matching": "connected components >=3 pixels; centroid within 3 pixels; one match per truth"
+          },
+          "ariadne_quality": {
+            "true_spots": 64,
+            "detected_components": 44,
+            "true_positive": 44,
+            "false_positive": 0,
+            "recall": 0.6875,
+            "precision": 1.0,
+            "matching": "connected components >=3 pixels; centroid within 3 pixels; one match per truth"
+          }
+        }
+      },
+      "ariadne": {
+        "kind": "spots",
+        "engine": "ariadne",
+        "size": 1024,
+        "repeats": 5,
+        "batch": 3,
+        "seconds": [
+          0.03664501366438344,
+          0.03155181933349619,
+          0.03651522232879264,
+          0.03746799999498762,
+          0.032417500003551446
+        ],
+        "median_seconds": 0.03651522232879264,
+        "peak_process_rss_bytes": 653475840,
+        "details": {
+          "shape": [
+            1024,
+            1024
+          ],
+          "noise": "Poisson; background 4 photons/pixel; gain=1; 1% mask",
+          "flux_levels": [
+            30,
+            100,
+            400,
+            1200
+          ],
+          "sigma_levels": [
+            0.8,
+            1.3,
+            2.0
+          ],
+          "dials_settings": {
+            "kernel": [
+              3,
+              3
+            ],
+            "sigma_background": 6.0,
+            "sigma_strong": 3.0,
+            "global_threshold": 0.0,
+            "min_count": 2
+          },
+          "ariadne_settings": {
+            "gain": 1.0,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "noise_model": "poisson",
+            "background_width": 31,
+            "exclusion_width": 7,
+            "scales": [
+              1,
+              3,
+              5
+            ],
+            "score_threshold": 6.0,
+            "support_sigma": 1.0,
+            "min_valid_fraction": 0.5,
+            "background_iterations": 2
+          },
+          "dials_quality": {
+            "true_spots": 64,
+            "detected_components": 38,
+            "true_positive": 38,
+            "false_positive": 0,
+            "recall": 0.59375,
+            "precision": 1.0,
+            "matching": "connected components >=3 pixels; centroid within 3 pixels; one match per truth"
+          },
+          "ariadne_quality": {
+            "true_spots": 64,
+            "detected_components": 44,
+            "true_positive": 44,
+            "false_positive": 0,
+            "recall": 0.6875,
+            "precision": 1.0,
+            "matching": "connected components >=3 pixels; centroid within 3 pixels; one match per truth"
+          }
+        }
+      },
+      "ariadne_over_dials_time": 12.247436734076706
+    }
+  ],
+  "identifiability": {
+    "case": "exactly coincident profiles; only total=140 is identifiable",
+    "ariadne": {
+      "rank": 1,
+      "total": {
+        "identifiable": true,
+        "nullspace_fraction": 1.3020234088216562e-16,
+        "intensity": 139.99999999999966,
+        "variance": 304.02999280469203
+      },
+      "components": [
+        {
+          "identifiable": false,
+          "nullspace_fraction": 0.7071067811865477,
+          "intensity": null,
+          "variance": null
+        },
+        {
+          "identifiable": false,
+          "nullspace_fraction": 0.7071067811865475,
+          "intensity": null,
+          "variance": null
+        }
+      ]
+    },
+    "dials": {
+      "status": "rejected_singular_system",
+      "error_type": "RuntimeError",
+      "message": "inversion_in_place: singular matrix"
+    },
+    "timed": false,
+    "scope": "capability/identifiability check, not a speed comparison"
+  },
+  "timing_scope": "preloaded in-process kernels; excludes import, file I/O and NumPy/flex conversions; single BLAS thread",
+  "memory_scope": "fresh worker peak OS RSS, includes common imports, fixture generation and correctness checks for both engines; not an isolated allocation measure",
+  "limits": [
+    "Synthetic images and pixel patches, not real raw-frame end-to-end reduction",
+    "Spot algorithms have different detection rules; quality is reported at fixed declared settings, without tuning",
+    "Matched profile IRLS applies stock DIALS weighting in an external Ariadne harness; does not change Ariadne default estimator"
+  ]
+}

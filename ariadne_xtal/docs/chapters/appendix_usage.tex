@@ -1,0 +1,90 @@
+\chapter{安装、复现与扩展入口}
+\section{最小安装与示例}
+在解压后的项目目录中执行：
+\begin{lstlisting}
+python -m venv .venv
+# macOS / Linux:
+source .venv/bin/activate
+# Windows PowerShell:
+# .venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev,mcp]"
+ariadne-xtal capabilities
+ariadne-xtal run examples/refine_job.json --root .
+\end{lstlisting}
+示例数据已经包含在包内。重新生成时运行 \code{python examples/generate_examples.py}。每次任务在 \code{runs/} 下创建一个新目录；实际目录名由返回的 JSON 给出。
+
+原生结构模型与反射 JSON 分别保存，示例请求为
+\begin{lstlisting}
+{
+  "action": "refine",
+  "structure": "examples/demo_start.json",
+  "hkl": "examples/demo_reflections.json",
+  "options": {
+    "max_nfev": 150,
+    "covariance_scale": "absolute"
+  },
+  "graphics": true
+}
+\end{lstlisting}
+输入中保留反射的 \code{free_flags}，不需要从批次符号推断。全部字段定义见 \code{docs/API.md}。
+
+\section{Python 精修接口}
+\begin{lstlisting}
+from ariadne_xtal.io import read_structure, read_reflections
+from ariadne_xtal.refinement import RefinementOptions, refine
+
+model = read_structure("examples/demo_start.json")
+data = read_reflections("examples/demo_reflections.json")
+result = refine(
+    model, data,
+    options=RefinementOptions(max_nfev=150),
+    restraints=[],
+    constraints=[],
+)
+print(result.metrics)
+print(result.warnings)
+\end{lstlisting}
+结构求解接口为 \code{solve_p1(cell, reflections, elements, options)}；已知组成必须对应 $P1$ 单胞内原子数。对称结构的独立原子列表与完整单胞列表不可混用。
+
+\section{连接宿主智能体}
+JSONL 入口适合逐条请求：
+\begin{lstlisting}
+ariadne-xtal serve --root /absolute/path/to/project
+\end{lstlisting}
+标准输入每行是一个 JSON 请求，标准输出每行是一个结构化结果。MCP 入口为
+\begin{lstlisting}
+ariadne-xtal-mcp --root /absolute/path/to/project
+\end{lstlisting}
+宿主可调用 \code{crystal_capabilities} 查询能力，再用 \code{crystal_execute} 执行请求。运行 MCP 不需要把语言模型凭据写进本项目；宿主自行管理模型与对话。
+
+\section{选择官方后端}
+先在本机按官方要求安装程序，再显式提供可执行文件：
+\begin{lstlisting}
+ariadne-xtal run legacy_job.json --root . \
+  --shelxl /absolute/path/to/shelxl
+\end{lstlisting}
+\begin{lstlisting}
+{
+  "action": "legacy",
+  "engine": "shelxl",
+  "input": "data/sample.ins",
+  "timeout": 300
+}
+\end{lstlisting}
+\code{data/sample.hkl} 与相应附属文件应位于输入目录。未在启动时启用该引擎，任务即被拒绝。结构求解可用相同方式明确选择 \code{shelxt}。官方程序的授权与安装不由此源码包替代~\cite{shelx_distribution}。
+
+\section{复现报告与数值验证}
+\begin{lstlisting}
+python validation/run_real_fen4.py
+python validation/run_phasing_recovery.py
+python tools/fetch_report_fonts.py
+cd docs
+xelatex -interaction=nonstopmode -halt-on-error report.tex
+xelatex -interaction=nonstopmode -halt-on-error report.tex
+\end{lstlisting}
+报告的所有公式保留为 LaTeX；矢量图在 \code{docs/figures/} 中。中文字体可使用系统已安装的 Noto Serif CJK SC，也可由脚本从官方字体仓库下载。字体文件未打入源码包，随下载保存其许可。程序测试不依赖排版系统。
+
+\section{扩展一个原生计算模块}
+新模块首先明确数据对象、物理单位、优化变量和可辨识条件；随后给出独立的解析或外部数值检验，再加入公开数据回归。工具层新增动作时定义专属输入字段和资源预算，并把新能力写入机器可读能力表。若该模块迁移一条原始 SHELXL 指令，还需要验证默认值、选取语法、文件回写和与其他指令的相互作用。
+
+本报告中的推导、源码模块、验证输入和运行清单构成同一套可检查的计算说明。修改算法时，应同步更新对应公式、接口边界与复现实验，使结构结论始终能追溯到其观测与计算定义。

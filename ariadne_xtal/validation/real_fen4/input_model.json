@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "cell": {
+    "a": 2.4473,
+    "b": 3.4688,
+    "c": 3.5144,
+    "alpha": 105.224,
+    "beta": 110.601,
+    "gamma": 91.389
+  },
+  "atoms": [
+    {
+      "label": "Fe",
+      "element": "Fe",
+      "frac": [
+        0.5,
+        0.0,
+        0.0
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.0072,
+      "u_aniso": null,
+      "f_prime": 0.1197,
+      "f_double_prime": 0.1747,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "N1",
+      "element": "N",
+      "frac": [
+        0.163,
+        -0.346,
+        -0.485
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.0066,
+      "u_aniso": null,
+      "f_prime": -0.001,
+      "f_double_prime": 0.0005,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "N2",
+      "element": "N",
+      "frac": [
+        0.065,
+        -0.309,
+        -0.861
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.0068,
+      "u_aniso": null,
+      "f_prime": -0.001,
+      "f_double_prime": 0.0005,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    }
+  ],
+  "spacegroup": "P -1",
+  "wavelength": 0.30996,
+  "sym_ops": [
+    "x, y, z",
+    "-x, -y, -z"
+  ]
+}

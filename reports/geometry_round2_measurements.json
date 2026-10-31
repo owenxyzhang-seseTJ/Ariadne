@@ -1,0 +1,188 @@
+{
+  "schema": "ariadne-geometry-round2-benchmark/1",
+  "baseline": "first-principles delivery of 2026-10-29",
+  "environment": {
+    "python": "3.12.16 (main, Oct 26 2026, 11:37:43) [GCC 15.3.0]",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39"
+  },
+  "scope": "synthetic known-geometry kernels; no experimental weak-spot recovery claim",
+  "memory_scope": "tracemalloc peak allocation during one call; preallocated inputs excluded; not process RSS",
+  "repeats": 3,
+  "measurements": [
+    {
+      "name": "complete_gaussian_mixture_2000000_pairs",
+      "observations": 400,
+      "predictions": 5000,
+      "before": {
+        "seconds": [
+          0.9159622240003955,
+          0.683266248000109,
+          0.6900183689999722
+        ],
+        "median_seconds": 0.6900183689999722,
+        "peak_traced_bytes_excluding_inputs": 146022571
+      },
+      "after": {
+        "seconds": [
+          0.3006067199999052,
+          1.7447394599998916,
+          12.643646409000212
+        ],
+        "median_seconds": 1.7447394599998916,
+        "peak_traced_bytes_excluding_inputs": 21858347
+      },
+      "elapsed_ratio": 0.39548504795095024,
+      "peak_allocation_ratio": 6.680403188768117,
+      "maximum_absolute_differences": {
+        "responsibility": 3.8163916471489756e-17,
+        "outlier": 1.0842021724855044e-18,
+        "log_density": 1.7763568394002505e-15
+      }
+    },
+    {
+      "name": "nonexclusive_compatibility_400_by_128_candidates",
+      "before": {
+        "seconds": [
+          1.0681859400001485,
+          1.3113718320000771,
+          1.4789504729997134
+        ],
+        "median_seconds": 1.3113718320000771,
+        "peak_traced_bytes_excluding_inputs": 2087708
+      },
+      "after": {
+        "seconds": [
+          0.022173870999722567,
+          0.014904821000072843,
+          0.02791302800005724
+        ],
+        "median_seconds": 0.022173870999722567,
+        "peak_traced_bytes_excluding_inputs": 895162
+      },
+      "elapsed_ratio": 59.14041044148244,
+      "max_log_density_difference": 7.105427357601002e-14
+    }
+  ],
+  "native_refinement": {
+    "scenario": "two static crystals; complete native prediction set; 70 synthetic single-source observations; correlated fixed covariance",
+    "before_runs": [
+      {
+        "seconds": 2.4835333890000584,
+        "prediction_calls_including_support": 118,
+        "status": "converged",
+        "rank": 18,
+        "predictions": 6240,
+        "parameters": 18,
+        "rms_mm_mm_rad": [
+          1.2826772476611308e-08,
+          4.243142584210072e-09,
+          6.279558863379882e-11
+        ],
+        "log_likelihood_history": [
+          -50.69029334393476,
+          -45.14464315938828,
+          -45.14464315938828
+        ]
+      },
+      {
+        "seconds": 1.7421503040000061,
+        "prediction_calls_including_support": 118,
+        "status": "converged",
+        "rank": 18,
+        "predictions": 6240,
+        "parameters": 18,
+        "rms_mm_mm_rad": [
+          1.2826772476611308e-08,
+          4.243142584210072e-09,
+          6.279558863379882e-11
+        ],
+        "log_likelihood_history": [
+          -50.69029334393476,
+          -45.14464315938828,
+          -45.14464315938828
+        ]
+      },
+      {
+        "seconds": 1.6970581390000916,
+        "prediction_calls_including_support": 118,
+        "status": "converged",
+        "rank": 18,
+        "predictions": 6240,
+        "parameters": 18,
+        "rms_mm_mm_rad": [
+          1.2826772476611308e-08,
+          4.243142584210072e-09,
+          6.279558863379882e-11
+        ],
+        "log_likelihood_history": [
+          -50.69029334393476,
+          -45.14464315938828,
+          -45.14464315938828
+        ]
+      }
+    ],
+    "after_runs": [
+      {
+        "seconds": 0.3548709079996115,
+        "prediction_calls_including_support": 6,
+        "status": "converged",
+        "rank": 18,
+        "predictions": 6240,
+        "parameters": 18,
+        "rms_mm_mm_rad": [
+          1.2869833302613019e-08,
+          4.144886797563214e-09,
+          6.206578772181492e-11
+        ],
+        "log_likelihood_history": [
+          -50.690293343934776,
+          -45.14464315938827,
+          -45.14464315938827
+        ]
+      },
+      {
+        "seconds": 0.3378639640000074,
+        "prediction_calls_including_support": 6,
+        "status": "converged",
+        "rank": 18,
+        "predictions": 6240,
+        "parameters": 18,
+        "rms_mm_mm_rad": [
+          1.2869833302613019e-08,
+          4.144886797563214e-09,
+          6.206578772181492e-11
+        ],
+        "log_likelihood_history": [
+          -50.690293343934776,
+          -45.14464315938827,
+          -45.14464315938827
+        ]
+      },
+      {
+        "seconds": 0.45384606600009647,
+        "prediction_calls_including_support": 6,
+        "status": "converged",
+        "rank": 18,
+        "predictions": 6240,
+        "parameters": 18,
+        "rms_mm_mm_rad": [
+          1.2869833302613019e-08,
+          4.144886797563214e-09,
+          6.206578772181492e-11
+        ],
+        "log_likelihood_history": [
+          -50.690293343934776,
+          -45.14464315938827,
+          -45.14464315938827
+        ]
+      }
+    ],
+    "before_median_seconds": 1.7421503040000061,
+    "after_median_seconds": 0.3548709079996115,
+    "equivalent_completion_speedup": 4.909250842286326,
+    "max_prediction_difference": 4.0115907817828145e-10,
+    "final_log_likelihood_difference": 7.105427357601002e-15
+  }
+}

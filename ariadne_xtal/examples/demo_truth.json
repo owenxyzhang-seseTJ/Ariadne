@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "cell": {
+    "a": 9.6,
+    "b": 10.8,
+    "c": 12.2,
+    "alpha": 90.0,
+    "beta": 103.5,
+    "gamma": 90.0
+  },
+  "atoms": [
+    {
+      "label": "C1",
+      "element": "C",
+      "frac": [
+        0.6297778711800375,
+        0.5638469171068466,
+        0.5345042053006988
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.025,
+      "u_aniso": null,
+      "f_prime": 0.0031303901607848744,
+      "f_double_prime": 0.0016118024482300133,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "C2",
+      "element": "C",
+      "frac": [
+        0.5039754919995812,
+        0.6138963805786911,
+        0.5554413982797201
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.025,
+      "u_aniso": null,
+      "f_prime": 0.0031303901607848744,
+      "f_double_prime": 0.0016118024482300133,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "C3",
+      "element": "C",
+      "frac": [
+        0.37419762081954383,
+        0.5500494634718446,
+        0.5209371929790213
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.025,
+      "u_aniso": null,
+      "f_prime": 0.0031303901607848744,
+      "f_double_prime": 0.0016118024482300133,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "C4",
+      "element": "C",
+      "frac": [
+        0.3702221288199625,
+        0.43615308289315347,
+        0.46549579469930125
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.025,
+      "u_aniso": null,
+      "f_prime": 0.0031303901607848744,
+      "f_double_prime": 0.0016118024482300133,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "C5",
+      "element": "C",
+      "frac": [
+        0.49602450800041864,
+        0.386103619421309,
+        0.44455860172027994
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.025,
+      "u_aniso": null,
+      "f_prime": 0.0031303901607848744,
+      "f_double_prime": 0.0016118024482300133,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "C6",
+      "element": "C",
+      "frac": [
+        0.6258023791804562,
+        0.4499505365281556,
+        0.4790628070209787
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.025,
+      "u_aniso": null,
+      "f_prime": 0.0031303901607848744,
+      "f_double_prime": 0.0016118024482300133,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "Br1",
+      "element": "Br",
+      "frac": [
+        0.8031240276848018,
+        0.6491281563852775,
+        0.5805919652380607
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.032,
+      "u_aniso": [
+        [
+          0.021291976391703375,
+          -0.0038560827371988734,
+          -0.0027335990094395383
+        ],
+        [
+          -0.0038560827371988734,
+          0.028489155790824575,
+          -0.006858999446193025
+        ],
+        [
+          -0.0027335990094395374,
+          -0.006858999446193026,
+          0.037218867817472016
+        ]
+      ],
+      "f_prime": -0.29077588814890654,
+      "f_double_prime": 2.4676486200405607,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "C7",
+      "element": "C",
+      "frac": [
+        0.23395536408092316,
+        0.36911381993096454,
+        0.4292663791335676
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.025,
+      "u_aniso": null,
+      "f_prime": 0.0031303901607848744,
+      "f_double_prime": 0.0016118024482300133,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "O1",
+      "element": "O",
+      "frac": [
+        0.12237815328951407,
+        0.41024118945562105,
+        0.44625094830503464
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.032,
+      "u_aniso": null,
+      "f_prime": 0.010883494827669487,
+      "f_double_prime": 0.006065839448265467,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    },
+    {
+      "label": "O2",
+      "element": "O",
+      "frac": [
+        0.2288881436822527,
+        0.2669077211316169,
+        0.3794751879665029
+      ],
+      "occupancy": 1.0,
+      "u_iso": 0.032,
+      "u_aniso": null,
+      "f_prime": 0.010883494827669487,
+      "f_double_prime": 0.006065839448265467,
+      "refine_xyz": true,
+      "refine_u": true,
+      "refine_occupancy": false
+    }
+  ],
+  "spacegroup": "P 1",
+  "wavelength": 0.71073,
+  "sym_ops": null
+}

@@ -1,0 +1,66 @@
+{
+  "schema": "ariadne-rebuild-validation/1",
+  "build": "0.7.0-rebuild-20261030",
+  "executed_at": "2026-10-30T02:58:47.779066+00:00",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "dependencies": {
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "gemmi": "0.7.5",
+    "mcp": "1.30.0",
+    "pytest": "9.2.0",
+    "dials": null,
+    "cctbx-base": null
+  },
+  "subprocess_returncodes": [
+    0,
+    0
+  ],
+  "inherited_R2": {
+    "tests": 173,
+    "passed": 167,
+    "skipped": 6,
+    "failures": 0,
+    "errors": 0
+  },
+  "reconstruction": {
+    "tests": 113,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 113
+  },
+  "native_Gemmi_executed": true,
+  "native_DIALS_executed": false,
+  "native_SHELXT_SHELXL_executed": false,
+  "online_language_model_executed": false,
+  "language_model_HTTP_protocol_fixture_executed": true,
+  "experimental_raw_frame_accuracy_tested": false,
+  "skipped_reasons": [
+    {
+      "test": "test_cli_output_composite_exclusion_and_holdout_comparison (test_centroid_em.DialsAdapterTests.test_cli_output_composite_exclusion_and_holdout_comparison)",
+      "reason": "Requires native DIALS environment"
+    },
+    {
+      "test": "test_native_prediction_whitening_joint_refinement (test_centroid_em.DialsAdapterTests.test_native_prediction_whitening_joint_refinement)",
+      "reason": "Requires native DIALS environment"
+    },
+    {
+      "test": "test_analytic_jacobian_matches_native_central_differences (test_geometry_round2.NativeDerivativeTests.test_analytic_jacobian_matches_native_central_differences)",
+      "reason": "Requires native DIALS environment"
+    },
+    {
+      "test": "test_nontriclinic_parameter_blocks_and_multiple_panels (test_geometry_round2.NativeDerivativeTests.test_nontriclinic_parameter_blocks_and_multiple_panels)",
+      "reason": "Requires native DIALS environment"
+    },
+    {
+      "test": "test_prediction_cache_is_defensive_and_tracks_instrument_changes (test_geometry_round2.NativeDerivativeTests.test_prediction_cache_is_defensive_and_tracks_instrument_changes)",
+      "reason": "Requires native DIALS environment"
+    },
+    {
+      "test": "test_native_raw_frames_gaussian_flux_and_empirical_derivative_provenance (test_profiles_round2.NativeProfilePrepareTests.test_native_raw_frames_gaussian_flux_and_empirical_derivative_provenance)",
+      "reason": "Requires native DIALS/dxtbx raw-image readers"
+    }
+  ]
+}

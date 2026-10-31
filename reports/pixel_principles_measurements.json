@@ -1,0 +1,95 @@
+{
+  "baseline_commit": "797ac22ffa9b81da2dd977e013bea8f114b49eb2",
+  "scope": "Synthetic exact PG numerical kernels and conditional fixed-background profile fits; not raw diffraction reduction",
+  "seed": 20261029,
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39"
+  },
+  "batched_convolution": {
+    "pixels": 4096,
+    "gain_adu_per_photon": 1.0,
+    "readout_variance_adu2": 4.0,
+    "before": {
+      "seconds": [
+        5.485277735999944,
+        5.559044961000154,
+        3.8000378090000595,
+        4.05045677499993,
+        4.788922339999999
+      ],
+      "median_seconds": 4.788922339999999,
+      "terms_evaluated": 259327
+    },
+    "after": {
+      "seconds": [
+        0.13788898799998606,
+        0.07698420299993813,
+        0.06599070799984474,
+        0.08017880100010188,
+        0.0741258780001317
+      ],
+      "median_seconds": 0.07698420299993813,
+      "terms_evaluated": 259327
+    },
+    "speedup": 62.20655866248102,
+    "max_old_new_log_difference": 9.35873600838022e-12,
+    "max_old_new_score_difference": 3.325493092704024e-12
+  },
+  "high_count_stability": [
+    {
+      "mean_photons": 100000000.0,
+      "reference_log_density_80_digit": -10.141276588572913,
+      "before_absolute_log_error": 1.8232854870348092e-07,
+      "after_absolute_log_error": 0.0
+    },
+    {
+      "mean_photons": 1000000000.0,
+      "reference_log_density_80_digit": -11.292569121481552,
+      "before_absolute_log_error": 4.6814167831144005e-07,
+      "after_absolute_log_error": 1.7763568394002505e-15
+    },
+    {
+      "mean_photons": 1000000000000.0,
+      "reference_log_density_80_digit": -14.746458167630855,
+      "before_absolute_log_error": 0.0011633652578186826,
+      "after_absolute_log_error": 0.0
+    }
+  ],
+  "low_count_covariance": {
+    "fitted_intensity_adu": 0.29381573464286065,
+    "moment_proxy_variance_adu2": 4.383900461383365,
+    "observed_information_variance_adu2": 5.273844503532208,
+    "comparison": "Observed information is the finite-difference-verified curvature of the exact PG likelihood; this does not prove frequentist coverage"
+  },
+  "strong_weak_overlap": {
+    "truth_adu": [
+      1000.0,
+      1.0
+    ],
+    "frozen_background_adu": 0.39565272478183217,
+    "fitted_intensities_adu": [
+      1042.3495497868334,
+      0.0
+    ],
+    "weak_profile_interval": {
+      "identifiable": true,
+      "nullspace_fraction": 0.0,
+      "estimate": 0.0,
+      "lower": 0.0,
+      "upper": 38.07410509975347,
+      "confidence_level": 0.95,
+      "likelihood_ratio_threshold": 3.841458820694124,
+      "calibration": "chi-square(1) asymptotic; not exact, including at boundary",
+      "unit": "calibrated_adu",
+      "scope": "conditional on frozen WLS-estimated background, supplied profiles, geometry and noise calibration; background-estimation uncertainty excluded",
+      "status": "ok",
+      "lower_at_nonnegative_boundary": true,
+      "lower_likelihood_ratio": 0.0,
+      "upper_likelihood_ratio": 3.8414588206847498
+    },
+    "interpretation": "The weak 1 ADU component is not resolved in this realization; a boundary estimate and broad conditional interval are retained"
+  }
+}

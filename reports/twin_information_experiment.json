@@ -1,0 +1,74 @@
+{
+  "schema": "ariadne-twin-information-experiment/1",
+  "seed": 20261029,
+  "scope": "synthetic independent Poisson pixels; true fixed variance supplied; calibrated profiles and static known geometry",
+  "domain_intensities": [
+    1200.0,
+    12.0,
+    0.8
+  ],
+  "strong_to_weak_ratio": 1500.0,
+  "repeats_per_geometry": 40,
+  "geometries": 2,
+  "local_signal_ranks": [
+    2,
+    2
+  ],
+  "legacy_total_only_rank": 1,
+  "legacy_total_only_status": "unresolved",
+  "information_modes_rank": 3,
+  "information_modes_status": "converged",
+  "noiseless_recovered_intensities": [
+    1200.0000000000005,
+    11.999999999999996,
+    0.800000000000004
+  ],
+  "maximum_noiseless_amplitude_error": 4.547473508864641e-13,
+  "maximum_raw_pixel_reference_difference": 2.2737367544323206e-13,
+  "maximum_raw_pixel_covariance_difference": 3.552713678800501e-15,
+  "pixel_observations": 240,
+  "compressed_observations": 4,
+  "conditional_standard_errors": [
+    4.011927416054744,
+    1.3160922140542715,
+    0.8396225326383231
+  ],
+  "monte_carlo_trials": 500,
+  "monte_carlo_seconds": 1.5533687780000491,
+  "mean_estimates": [
+    1200.238332707545,
+    12.037158375528291,
+    0.7929458006542264
+  ],
+  "mean_bias": [
+    0.2383327075446141,
+    0.03715837552829167,
+    -0.007054199345773355
+  ],
+  "bias_monte_carlo_standard_error": [
+    0.17519608572848075,
+    0.05807130086628023,
+    0.038415372423962
+  ],
+  "rmse": [
+    3.920834482392947,
+    1.297746686005639,
+    0.8581634110854351
+  ],
+  "negative_estimate_fractions": [
+    0.0,
+    0.0,
+    0.174
+  ],
+  "nominal_95pct_gaussian_interval_coverage": [
+    0.958,
+    0.94,
+    0.946
+  ],
+  "positive_clipping_bias": [
+    0.2383327075449415,
+    0.03715837552829093,
+    0.0762171036986351
+  ],
+  "qualification": "coverage is this synthetic experiment only; no universal low-count Gaussian coverage or weak-peak detection claim"
+}

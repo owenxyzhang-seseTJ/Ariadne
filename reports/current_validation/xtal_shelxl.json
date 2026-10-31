@@ -1,0 +1,359 @@
+{
+  "schema": "ariadne-comparative-refinement/1",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "machine": "arm64",
+  "python": "3.12.15 (main, Oct 13 2026, 16:47:20) [Clang 21.1.8 ]",
+  "numpy": "2.5.4",
+  "shelxl_binary_architecture": "x86_64 (runs under macOS Rosetta on this arm64 host)",
+  "blas_threads": 1,
+  "cases": [
+    {
+      "case": "FeN4_COD2242624_measured",
+      "source": "public measured F\u00b2",
+      "reflections": 71,
+      "negative_intensities": 0,
+      "model": "same fixed cell, P -1 symmetry, fixed occupancies, isotropic ADPs, explicit dispersion and starting scale=1",
+      "weights": {
+        "weight_a": 0.0282,
+        "weight_b": 0.3122,
+        "weight_cycles": 20
+      },
+      "repeats": 3,
+      "xtal_warm_kernel": {
+        "seconds": [
+          0.08501866698497906,
+          0.0849040420143865,
+          0.08185324998339638
+        ],
+        "median_seconds": 0.0849040420143865,
+        "minimum_seconds": 0.08185324998339638,
+        "maximum_seconds": 0.08501866698497906
+      },
+      "xtal_fresh_python_process": {
+        "seconds": [
+          0.33736125001451,
+          0.34034516697283834,
+          0.31785245798528194
+        ],
+        "median_seconds": 0.33736125001451,
+        "minimum_seconds": 0.31785245798528194,
+        "maximum_seconds": 0.34034516697283834
+      },
+      "shelxl_fresh_process": {
+        "seconds": [
+          0.07858724999823608,
+          0.07677266700193286,
+          0.0784235000028275
+        ],
+        "median_seconds": 0.0784235000028275,
+        "minimum_seconds": 0.07677266700193286,
+        "maximum_seconds": 0.07858724999823608
+      },
+      "xtal_peak_process_rss_bytes": [
+        79052800,
+        78839808,
+        78659584
+      ],
+      "xtal_success": true,
+      "xtal_metrics": {
+        "n": 71,
+        "n_gt": 70,
+        "r1_all": 0.04126821954346635,
+        "r1_gt": 0.040315749368695926,
+        "wr2": 0.08148047291469242,
+        "chi_squared": 85.41565653598035,
+        "sigma_rmse": 4.965162479665496,
+        "negative_intensities": 0,
+        "n_work": 71,
+        "n_free": 0,
+        "n_parameters": 10,
+        "jacobian_rank": 10,
+        "diffraction_jacobian_rank": 10,
+        "identifiable": true,
+        "jacobian_condition": 129.52903765289668,
+        "normal_condition": 16777.771595285525,
+        "degrees_of_freedom": 61,
+        "gof": 1.1833244122066728,
+        "restraint_residual_count": 0,
+        "restraint_sum_squares": 0.0,
+        "free": {
+          "n": 0,
+          "r1_all": null,
+          "r1_gt": null,
+          "wr2": null,
+          "chi_squared": null,
+          "sigma_rmse": null,
+          "negative_intensities": 0
+        },
+        "objective_evaluations_total": 400,
+        "weighting": "frozen_weight_IRLS",
+        "covariance_scaling": "absolute",
+        "final_weight_relative_change": 0.0
+      },
+      "shelxl_metrics": {
+        "r1_gt": 0.0404,
+        "r1_all": 0.0413,
+        "wr2": 0.0815,
+        "gof": 1.183,
+        "n_parameters": 10.0
+      },
+      "max_coordinate_difference_angstrom": 0.0019567720526269226,
+      "timing_scope": "native warm fit excludes import/I/O; native fresh process includes Python startup and JSON I/O; SHELXL process includes native startup and its standard CIF/LST/RES output",
+      "official_output_parsing": "structural/metric section before _geom_special_details; avoids empty geometry loops emitted by this SHELXL build for sparse synthetic atoms",
+      "native_kernel_over_shelxl_process": 1.0826352051531156,
+      "native_process_over_shelxl_process": 4.301787729473267
+    },
+    {
+      "case": "Pminus1_3_atom_synthetic",
+      "source": "seeded synthetic signed F\u00b2",
+      "reflections": 665,
+      "negative_intensities": 22,
+      "model": "same fixed cell, P -1 symmetry, fixed occupancies, isotropic ADPs, explicit dispersion and starting scale=1",
+      "weights": {
+        "weight_a": 0.0,
+        "weight_b": 0.0,
+        "weight_cycles": 1
+      },
+      "repeats": 3,
+      "xtal_warm_kernel": {
+        "seconds": [
+          0.10665175001486205,
+          0.11483445801422931,
+          0.11054283299017698
+        ],
+        "median_seconds": 0.11054283299017698,
+        "minimum_seconds": 0.10665175001486205,
+        "maximum_seconds": 0.11483445801422931
+      },
+      "xtal_fresh_python_process": {
+        "seconds": [
+          0.3426684589940123,
+          0.34249445897876285,
+          0.3465449159848504
+        ],
+        "median_seconds": 0.3426684589940123,
+        "minimum_seconds": 0.34249445897876285,
+        "maximum_seconds": 0.3465449159848504
+      },
+      "shelxl_fresh_process": {
+        "seconds": [
+          0.07874425000045449,
+          0.07864066699403338,
+          0.07458804099587724
+        ],
+        "median_seconds": 0.07864066699403338,
+        "minimum_seconds": 0.07458804099587724,
+        "maximum_seconds": 0.07874425000045449
+      },
+      "xtal_peak_process_rss_bytes": [
+        87932928,
+        87769088,
+        87097344
+      ],
+      "xtal_success": true,
+      "xtal_metrics": {
+        "n": 665,
+        "n_gt": 614,
+        "r1_all": 0.014434245122663295,
+        "r1_gt": 0.011020268491548656,
+        "wr2": 0.024887101766697707,
+        "chi_squared": 667.1090982102116,
+        "sigma_rmse": 1.0015845327559514,
+        "negative_intensities": 22,
+        "n_work": 665,
+        "n_free": 0,
+        "n_parameters": 13,
+        "jacobian_rank": 13,
+        "diffraction_jacobian_rank": 13,
+        "identifiable": true,
+        "jacobian_condition": 737.3230797046269,
+        "normal_condition": 543645.3238651156,
+        "degrees_of_freedom": 652,
+        "gof": 1.011520372267704,
+        "restraint_residual_count": 0,
+        "restraint_sum_squares": 0.0,
+        "free": {
+          "n": 0,
+          "r1_all": null,
+          "r1_gt": null,
+          "wr2": null,
+          "chi_squared": null,
+          "sigma_rmse": null,
+          "negative_intensities": 0
+        },
+        "objective_evaluations_total": 270,
+        "weighting": "sigma",
+        "covariance_scaling": "absolute"
+      },
+      "shelxl_metrics": {
+        "r1_gt": 0.011,
+        "r1_all": 0.0144,
+        "wr2": 0.0248,
+        "gof": 1.008,
+        "n_parameters": 13.0
+      },
+      "max_coordinate_difference_angstrom": 8.2675316851334e-05,
+      "timing_scope": "native warm fit excludes import/I/O; native fresh process includes Python startup and JSON I/O; SHELXL process includes native startup and its standard CIF/LST/RES output",
+      "official_output_parsing": "structural/metric section before _geom_special_details; avoids empty geometry loops emitted by this SHELXL build for sparse synthetic atoms",
+      "native_kernel_over_shelxl_process": 1.4056700841380716,
+      "native_process_over_shelxl_process": 4.357395125094898
+    },
+    {
+      "case": "Pminus1_8_atom_synthetic",
+      "source": "seeded synthetic signed F\u00b2",
+      "reflections": 665,
+      "negative_intensities": 8,
+      "model": "same fixed cell, P -1 symmetry, fixed occupancies, isotropic ADPs, explicit dispersion and starting scale=1",
+      "weights": {
+        "weight_a": 0.0,
+        "weight_b": 0.0,
+        "weight_cycles": 1
+      },
+      "repeats": 3,
+      "xtal_warm_kernel": {
+        "seconds": [
+          0.5484009170031641,
+          0.5691787910182029,
+          0.5662951249978505
+        ],
+        "median_seconds": 0.5662951249978505,
+        "minimum_seconds": 0.5484009170031641,
+        "maximum_seconds": 0.5691787910182029
+      },
+      "xtal_fresh_python_process": {
+        "seconds": [
+          0.7754149170068558,
+          0.7835857080062851,
+          0.7992994590022136
+        ],
+        "median_seconds": 0.7835857080062851,
+        "minimum_seconds": 0.7754149170068558,
+        "maximum_seconds": 0.7992994590022136
+      },
+      "shelxl_fresh_process": {
+        "seconds": [
+          0.07776987500255927,
+          0.07911500000045635,
+          0.07908537500770763
+        ],
+        "median_seconds": 0.07908537500770763,
+        "minimum_seconds": 0.07776987500255927,
+        "maximum_seconds": 0.07911500000045635
+      },
+      "xtal_peak_process_rss_bytes": [
+        90898432,
+        89473024,
+        90882048
+      ],
+      "xtal_success": true,
+      "xtal_metrics": {
+        "n": 665,
+        "n_gt": 633,
+        "r1_all": 0.009669882982304475,
+        "r1_gt": 0.008553642034699866,
+        "wr2": 0.02072494729896269,
+        "chi_squared": 570.456854672432,
+        "sigma_rmse": 0.9261910475977803,
+        "negative_intensities": 8,
+        "n_work": 665,
+        "n_free": 0,
+        "n_parameters": 33,
+        "jacobian_rank": 33,
+        "diffraction_jacobian_rank": 33,
+        "identifiable": true,
+        "jacobian_condition": 740.9857507543466,
+        "normal_condition": 549059.8828209826,
+        "degrees_of_freedom": 632,
+        "gof": 0.9500640007359265,
+        "restraint_residual_count": 0,
+        "restraint_sum_squares": 0.0,
+        "free": {
+          "n": 0,
+          "r1_all": null,
+          "r1_gt": null,
+          "wr2": null,
+          "chi_squared": null,
+          "sigma_rmse": null,
+          "negative_intensities": 0
+        },
+        "objective_evaluations_total": 670,
+        "weighting": "sigma",
+        "covariance_scaling": "absolute"
+      },
+      "shelxl_metrics": {
+        "r1_gt": 0.0086,
+        "r1_all": 0.0097,
+        "wr2": 0.0207,
+        "gof": 0.95,
+        "n_parameters": 33.0
+      },
+      "max_coordinate_difference_angstrom": 7.720682200902251e-05,
+      "timing_scope": "native warm fit excludes import/I/O; native fresh process includes Python startup and JSON I/O; SHELXL process includes native startup and its standard CIF/LST/RES output",
+      "official_output_parsing": "structural/metric section before _geom_special_details; avoids empty geometry loops emitted by this SHELXL build for sparse synthetic atoms",
+      "native_kernel_over_shelxl_process": 7.160554336913236,
+      "native_process_over_shelxl_process": 9.908098784761624
+    }
+  ],
+  "phasing": {
+    "case": "noiseless four-carbon P1; known cell and unit-cell composition; no input coordinates",
+    "reflections": 4540,
+    "repeats": 3,
+    "xtal_kernel": {
+      "seconds": [
+        0.5860248749959283,
+        0.5992893750080839,
+        0.5900485000165645
+      ],
+      "median_seconds": 0.5900485000165645,
+      "minimum_seconds": 0.5860248749959283,
+      "maximum_seconds": 0.5992893750080839
+    },
+    "xtal_phase_and_refine": {
+      "seconds": [
+        1.9370388749812264,
+        1.9000827500130981,
+        1.8668380830204114
+      ],
+      "median_seconds": 1.9000827500130981,
+      "minimum_seconds": 1.8668380830204114,
+      "maximum_seconds": 1.9370388749812264
+    },
+    "xtal_final_rms_angstrom": [
+      1.4226006601639522e-08,
+      1.4226006601639522e-08,
+      1.4226006601639522e-08
+    ],
+    "shelxt_process": {
+      "seconds": [
+        0.3559286250092555,
+        0.29238724999595433,
+        0.29854041698854417
+      ],
+      "median_seconds": 0.29854041698854417,
+      "minimum_seconds": 0.29238724999595433,
+      "maximum_seconds": 0.3559286250092555
+    },
+    "xtal_best_rms_angstrom": [
+      0.010747398733449641,
+      0.010747398733449641,
+      0.010747398733449641
+    ],
+    "shelxt_best_rms_angstrom": [
+      4.634433162729445e-16,
+      4.634433162729445e-16,
+      4.634433162729445e-16
+    ],
+    "shelxt_candidate_counts": [
+      1,
+      1,
+      1
+    ],
+    "assessment": "origin, same-element permutation and inversion optimized for coordinates; structural subset extracted from official RES solely for assessment",
+    "search_scopes": "Xtal: four seeded P1 charge-flipping trials, 400 iterations; SHELXT: installed default integrated search, may consider other symmetry. Search spaces are not equivalent.",
+    "scope": "single seeded synthetic recovery; not a real-structure success-rate benchmark"
+  },
+  "exclusions": [
+    "COD 4003024 contains EXTI and a mixed-occupancy EADP model outside the native shared model; excluded rather than dropping those terms",
+    "No general SHELXT/SHELXL functional equivalence or experimental structure-solution success rate is inferred"
+  ]
+}

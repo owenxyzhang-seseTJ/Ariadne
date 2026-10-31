@@ -1,0 +1,1032 @@
+% !TeX program = xelatex
+% Self-contained source: compile twice with XeLaTeX. No external figures needed.
+\documentclass[UTF8,11pt,a4paper,fontset=fandol]{ctexart}
+\usepackage[margin=24mm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,bm,mathtools,booktabs,longtable,tabularx,array}
+\usepackage{graphicx,xcolor,hyperref,enumitem,fancyhdr,listings,tikz,pgfplots}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\pgfplotsset{compat=1.18}
+\definecolor{ink}{HTML}{24232A}
+\definecolor{plum}{HTML}{75516A}
+\definecolor{copper}{HTML}{B87550}
+\definecolor{papergray}{HTML}{F4F2F1}
+\hypersetup{colorlinks=true,linkcolor=plum,urlcolor=plum,citecolor=plum,
+  pdftitle={Ariadne: 复杂孪晶与弱衍射的可辨识联合反演},
+  pdfauthor={Ariadne technical revision}}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{3em}
+\setlist{itemsep=3pt,topsep=4pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Ariadne\quad 数学原理与源码重构}
+\fancyhead[R]{\small 2026-10-29}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible,
+  backgroundcolor=\color{papergray},frame=single,rulecolor=\color{papergray},
+  xleftmargin=4pt,xrightmargin=4pt,aboveskip=8pt,belowskip=8pt,
+  showstringspaces=false}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Null}{\operatorname{null}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\T}{^{\mathsf T}}
+\newcommand{\TestCount}{151 项全部通过；0 失败、0 错误、0 跳过}
+\newcommand{\ScaleSpeed}{1.50}
+\newtheorem{proposition}{命题}[section]
+\newtheorem{definition}{定义}[section]
+\ctexset{section={format=\Large\bfseries\color{ink}},
+  subsection={format=\large\bfseries\color{ink}}}
+
+\begin{document}
+\begin{titlepage}
+\vspace*{17mm}
+{\sffamily\color{plum}\Large ARIADNE\par}
+\vspace{12mm}
+{\Huge\bfseries 复杂孪晶与弱衍射的\\[6pt]可辨识联合反演\par}
+\vspace{8mm}
+{\Large 数学原理、源码重构与可复现验证\par}
+\vspace{15mm}
+\noindent\rule{\textwidth}{0.7pt}
+\vspace{4mm}
+\noindent\begin{tabularx}{\textwidth}{@{}lX@{}}
+源码基线 & \path{797ac22ffa9b81da2dd977e013bea8f114b49eb2}\\
+项目 & \url{https://github.com/owenxyzhang-seseTJ/Ariadne}\\
+上游接口目标 & DIALS 3.30.1；dxtbx 3.30.0\\
+日期 & 2026 年 10 月 29 日\\
+交付 & 可应用补丁、完整源码、原理测试、基准脚本及本 \LaTeX{} 原稿
+\end{tabularx}
+\vspace{11mm}
+\noindent\colorbox{papergray}{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{
+\vspace{3mm}\textbf{本轮的中心改变}\\[4pt]
+把重叠区域提供的\textbf{可观测强度组合}保留下来，让不同扫描、不同重叠关系中的信息共同约束晶畴强度。局部无法拆分的峰仍可参与全局推断；只有数据实际支持的量才能作为测量结果发布。
+\vspace{3mm}}}
+\vfill
+\noindent\small
+本报告区分数学恒等式、源码实现、合成数值结果与真实衍射性能。
+验证覆盖原生 DIALS 接口及合成数值问题；未用用户的原始 Bruker 孪晶数据完成端到端实验精度评估。
+文中的线性代数、Poisson--Gaussian 统计和图论结果均有既有理论基础；
+本轮的方法贡献是把它们接入 Ariadne 的局部积分、全局联合估计与观测设计。
+\end{titlepage}
+\tableofcontents
+\newpage
+
+\section{目标与已实现的改变}
+
+复杂孪晶和弱衍射的核心困难是\textbf{信息不足、信息混合与不确定度传播}。
+同一像素区域可能同时含有若干晶畴的散射；其中某些强度差可以从轮廓区别出来，
+另一些方向只能靠其他扫描补充。单纯提高阈值、增加迭代次数或对负强度截零，
+不能创造缺失的观测约束。
+
+本轮以基线源码的真实行为为起点，保留 DIALS 反射预测、仪器几何、体素积分轮廓、
+有符号 WLS、非负计数似然、条件剖面区间、缩放及导出能力。
+主要变化见表~\ref{tab:changes}。未重写 DIALS 的 C++ 衍射几何内核；
+现有源码补丁继续调用 Ariadne 的更新数学核。
+
+\begin{table}[htbp]
+\centering\small
+\caption{从问题到实现的对应关系}\label{tab:changes}
+\begin{tabularx}{\textwidth}{@{}p{.20\textwidth}XX@{}}
+\toprule
+问题 & 数学处理 & 已落地的实现\\
+\midrule
+局部只能测强度组合 & QR 消去背景，SVD 保留全部数值可观测模式 & 像素模式进入全局缩放；无需先拆出不可测分量\\
+复杂重叠仍欠定 & 检查各观测零空间的交集 & 三/四晶畴跨观测恢复及不可恢复反例\\
+补测未增加独立约束 & 一般设计矩阵的秩增益；单位双峰和的无符号 Laplacian & 给定候选观测的选择器与图解释\\
+同一晶格因基底不同被误筛 & 整数幺模换基；密度求和与最近节点分离 & 基底约化、可分离 theta 和、最近点排除界\\
+低计数噪声与协方差不一致 & 精确 Poisson--Gaussian 似然及同一似然的曲率 & 批量有界卷积、观测信息、边界剖面区间\\
+强弱列量纲差导致误判秩 & 列尺度均衡与物理坐标回变换 & 稳定协方差、同源误差传播和近驻点更新\\
+矩形区域重叠重复计噪声 & 每个原始像素的唯一归属 & 支持并集掩膜；文件/帧/面板身份审计\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{物理前向模型与统计对象}
+
+\subsection{从倒易晶格到实际探测器像素}
+
+采用晶体学倒易空间约定，不含 $2\pi$ 因子。对晶畴 $a$，
+\begin{equation}
+A_a=U_aB_a,\qquad \bm q_a=A_a\bm h,\qquad
+\norm{\bm s_0}=\norm{\bm s_1}=\lambda^{-1}.
+\end{equation}
+在转动实验中，固定、扫描及设置转动共同作用于晶体：
+\begin{equation}
+\bm s_1=\bm s_0+
+R_{\mathrm{set}}R_{\hat{\bm a}}(\varphi)R_{\mathrm{fix}}A_a\bm h,
+\qquad \norm{\bm s_1}^2=\lambda^{-2}.
+\end{equation}
+Ewald 球条件决定反射的扫描角；出射光线与面板的交点决定像素坐标。
+这一几何层沿用 DIALS/dxtbx 的模型与实现\cite{winter2018,waterman2016}。
+晶格点评分中的最近倒易节点不能替代实际面板与扫描位置的反射预测。
+
+本轮保持静态晶体模型与原生未折叠扫描角的语义。
+跨越不同转数的两次曝光不能仅因角度模 $2\pi$ 相等而合并。
+同一扫描的多晶畴模型共享仪器几何，晶畴取向与相身份仍分别保存。
+
+\subsection{为何像素强度可以相加}
+
+对普通宏观晶畴的运动学衍射，且不同晶畴间相干干涉在观测尺度下平均掉，
+像素期望可以写为
+\begin{equation}\label{eq:forward}
+\mu_j=b_j+\sum_{a=1}^{K} P_{ja} I_a.
+\end{equation}
+这里 $I_a$ 是完整轮廓的幅度，$P_{ja}\geq0$ 是在探测器像素及扫描帧上
+积分后的轮廓概率，$b_j$ 为背景。归一化参考是完整支持，
+有效像素仅覆盖其中一部分时，不能再把估计的完整幅度除以已覆盖质量一次。
+
+强度叠加不适用于任意相干纳米畴干涉或显著动力学多重散射。
+算法也不因晶胞接近就自动认定多个晶体属于同一孪晶相。
+非共格孪晶中，独立、部分重叠与完全重叠的反射可以并存，
+其积分和缩放需要保留贡献关系\cite{sevvana2019}。
+
+\subsection{三个需要分开的量}
+
+\begin{enumerate}
+\item \textbf{位置兼容性}：某个观测位置是否与候选晶畴的反射预测相符。
+\item \textbf{像素强度贡献}：在式~\eqref{eq:forward} 中，每个完整轮廓的幅度是多少。
+\item \textbf{晶畴体积分数}：需要额外的相关系、结构因子及尺度约束才能解释的物理量。
+\end{enumerate}
+本轮不把几何兼容分数、周期密度混合权重或经验缩放参数当作晶畴体积分数。
+全局等效强度的身份由 $(\mathrm{domain},\mathrm{HKL\ equivalence})$ 定义；
+不同晶畴的强度不会被无依据地强制相等。
+
+\section{核心机制：保留局部可观测模式}
+
+\subsection{背景消元是对同一似然的解析处理}
+
+先考虑给定方差 $v_j>0$ 的条件高斯模型：
+\begin{equation}
+\bm y=P\bm I+B\bm\beta+\bm\epsilon,\qquad
+\Cov(\bm\epsilon)=W^{-1},\qquad W=\diag(v_j^{-1}).
+\end{equation}
+背景基底 $B$ 可以是常数或低阶平面。令
+\begin{equation}
+A_P=W^{1/2}P,\quad A_B=W^{1/2}B,\quad
+\bm y_w=W^{1/2}\bm y,\quad A_B=QR,
+\end{equation}
+其中 $Q\T Q=I$。对固定 $\bm I$，
+\begin{align}
+\widehat{\bm\beta}(\bm I)&=R^{-1}Q\T(\bm y_w-A_P\bm I),\\
+\min_{\bm\beta}\norm{\bm y_w-A_P\bm I-A_B\bm\beta}^2
+&=\norm{\widetilde{\bm y}-D\bm I}^2,\\
+D&=(I-QQ\T)A_P,\qquad
+\widetilde{\bm y}=(I-QQ\T)\bm y_w.
+\end{align}
+实现通过 $X-Q(Q\T X)$ 计算投影，不构造像素数平方大小的矩阵。
+如果启用局部一阶位置扰动，轮廓位置导数也进入 nuisance 基底；
+此时消去的是背景与线性位置矩，而非假定位置已知。
+
+\subsection{为什么只保存各分量或总和会丢信息}
+
+假设三个晶畴在第一组区域有 $P_1=P_2$，而 $P_3$ 与其不同。
+数据可以测出 $I_1+I_2$ 及 $I_3$ 两个独立量，
+但无法分别给出 $I_1$ 与 $I_2$。只保留总和 $I_1+I_2+I_3$
+会再丢掉一个已经测出的独立方向。
+
+基线的全局接口对 \texttt{total\_only} 记录只使用总强度。
+本轮保留局部设计矩阵的全部数值可观测方向，使这类组仍能带着两条信息进入全局估计。
+同样地，即使物理总和本身不可辨识，其他线性组合仍可能可测。
+
+\subsection{从像素到小型高斯观测的推导}
+
+取列尺度
+\begin{equation}
+S=\diag(s_1,\ldots,s_K),\qquad s_a=\norm{D_{:a}},\qquad
+DS^{-1}=U\Sigma V\T.
+\end{equation}
+保留数值可解析的 $r$ 个奇异方向，并定义
+\begin{equation}\label{eq:modes}
+\boxed{\quad \bm z=U_r\T\widetilde{\bm y},\qquad
+H=\Sigma_rV_r\T S,\qquad \Cov(\bm z)=I_r.\quad}
+\end{equation}
+则
+\begin{equation}\label{eq:modeidentity}
+\norm{\widetilde{\bm y}-D_r\bm I}^2
+=\norm{\bm z-H\bm I}^2+
+\underbrace{\norm{(I-U_rU_r\T)\widetilde{\bm y}}^2}_{c}.
+\end{equation}
+$D_r=U_rH$ 是保留子空间中的设计矩阵，$c$ 与 $\bm I$ 无关。
+因此最优点、保留方向的曲率以及任意强度向量的条件二次型
+都能用一个最多 $K$ 行的观测块表示。式~\eqref{eq:modes}
+没有把强度分配给未测到的分量。
+
+实现直接复用局部积分已有的 SVD。信息模式使用机器精度层面的秩阈值：
+\begin{equation}
+\tau_{\mathrm{info}}
+=\epsilon_{\mathrm{mach}}\max(N,K)\sigma_1.
+\end{equation}
+它与发布单分量强度时配置的保守 \texttt{svd\_rcond} 分开。
+一个暂不适合单独发布的弱方向，仍可能在跨观测累积后获得足够约束。
+被省略奇异值及其最大值会写入结果。
+
+\textbf{精确性的边界。}
+等价性针对固定 $W$、固定轮廓与线性 nuisance 后的保留数值子空间。
+若 $W$ 来自观测计数或 IRLS 更新，则还必须保留这一条件化说明。
+它不是任意 Poisson 数据的充分统计量；本轮不会把精确 Poisson--Gaussian
+拟合结果伪装成此类高斯模式。对于被数值截断的极小方向，
+也不声称对无界强度向量绝对无损。
+
+\subsection{全局约束来自零空间交集}
+
+令 $E_b$ 选择第 $b$ 组贡献所对应的全局等效强度，
+$G_b$ 为该组已知或拟合的正向尺度。全局模型为
+\begin{equation}
+\bm z_b=H_bG_bE_b\bm I+\bm\varepsilon_b.
+\end{equation}
+固定尺度时，堆叠设计 $\mathcal H$ 满足
+\begin{equation}\label{eq:nullintersection}
+\Null(\mathcal H)=
+\bigcap_b\Null(H_bG_bE_b).
+\end{equation}
+每组局部都有零空间，并不意味着它们的交集非零。
+这是跨扫描恢复信息的来源。重复相同设计只能增强已有方向；
+改变设计矩阵，包括轮廓混合关系或已知分量系数，才可能增加独立约束。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=9mm and 8mm,
+  box/.style={draw=plum,rounded corners=2pt,align=center,text width=35mm,minimum height=13mm},
+  arr/.style={-{Latex[length=2mm]},thick,draw=plum}]
+\node[box] (p1) {观测区域 1\\$P_1=P_2,\ P_3\ne P_1$};
+\node[box,below=of p1] (p2) {观测区域 2\\$P_2=P_3,\ P_1\ne P_2$};
+\node[box,right=of p1] (m1) {$I_1+I_2$ 与 $I_3$\\两个可观测模式};
+\node[box,right=of p2] (m2) {$I_1$ 与 $I_2+I_3$\\两个可观测模式};
+\node[box,right=of m1,yshift=-11mm,fill=papergray] (g) {联合设计满秩\\$I_1,\ I_2,\ I_3$};
+\draw[arr] (p1)--(m1);\draw[arr] (p2)--(m2);
+\draw[arr] (m1)--(g);\draw[arr] (m2)--(g);
+\end{tikzpicture}
+\caption{恢复来自不同观测约束的互补。图中假设同一组全局等效强度在这些观测间成立，
+且尺度、轮廓和噪声假设已经明确。局部未测出的分量没有先被强行拆开。}
+\end{figure}
+
+\subsection{全局估计与原始测量导出的区别}
+
+跨观测可辨识的 $\widehat{\bm I}$ 是全局模型的估计，
+不自动意味着每一个局部区域都能发布其独立分量。
+本轮保留原 \texttt{joint\_components}/\texttt{total\_only}/\texttt{unresolved} 状态。
+带合法模式的 unresolved 组可以参与全局拟合，但不被伪造成 HKLF 单分量测量。
+原本可发布的分量和总量继续通过经过一致性检查的线性映射维持校正、导出能力。
+
+\section{机制解释与观测设计：何时新扫描能够解除歧义}
+
+\subsection{单位双峰和对应无符号 Laplacian}
+
+考虑已经统一系数约定的特殊情形，每条观测测量两个强度之和：
+\begin{equation}
+y_e=I_u+I_v+\epsilon_e,\qquad \Var(\epsilon_e)=w_e^{-1}>0.
+\end{equation}
+假设这些观测误差互不相关，即 $W=\diag(w_e)$。
+建立图，顶点为未知强度，边为双峰和观测。设计 $H$ 每行有两个 1，
+所以信息矩阵为
+\begin{equation}
+F=H\T WH=D_w+A_w.
+\end{equation}
+它是加权无符号 Laplacian。对任意 $\bm x$，
+\begin{equation}\label{eq:signless}
+\bm x\T F\bm x=\sum_{(u,v)}w_{uv}(x_u+x_v)^2.
+\end{equation}
+
+\begin{proposition}
+在单位双峰和模型中，每个连通二分分量提供一个交替符号的零方向；
+含奇环的连通分量没有这一零方向。
+\end{proposition}
+
+\noindent\textbf{证明。}
+由式~\eqref{eq:signless}，$\bm x$ 属于零空间当且仅当每条边满足 $x_v=-x_u$。
+在二分图两侧可分别取 $+c$ 和 $-c$。沿奇数长度闭环传播得到 $c=-c$，
+故 $c=0$；连通性再使整个分量为零。\hfill$\square$
+
+例如三晶畴链给出
+\begin{equation}
+H_{\mathrm{chain}}=
+\begin{pmatrix}1&1&0\\0&1&1\end{pmatrix},\qquad
+\Null(H_{\mathrm{chain}})=\operatorname{span}(1,-1,1)\T .
+\end{equation}
+补充 $I_1+I_3$ 即闭合成三角形，三个强度均可辨识。
+重复原两种观测无论多少次，都不能消除这个代数零方向。
+这是已有谱图理论在当前观测模型中的应用\cite{cvetkovic2007,cvetkovicbounds}，
+不是新提出的图论定理。
+
+\textbf{适用条件不能省略。}
+真实 LP、吸收、部分覆盖或其他系数不相等时，必须分析实际设计矩阵。
+一般加权混合可能在偶环上也成为满秩，不能把单位系数图结论直接推广。
+新增测试包含不等系数偶环的反例。
+
+\subsection{不用人为正则化制造信息的候选选择}
+
+当前观测块与各候选块之间假定独立；块内允许完整协方差。
+对用户提供的候选设计 $H_c$ 与噪声协方差 $C_c=L_cL_c\T$，
+在共同参数尺度 $S_p$ 下白化：
+\begin{equation}
+A_c=L_c^{-1}H_cS_p.
+\end{equation}
+当前设计的零空间基为 $Z$。候选观测的选择按以下顺序：
+\begin{enumerate}
+\item 堆叠后增加的数值秩；
+\item 在原零空间中新增约束的最弱奇异值，即分析 $A_cZ$；
+\item 信息矩阵 log 伪行列式增益；已满秩时退化为普通 log 行列式比较。
+\end{enumerate}
+所有比较使用同一绝对秩阈值及同一参数尺度，不向信息矩阵加入 $\varepsilon I$
+以把不可辨识方向变成表面上的有限方差。
+每个大设计块先压成 QR 的 $R$ 因子，利用 $A\T A=R\T R$
+减少后续候选比较的运算量。
+
+该选择器是有预算的贪心计算，优先解除当前歧义，
+不宣称找到全局最优扫描策略。输入必须来自有效的预测几何；
+脚本不会构造未经验证的 Bruker 电机位置，也不操作采集硬件。
+
+\section{弱衍射：估计、发现与物理非负性的分工}
+
+\subsection{为什么有符号强度必须保留}
+
+物理期望强度非负，但扣除背景后的测量估计会因噪声落到零以下。
+若用 $\max(\widehat I,0)$ 替换原测量，其期望一般大于原期望。
+对 $\widehat I\sim N(I,\sigma^2)$，
+\begin{equation}
+\mathbb E[\max(\widehat I,0)]
+=I\Phi(I/\sigma)+\sigma\phi(I/\sigma).
+\end{equation}
+特别在 $I=0$ 时，其偏差为 $\sigma/\sqrt{2\pi}>0$。
+因此有符号 WLS 和后续等效反射合并保留弱负测量，
+不以 $I/\sigma$ 阈值删掉参与估计的反射。
+
+对于采用物理非负参数的 Poisson 或 Poisson--Gaussian 最大似然，
+边界估计可以为零，但必须保留相应的剖面区间和边界状态。
+点估计位于零并不等于“没有反射”，更不等于误差为零。
+
+\subsection{重叠损失可以由条件信息量化}
+
+背景消元后，单个幅度在其他幅度已知时的信息量为
+$F_{aa}=(D\T D)_{aa}$。其他幅度同时未知时，边际信息是
+$(C_{aa})^{-1}$。定义
+\begin{equation}
+\rho_a^{\mathrm{info}}=
+\frac{1}{C_{aa}F_{aa}}.
+\end{equation}
+满秩情况下，$0<\rho_a^{\mathrm{info}}\leq1$；
+较小数值表示与其他轮廓混合造成明显信息损失。
+它区分“总计数较少”与“轮廓难以分开”。
+新增输出同时保留有符号信噪比、信息比例与可辨识状态，
+不把它们转换成未经标定的 Bragg 检测概率。
+
+\subsection{本轮实际改变了哪一段弱峰路径}
+
+完整反射预测仍包含未进入初始强点列表的弱反射；
+它们可以进入联合像素积分。新增模式进一步防止这些反射的局部可观测组合
+在全局接口被丢弃。晶格评分修改则减少次要晶畴因基底表示或预算而被误筛。
+
+初始候选晶格仍依赖已有候选生成路径。
+本轮没有证明在完全没有可用几何种子的情况下，能够发现任意隐蔽的少数晶畴。
+真实弱点检出率、假阳性率以及最高可解孪晶阶数需要带已知答案的实验数据评估。
+
+\section{精确 Poisson--Gaussian 似然与一致的曲率}
+
+\subsection{校准约定}
+
+对已去偏置的 ADU 数据，使用
+\begin{equation}
+Y=gN+\epsilon,\qquad N\sim\operatorname{Poisson}(\mu),\quad
+\epsilon\sim N(0,v_r).
+\end{equation}
+$g$ 的单位是 ADU/photon，$v_r$ 是 ADU$^2$。
+当 $v_r>0$ 时，负 ADU 是允许的观测。
+只有确认计数为非负整数且读出噪声为零，才使用理想离散 Poisson 分支。
+该混合噪声模型有成熟理论基础\cite{chouzenoux2015,foi2008}；
+具体仪器校准决定是否适用。
+
+\subsection{移位密度统一给出梯度与观测信息}
+
+定义
+\begin{equation}
+f_s(y;\mu)=\sum_{n=0}^{\infty}
+e^{-\mu}\frac{\mu^n}{n!}\,
+\phi_{v_r}\!\left(y-g(n+s)\right).
+\end{equation}
+对 Poisson 质量求导并重排求和，得到
+\begin{equation}
+\partial_\mu f_s=f_{s+1}-f_s.
+\end{equation}
+于是
+\begin{align}
+\partial_\mu\log f_0&=\frac{f_1}{f_0}-1,\\
+h(y,\mu):=-\partial_\mu^2\log f_0
+&=\left(\frac{f_1}{f_0}\right)^2-\frac{f_2}{f_0}.
+\end{align}
+这些公式在 $\mu=0$ 仍有定义，避免使用 $\mathbb E[N\mid y]/\mu$
+所产生的除零问题。
+
+对 ADU 强度 $I_a$，$\mu_j=(b_j+\sum_aP_{ja}I_a)/g$，因此内部点的
+观测 Hessian 为
+\begin{equation}
+H_I=P\T\diag(h_j/g^2)P.
+\end{equation}
+基线用计数均值和读出方差构造 moment-Gaussian 曲率近似。
+本轮在数值曲率可解析时使用与优化器相同的精确似然 Hessian。
+它是\textbf{观测信息}；对观测取期望后才是 Fisher 信息。
+其逆仍是局部内部近似，不能充当非负边界的严格置信区间。
+
+\subsection{有界批量求和}
+
+令 $t_n$ 为某个移位密度的第 $n$ 项，则
+\begin{equation}
+\log\frac{t_{n+1}}{t_n}
+=\log\mu-\log(n+1)+\frac{g[y-g(n+s+\tfrac12)]}{v_r}.
+\end{equation}
+该比值随 $n$ 单调下降，可先用二分查找定位模态，再向两端展开。
+若上端比值 $r_+=t_{h+1}/t_h<1$，则
+\begin{equation}
+\sum_{n>h}t_n\leq t_h\frac{r_+}{1-r_+}.
+\end{equation}
+下端同理。实现用 \texttt{logsumexp}、
+\texttt{expm1} 和 \texttt{logaddexp} 计算尾界，
+在批量数组中处理许多像素，并缓存均值未改变的已认证求和。
+这尤其减少背景像素在优化和剖面区间求解中的重复卷积。
+
+每个移位像素和每次似然评估都有明确项数预算；
+超预算报错，不切换成未声明的高计数高斯近似。
+尾界控制的是截断误差，不是完整浮点前向误差。
+三组移位密度还给出曲率截断误差估计；
+若真实曲率与截断或舍入分辨尺度无法区分，公开结果不给有限标准差，
+同时保留精确条件剖面区间。
+
+\subsection{高计数稳定表达仍然是同一个 Poisson 模型}
+
+原表达
+$n\log\mu-\mu-\log\Gamma(n+1)$
+在 $n\approx\mu\gg1$ 时会相减巨大近等量。现在使用
+\begin{align}
+\log p(n\mid\mu)
+&=-D(n,\mu)-\tfrac12\log(2\pi n)-R(n),\\
+D(n,\mu)&=n\log(n/\mu)-n+\mu,\\
+D(n,\mu)&=\mu\sum_{k=2}^{\infty}
+\frac{(-1)^k\delta^k}{k(k-1)},\quad \delta=(n-\mu)/\mu,
+\end{align}
+其中近零 $\delta$ 使用收敛级数，远离零使用直接偏差表达；
+$R(n)$ 由有余项控制的 Stirling 展开计算\cite{dlmf}。
+小整数保留直接特殊函数路径，$n=0$ 使用 $-\mu$。
+这是同一离散概率的稳定求值，不是更换噪声机制。
+
+\subsection{仍须保留的背景与区间假设}
+
+约束似然分支仍使用既有背景选择和 WLS 背景估计，并在强度拟合、剖面区间中冻结背景。
+所以背景估计误差、轮廓误差、几何误差与增益校准误差尚未全部传播。
+低计数剖面区间使用 $\chi_1^2$ 渐近阈值，其有限样本覆盖率不能仅凭公式保证。
+本轮对这一边界作明确记录，没有把条件区间标成已验证的频率学精确区间。
+
+\section{晶格评分：坐标不应改变物理晶格}
+
+\subsection{周期密度模型}
+
+对倒易基底 $A$ 与各向同性位置误差 $\sigma_q$，
+\begin{equation}
+R_A(\bm q)=|\det A|
+\sum_{\bm h\in\Z^3}
+\frac{\exp[-\norm{\bm q-A\bm h}^2/(2\sigma_q^2)]}
+{(2\pi\sigma_q^2)^{3/2}}.
+\end{equation}
+体积因子把周期密度与基本胞上的均匀密度比较，
+避免单纯增加倒易点密度就自动获得好分数。
+候选评分仍是已有混合模型
+\begin{equation}
+\mathcal S(A)=\frac1N\sum_i
+\log\{(1-\eta)+\eta R_A(\bm q_i)\}.
+\end{equation}
+$\eta$ 是工作混合权重，$\sigma_q$ 是配置的噪声假设。
+这不是完整的空间群或晶畴数 Bayesian evidence。
+
+\subsection{幺模换基的严格不变性}
+
+对整数矩阵 $M$，若 $\det M=\pm1$，则
+\begin{equation}
+B=AM,\qquad B\Z^3=A\Z^3,\qquad |\det B|=|\det A|.
+\end{equation}
+用 $\bm h=M\bm h'$ 重排整数求和即得
+$R_A(\bm q)=R_B(\bm q)$。
+本轮用三维 LLL 型整数列操作缩短基向量\cite{lll1982}，
+整数变换用 Python 整数累计，浮点基向量用扩展精度重算。
+它是坐标变化，不是新的晶相或孪晶律。
+
+基线在较差剪切基底下，可能需要极大整数邻域；
+固定预算会让同一晶格因表示方式不同被拒绝。
+先约化基底，再判断实际所选表示的运算预算，
+修复本轮剪切反例中的坐标依赖，并降低有限求和和计算预算对非约化基底的敏感性。
+LLL 不给出唯一规范基底，有限截断仍存在；因此不承诺任意幺模输入逐位一致，
+或在任意相同预算下作出完全相同的判决。
+
+\subsection{正交度量下的精确降维}
+
+若约化后 $B\T B=\diag(\ell_1^2,\ell_2^2,\ell_3^2)$，
+则三维和分离为
+\begin{equation}
+R_B(B\bm f)=\prod_{j=1}^{3}
+\left[\frac{\ell_j}{\sqrt{2\pi}\sigma_q}
+\sum_{n\in\Z}e^{-\ell_j^2(f_j-n)^2/(2\sigma_q^2)}\right].
+\end{equation}
+Poisson 求和给出每个因子的 Fourier 表示
+\begin{equation}
+1+2\sum_{k\geq1}e^{-2\pi^2\sigma_q^2 k^2/\ell_j^2}
+\cos(2\pi kf_j).
+\end{equation}
+每个轴分别选择较省的实空间或 Fourier 求和；
+各向异性晶格可以混用两种表示。
+运算量从邻域项数的乘积降到三个轴项数之和。
+真正的三斜耦合度量仍按三维和计算，只有浮点舍入尺度内的非对角项才视作零。
+
+Fourier 路径要求保留的非常数 Fourier 系数绝对和小于 $1/2$，
+从而保留密度具有正下界，避免靠截断负值维持数值稳定。
+该条件不构成无限级数截断误差的严格全局保证；
+密度仍使用明确的有限尾邻域，报告将其与最近节点证明分开。
+
+\subsection{最近节点需要独立的几何排除界}
+
+由
+$\bm f-\bm h=B^{-1}(\bm q-B\bm h)$，得到
+\begin{equation}
+\norm{\bm q-B\bm h}\geq
+\frac{|f_j-h_j|}{\norm{\operatorname{row}_j(B^{-1})}}.
+\end{equation}
+如果未搜索节点有 $|h_j|\geq r_j+1$，则其距离至少为
+\begin{equation}
+d_{\mathrm{escape}}=
+\min_j\frac{r_j+1-|f_j|}
+{\norm{\operatorname{row}_j(B^{-1})}}.
+\end{equation}
+当前最近距离若不大于这个界，所有被排除节点都不可能更近。
+否则扩大搜索到所有可能改进的节点：
+\begin{equation}
+|h_j|\leq |f_j|+
+d_{\mathrm{current}}\norm{\operatorname{row}_j(B^{-1})}.
+\end{equation}
+这使几何支持判据不再依赖高斯尾部截断的偶然邻域。
+
+\subsection{代数三维支持与物理条件数分别报告}
+
+HKL 是整数。其仿射秩可以用整数差向量、叉积、点积精确判定，
+避免大剪切坐标下浮点 SVD 把三维整数支持误判为低维。
+另一方面，真正近共面的实验几何仍应被识别：
+实现另行报告物理倒易坐标中支持点的奇异值与轴比。
+因此“代数上三维”和“实验几何充分良态”不会混为一谈。
+
+\section{全局缩放的数值稳定性与误差传播}
+
+\subsection{保留的模型}
+
+每个独立观测块使用
+\begin{equation}
+\bm\mu_b=D_b\diag(\bm g_b)E_b\bm I,\qquad
+\bm g_b=\bm k_b\odot\exp(X_b\bm\gamma),
+\quad C_b=L_bL_b\T.
+\end{equation}
+背景消元后的模式 $H_b$ 可以作为此处的 $D_b$。
+同一组经验尺度/吸收系数可以作用于不同晶畴，
+但每个晶畴的等效强度身份仍独立。
+尺度在等效类内恒定的方向可能与强度形成 gauge，
+全局特征中心化本身不保证解除全部 gauge。
+
+\subsection{预白化与列尺度均衡}
+
+固定协方差允许
+\begin{equation}
+L_b^{-1}D_b\diag(\bm g_b)
+=(L_b^{-1}D_b)\diag(\bm g_b).
+\end{equation}
+因此固定设计和观测只需白化一次，块内相关性完全保留。
+对联合 Jacobian，令 $S_J$ 为列范数对角矩阵：
+\begin{equation}
+J_wS_J^{-1}=U\Sigma V\T.
+\end{equation}
+其非零方向不应由强度和 log-scale 的不同单位决定。
+以下响应与协方差采用 Gauss--Newton 一阶线性化。
+保留子空间中的白化数据响应矩阵定义为
+\begin{equation}
+G=S_J^{-1}V_r\Sigma_r^{-1}U_r\T,\qquad
+C_\theta=GG\T.
+\end{equation}
+不再先构造 $C_\theta J_w\T$，以减少病态乘法和相消。
+对第 $b$ 块：
+\begin{equation}
+\frac{\partial\widehat{\theta}}{\partial \bm y_b}\approx G_bL_b^{-1},
+\qquad \Cov(\widehat{\theta},\bm y_b)\approx G_bL_b\T.
+\end{equation}
+这些量支持缩放因子与原测量来自同一数据时的局部交叉协方差传播。
+非线性模型在残差非零时，严格隐函数响应一般还依赖残差加权二阶项；
+下述精确 Hessian 驻点检查不把这里的响应变成完整非线性响应。
+秩亏时，返回的广义协方差只对可估对比有意义；
+零空间方向上的伪逆零值不是确定性证据。
+
+\subsection{单位不变性与算术分辨率是两件事}
+
+列均衡修复了极端单位下的错误判秩，但不能把舍入噪声归一成信息。
+例如 $x=(-1,0,1)$、$y=(-1,2,-1)$、单一等效强度的模型
+$\mu_i=e^{x_i\gamma}I$，在 $\gamma=0$ 的线性估计为 $I=0$。
+浮点求解可能给出 $10^{-17}$ 量级残差；
+若将其诱生的 $\partial_\gamma\mu$ 列直接归一，可能误报尺度方向已辨识。
+
+本轮加入方向局部的算术抵消审计，而不按统计 $I/\sigma$ 删除弱信号。
+对线性强度求解映射 $A^+$，使用类似
+\begin{equation}
+\delta I_j^{\mathrm{arith}}
+\ \propto\ \epsilon_{\mathrm{mach}}
+\left(|A^+|\,|\bm y_w|\right)_j
+\end{equation}
+的方向分辨尺度估计，并按设计矩阵的独立非零支持分块，
+防止独立强通道的巨大数值尺度污染另一个真实微弱通道。
+当尺度导数只能由算术上不可解析的零信号提供时，
+可辨识性结果标为 unresolved；数据、强度估计及弱负测量均不被删改。
+该尺度是保守算术估计，不是完整的严格浮点前向误差证书。
+
+\subsection{满秩驻点也可能是鞍点}
+
+只检查梯度很小与 Jacobian 满秩不足以证明局部极小。
+令 $x=(-1,0,1)$、$y=(1,-1,1)$、$\mu_i=I e^{x_i\gamma}$。
+在 $I=1/3,\gamma=0$ 处，梯度为零且 Jacobian 满秩，
+但 $\partial^2(\chi^2/2)/\partial\gamma^2=-2/9$。
+本轮在拟合验收阶段计算原目标函数的精确 Hessian：
+\begin{equation}
+H_{\mathrm{exact}}=J_w\T J_w+
+\sum_i r_i\nabla_\theta^2\mu_{w,i},\qquad r=\mu_w-y_w.
+\end{equation}
+在相同列均衡坐标下，若存在超出舍入尺度的负特征值，
+结果标为 \path{negative_curvature_stationary_point}，
+不进入可靠强度的自动校正与导出。
+该反例及整体乘 $10^{\pm12}$ 的对照均通过，
+归一化最小特征值为 $-1$。
+这是一项局部极小的必要条件诊断；不自动逃离鞍点，也不证明全局最优。
+它保持原 Gauss--Newton 协方差约定，并单独记录精确曲率诊断。
+
+\subsection{近驻点的小步使用准确目标增量}
+
+对强度增量 $\Delta I$ 和尺度参数增量 $\Delta\gamma$，
+模型差可准确写成
+\begin{equation}
+\Delta\mu_b=D_{w,b}\!
+\left[\bm g_b\odot
+\left(\Delta I_b+
+I_{\mathrm{new},b}\odot
+\operatorname{expm1}(X_b\Delta\gamma)\right)\right].
+\end{equation}
+于是
+\begin{equation}
+\Delta\chi^2=\Delta\mu\T(2r+\Delta\mu).
+\end{equation}
+这避免两个相近指数、两个相近预测和两个相近目标函数直接相减。
+Gauss--Newton 只用于提出候选步长；接受判据仍评价原指数模型，
+并保留梯度、目标变化、时间和迭代预算条件。
+局部收敛不是全局最优性的证明\cite{scipyLS}。
+
+\subsection{压缩后必须补回拟合优度}
+
+模式只保留参数有关的二次型，不能用更小的残差宣称拟合更好。
+若每组有 $N_b$ 个有效像素、$p_b$ 个 nuisance 方向和 $r_b$ 个模式，
+\begin{align}
+\chi^2_{\mathrm{pixel}}&=\chi^2_{\mathrm{mode}}+\sum_b c_b,\\
+\nu_{\mathrm{pixel}}&=\nu_{\mathrm{mode}}+
+\sum_b(N_b-p_b-r_b).
+\end{align}
+实现增加原像素域的 $\chi^2$、自由度和约化 $\chi^2$ 字段。
+混合 legacy/mode 记录时，明确说明只有模式块补回了其像素残差维数。
+
+\subsection{同源校正不能漏掉交叉协方差}
+
+对 $\bm z=\bm f\odot\bm I$，记 $F=\diag(\bm f)$、$J=\diag(\bm I)$，
+\begin{equation}
+C_z=FC_IF+JC_fJ+FC_{If}J+JC_{If}\T F.
+\end{equation}
+如果因子由同一批强度拟合，后两项通常不能删掉。
+对于原本可发布的局部测量，从模式返回原估计器的映射为
+\begin{equation}
+T=C_IH\T C_{\mathrm{mode}}^{-1}.
+\end{equation}
+必须实际检查 $Tz$ 与原测量、$TC_{\mathrm{mode}}T\T$ 与原协方差一致，
+才恢复校正与导出；unresolved 组仍保留在全局主记录中。
+
+\section{像素唯一归属：全局独立块假设的实现条件}
+
+局部支持盒的连通分量不一定有互不相交的外接矩形。
+例如一个 L 形连通区域的矩形外壳可能包住另一个独立小区域。
+若两个矩形都把内部全部像素视为有效，
+相同的原始噪声会被用两次，独立块协方差模型也随之失效。
+
+本轮在矩形提取结果上增加\textbf{扩展支持盒并集掩膜}：
+矩形用于存储与读取；只有真正属于该连通分量的支持并集像素参与估计。
+分组与掩膜使用同一个背景边界扩展参数。
+
+跨分区还按真实文件身份、容器内部帧索引与面板号审计：
+真实路径识别符号链接，文件设备号与 inode 识别硬链接；
+多帧容器保留 reader index，单帧文件的 imageset 切片索引不创造新原始帧。
+同一原始帧以相互重叠的 imageset 分区再次出现时，要求先统一扫描表示，
+不能当作独立观测继续积分。
+
+这一审计针对可识别的文件/帧身份。
+它不等于已经证明所有探测器电子学噪声、图像插值误差或校准误差跨像素独立；
+这些仍由输入噪声模型承担。
+
+\section{可复现结果与证据边界}
+
+\subsection{原生接口与原理测试}
+
+完整验证在隔离的 DIALS 3.30.1、dxtbx 3.30.0、
+cctbx-base 2026.9 环境进行。最终测试数量为 \textbf{\TestCount}，
+以随包 \path{reports/first_principles_validation.json} 为机器可读记录。
+包含原有测试及新增数学反例，覆盖：
+
+\begin{itemize}
+\item 原生反射预测、晶体精修、候选评分及现有导出约定；
+\item 独立三维晶格和、幺模换基、最近节点与整数秩；
+\item 高精度卷积参考、梯度/Hessian 差分、零计数和边界剖面区间；
+\item 三/四晶畴混合、完全重叠不可恢复、弱负测量与模式似然恒等式；
+\item 缩放单位变化、算术零信号、同源协方差、原像素拟合优度；
+\item 像素支持并集、路径别名及跨分区原始帧归属。
+\end{itemize}
+
+\subsection{三晶畴机制实验}
+
+固定种子 20261029，三个完整幅度为
+$(1200,12,0.8)$，强弱比为 $1500{:}1$。
+两种已知重叠几何，每种先平均 40 次独立重复，
+再把两幅各含 120 个像素的平均图压缩为 4 个模式。
+具体模拟为 $\bar Y_j=\operatorname{Poisson}(40\mu_j)/40$，
+采用已知真值方差 $\Var(\bar Y_j)=\mu_j/40$。
+这是物理噪声下的已知前向模型试验，不是从未知实验数据发现晶畴。
+
+\begin{table}[htbp]
+\centering\small
+\caption{三晶畴实验结果，完整数值见 \texttt{twin\_information\_experiment.json}}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+项目 & 结果\\
+\midrule
+每种局部几何的信号秩 & 2 和 2\\
+只保留总量的全局秩 & 1，欠定\\
+保留信息模式的全局秩 & 3，唯一可辨识\\
+平均图压缩前后行数 & 240 个像素行 $\rightarrow$ 4 个模式行\\
+无噪声强度最大误差 & $4.55\times10^{-13}$\\
+与独立原像素联合解的强度差 & $2.27\times10^{-13}$\\
+与原像素联合解的协方差最大差 & $3.55\times10^{-15}$\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+500 次 Poisson Monte Carlo 中，最弱 $0.8$ 幅度的平均估计为
+$0.79295$，偏差 $-0.00705$，而该平均偏差的 Monte Carlo 标准误为
+$0.03842$；RMSE 为 $0.85816$，条件理论标准差为 $0.83962$。
+有 $17.4\%$ 的弱幅度测量为负，全部保留。
+若把同一批估计截为非负，弱幅度平均偏差变为 $+0.07622$。
+名义 95\% 高斯区间在该场景的覆盖率为 $94.6\%$；
+这不是所有低计数情形的覆盖率保证。
+
+\subsection{精确计数模型不会保证每个弱峰都能恢复}
+
+另一个 $1000{:}1$ 双峰 Poisson--Gaussian 重叠例中，
+约束拟合给出约 $(1042.35,0)$ ADU，最弱分量的条件剖面区间约为
+$[0,38.07]$ ADU。它与独立宽求和参考一致，
+说明代码准确表达了该次观测的不足。
+该例不能被描述成成功恢复了真实的 1 ADU 弱峰。
+
+低计数内部点例中，同一精确似然给出 $I=0.29382$ ADU。
+旧 moment 曲率方差为 $4.38390$ ADU$^2$，
+精确观测 Hessian 方差为 $5.27384$ ADU$^2$，并由独立差分验证。
+差异说明误差条需要与所优化的统计模型一致。
+
+\subsection{性能与精度实测}
+
+时间均为合成核实测中位数，固定单 BLAS 线程；
+同一场景的前后在同一软件环境执行。
+共享主机存在调度波动，逐次时间、版本和随机种子全部随包保存。
+不把这些数字外推成原始帧处理吞吐率。
+
+\begin{table}[htbp]
+\centering\small
+\caption{与任务基线的核级比较}\label{tab:performance}
+\begin{tabularx}{\textwidth}{@{}Xrrr@{}}
+\toprule
+场景 & 基线 & 更新 & 同任务时间比\\
+\midrule
+4096 像素精确 PG 卷积 & 4.78892 s & 0.07698 s & 62.21\\
+5000 点正交宽晶格评分 & 0.03038 s & 0.01104 s & 2.75\\
+5000 点耦合宽晶格评分 & 0.01955 s & 0.01128 s & 1.73\\
+72 块相关缩放，精确合成 & 0.09133 s & 0.06102 s & \ScaleSpeed\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+PG 对比评估相同的 259327 个求和项，没有换用近似分布。
+在 $10^8$、$10^9$、$10^{12}$ 计数的算术压力例中，
+基线 log-density 绝对误差约为
+$1.82\times10^{-7}$、$4.68\times10^{-7}$、$1.16\times10^{-3}$；
+新版与 80 位参考的差达到所显示双精度舍入水平。
+这些极端值是数值压力例，不声称实际探测器具有该计数范围。
+
+剪切等价晶格的 129 个独立参考点中，
+基线最大 log-density 截断误差约 3712.19，新版约 $3.41\times10^{-13}$；
+最近距离误差由 $0.06889$ \AA$^{-1}$ 降至约 $1.39\times10^{-17}$ \AA$^{-1}$。
+这说明坐标表示导致的数值错误被修复，不能等同为实验晶胞或强度误差降低。
+
+噪声缩放例中，基线达到 100 轮预算仍略高于配置梯度阈值；
+新版在相同判据下收敛。由于基线没有完成同一验收目标，
+报告不把两者耗时之比标为等价完成的加速倍数。
+
+\section{源码位置、应用与复现}
+
+\subsection{核心文件}
+
+\begin{longtable}{@{}p{.52\textwidth}p{.42\textwidth}@{}}
+\toprule
+文件 & 作用\\
+\midrule
+\endhead
+\path{python/src/ariadne/lattice_math.py} & 整数约化、周期密度、最近节点、整数仿射秩\\
+\path{python/src/ariadne/ranking.py} & 现有 DIALS 候选评分接口与证据输出\\
+\path{skills/ariadne-reduction/scripts/information_modes.py} & 局部信息模式及弱信号诊断\\
+\path{skills/ariadne-reduction/scripts/overlap_integrator.py} & 模式生产、PG 曲率质量门控\\
+\path{skills/ariadne-reduction/scripts/overlap_prepare.py} & 支持并集与原始帧身份审计\\
+\path{skills/ariadne-reduction/scripts/overlap_observability.py} & 图机制与候选观测选择器\\
+\path{skills/ariadne-reduction/scripts/poisson_gaussian.py} & 有界精确批量卷积和导数\\
+\path{skills/ariadne-reduction/scripts/constrained_pixels.py} & 同似然曲率与条件剖面区间\\
+\path{skills/ariadne-reduction/scripts/composite_scaling.py} & 相关观测联合估计与稳定线性响应\\
+\path{skills/ariadne-reduction/scripts/global_scale.py} & 信息模式桥接、校正与拟合优度恢复\\
+\path{skills/ariadne-reduction/scripts/scaling_geometry.py} & unresolved 模式的几何侧文件支持\\
+\bottomrule
+\end{longtable}
+
+\subsection{应用源码修改}
+
+完整包可作为新的工作副本安装；已有副本可先检查补丁再应用。
+补丁基线记录为 \path{797ac22ffa9b81da2dd977e013bea8f114b49eb2}。
+应用器先检查目标和补丁兼容性，不覆盖不相容的本地改动；
+不会推送远端或删除用户数据。
+
+\begin{lstlisting}
+python scripts/apply_numerical_update.py /path/to/Ariadne
+python scripts/apply_numerical_update.py /path/to/Ariadne --apply
+\end{lstlisting}
+
+Python 包和 companion scripts 必须一起更新。
+已安装的 Ariadne 运行时如使用复制的 Python 包，需要重新安装更新后的
+\path{python/} 包，或在新的 runtime 目录重新运行原项目安装脚本。
+不能只更新 Git 工作树而继续加载旧运行时副本。
+现有 DIALS 3.30.1 上游补丁保留，已验证其可在匹配上游源码上应用。
+
+\subsection{数学核与完整原生测试}
+
+\begin{lstlisting}
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+  python scripts/run_numerical_validation.py --scope numerical
+
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+  ariadne-env python scripts/run_numerical_validation.py --scope native
+\end{lstlisting}
+
+第一条允许纯 NumPy/SciPy 数学验证；第二条要求匹配的原生 DIALS
+及已声明 MCP 依赖。每次运行写独立机器可读验证结果。
+进程生命周期测试需要正常的本地进程命名空间。
+
+\subsection{复现实验与候选观测选择}
+
+\begin{lstlisting}
+OPENBLAS_NUM_THREADS=1 python benchmarks/twin_information.py \
+  --output reports/twin_information_reproduced.json
+OPENBLAS_NUM_THREADS=1 python benchmarks/lattice_principles.py \
+  --output reports/lattice_reproduced.json
+OPENBLAS_NUM_THREADS=1 python benchmarks/pixel_principles.py \
+  --output reports/pixel_reproduced.json
+OPENBLAS_NUM_THREADS=1 python benchmarks/scaling_principles.py \
+  --output reports/scaling_reproduced.json
+
+python skills/ariadne-reduction/scripts/overlap_observability.py \
+  examples/overlap_design.json --budget 1 --output selection.json
+\end{lstlisting}
+
+分发包附基线源码归档，使上述对照在没有 Git 历史的完整源码包中也能执行。
+示例候选设计会选择能够闭合歧义方向的第三种交叉关系，
+而不是单纯重复已测组合。实际使用时应替换为真实预测几何及校准噪声。
+
+\section{方法贡献与下一步真实数据评价}
+
+\subsection{目前可以成立的技术贡献}
+
+本轮实现了一条贯通的算法路径：
+\textbf{原始像素唯一归属 $\rightarrow$ 局部可观测模式
+$\rightarrow$ 跨重叠关系联合约束 $\rightarrow$ 可辨识性驱动的候选观测选择}。
+它改变了局部积分与全局推断之间传递的信息对象，
+并把“哪个强度方向缺少观测”转化为可计算的诊断。
+三/四晶畴反例说明，这一改变能够恢复旧接口主动丢弃的约束，
+而不是依靠先验把不可辨识分量拆开。
+
+同时，精确 PG 梯度、曲率与截断界保持一致；
+晶格等价基底获得一致物理解释；
+不同单位的强度与尺度参数采用稳定坐标计算；
+同源校正协方差和原像素拟合优度得到保留。
+
+\subsection{“方法创新”与已有理论的准确关系}
+
+QR/SVD、LLL、Poisson 求和、Poisson--Gaussian 似然与无符号 Laplacian
+都是既有理论。它们的组合落地与此前 Ariadne 的能力有实质差异，
+但不等于已经证实“首创某个数学原理”。
+若形成方法论文，应围绕局部可观测信息的跨阶段保留、
+孪晶重叠约束的可辨识性解释和观测设计闭环组织贡献，
+并与现有孪晶积分/缩放程序做数据级对照。
+
+\subsection{优先级明确的真实数据评价}
+
+建议真实数据覆盖四类：单晶无孪晶基准、部分重叠非共格双晶、
+三畴以上复杂重叠、弱衍射及读出噪声显著的样品。
+所有对照固定原始帧、几何、分辨率范围、反射预测集合和校准约定；
+软件参数改变与算法改变分别记录。
+
+应同时评价强度偏差、重复观测一致性、区间覆盖、结构精修结果、
+弱负测量保留比例、不可辨识组比例和实际耗时。
+不能只用更低的 $R$ 值或更多“检测到”的点证明准确度提升；
+后者可能来自筛选规则、过拟合或统计模型变化。
+对无法从像素辨识的完全重叠情况，应检验程序能否正确保留欠定状态。
+
+当前密集全局核仍有显式参数与观测预算。
+它是局部非线性 WLS，不是已证明全局最优的大规模任意晶畴求解器。
+完整端到端稀疏化、联合背景精确似然、轮廓/几何误差传播，
+以及真实仪器候选扫描生成是后续清晰的拓展方向，
+不应在本轮交付中被当作已经完成的能力。
+
+\appendix
+\section{符号与单位}
+\noindent\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+符号 & 含义与约定\\
+\midrule
+$A=UB$ & 倒易晶格基底，\AA$^{-1}$；无 $2\pi$ 因子\\
+$P$ & 像素/帧积分后的完整轮廓概率，无量纲\\
+$I$ & 完整轮廓幅度；局部代码约定为校准 ADU\\
+$W$ & 给定像素方差的逆，ADU$^{-2}$\\
+$z,H$ & 可观测模式；$H$ 作用于原贡献顺序的完整幅度\\
+$g,v_r$ & ADU/photon 增益及 ADU$^2$ 读出方差\\
+$\sigma_q$ & 倒易位置误差假设，\AA$^{-1}$\\
+$S,S_J,S_p$ & 分别为局部列尺度、联合 Jacobian 列尺度、观测设计参数尺度\\
+$E_b$ & 贡献到 domain-specific HKL 等效强度的选择映射\\
+$\gamma$ & 共同经验 log-scale/吸收基函数系数，不是晶畴体积分数\\
+\bottomrule
+\end{tabularx}
+
+\begin{thebibliography}{99}
+\bibitem{winter2018}
+Winter G., Waterman D. G., Parkhurst J. M., et al.
+DIALS: implementation and evaluation of a new integration package.
+\emph{Acta Crystallographica D} \textbf{74}, 85--97 (2018).
+\href{https://doi.org/10.1107/S2059798317017235}{doi:10.1107/S2059798317017235}.
+\bibitem{waterman2016}
+Waterman D. G., Winter G., Gildea R. J., et al.
+Diffraction-geometry refinement in the DIALS framework.
+\emph{Acta Crystallographica D} \textbf{72}, 558--575 (2016).
+\href{https://doi.org/10.1107/S2059798316002187}{doi:10.1107/S2059798316002187}.
+\bibitem{sevvana2019}
+Sevvana M., Ruf M., Usón I., Sheldrick G. M., Herbst-Irmer R.
+Non-merohedral twinning: from minerals to proteins.
+\emph{Acta Crystallographica D} \textbf{75}, 1040--1050 (2019).
+\href{https://doi.org/10.1107/S2059798319010179}{doi:10.1107/S2059798319010179}.
+\bibitem{chouzenoux2015}
+Chouzenoux E., Jezierska A., Pesquet J.-C., Talbot H.
+A convex approach for image restoration with exact Poisson--Gaussian likelihood.
+\emph{SIAM Journal on Imaging Sciences} \textbf{8}, 2662--2682 (2015).
+\href{https://doi.org/10.1137/15M1014395}{doi:10.1137/15M1014395}.
+\bibitem{foi2008}
+Foi A., Trimeche M., Katkovnik V., Egiazarian K.
+Practical Poissonian--Gaussian noise modeling and fitting for single-image raw-data.
+\emph{IEEE Transactions on Image Processing} \textbf{17}, 1737--1754 (2008).
+\href{https://doi.org/10.1109/TIP.2008.2001399}{doi:10.1109/TIP.2008.2001399}.
+\bibitem{lll1982}
+Lenstra A. K., Lenstra H. W., Lovász L.
+Factoring polynomials with rational coefficients.
+\emph{Mathematische Annalen} \textbf{261}, 515--534 (1982).
+\href{https://doi.org/10.1007/BF01457454}{doi:10.1007/BF01457454}.
+\bibitem{cvetkovic2007}
+Cvetković D., Rowlinson P., Simić S. K.
+Signless Laplacians of finite graphs.
+\emph{Linear Algebra and its Applications} \textbf{423}, 155--171 (2007).
+\href{https://doi.org/10.1016/j.laa.2007.01.009}{doi:10.1016/j.laa.2007.01.009}.
+\bibitem{cvetkovicbounds}
+Cvetković D., Rowlinson P., Simić S. K.
+Eigenvalue bounds for the signless Laplacian.
+\emph{Publications de l'Institut Mathématique} \textbf{81(95)}, 11--27 (2007).
+\href{https://doi.org/10.2298/PIM0795011C}{doi:10.2298/PIM0795011C}.
+\bibitem{dlmf}
+NIST Digital Library of Mathematical Functions.
+Section 5.11: asymptotic expansions of the gamma function.
+\url{https://dlmf.nist.gov/5.11}.
+\bibitem{lapack}
+LAPACK Users' Guide. Linear least squares problems.
+\url{https://netlib.org/lapack/lug/node27.html}.
+\bibitem{scipyLS}
+SciPy documentation. \texttt{scipy.optimize.least\_squares}.
+\url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html}.
+\bibitem{ariadne}
+Ariadne source baseline, commit
+\path{797ac22ffa9b81da2dd977e013bea8f114b49eb2}.
+\url{https://github.com/owenxyzhang-seseTJ/Ariadne}.
+The accompanying source, tests and measurement JSON files document this revision.
+\end{thebibliography}
+\end{document}

@@ -1,20 +1,24 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=68", "numpy>=1.26,<3"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "ariadne"
-version = "0.5.0"
-description = "Experimental agent-native single-crystal reduction extensions for DIALS 3.30.1"
+version = "0.7.0"
+description = "Agent-native crystallography, intensity inference and evidence-controlled workflows"
 requires-python = ">=3.12"
 license = {text = "Proprietary"}
-dependencies = ["numpy", "scipy", "mcp>=1.12,<2"]
+dependencies = ["numpy>=1.26", "scipy>=1.11", "gemmi>=0.7.4,<0.8", "mcp>=1.12,<2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "build>=1,<2", "ruff>=0.11,<1"]
 
 [project.entry-points."dials.spotfinder.threshold"]
 ariadne = "dials.extensions.ariadne_spotfinder_threshold_ext:AriadneThresholdExt"
 
 [project.scripts]
 ariadne-mcp = "ariadne.server:main"
+ariadne-agent = "ariadne.agent.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -9,10 +9,9 @@ from __future__ import annotations
 
 import numpy as np
 from scipy.optimize import brentq, lsq_linear, minimize
-from scipy.special import gammaln, xlogy
 from scipy.stats import chi2
 
-from poisson_gaussian import LikelihoodBudgetError, PoissonGaussian
+from poisson_gaussian import LikelihoodBudgetError, PoissonGaussian, _poisson_deviance, _poisson_logpmf
 
 
 _SCOPE = ('conditional on frozen WLS-estimated background, supplied profiles, '
@@ -51,14 +50,164 @@ def _minimize_nonnegative(fun, initial):
     return result.x, value, bool(result.success and np.isfinite(value) and error <= 1e-6), error, str(result.message)
 
 
+def _poisson_predictor_reduction(counts, background, design, profiles):
+    """Exactly aggregate equal-contributor Poisson rays at zero background.
+
+    If every positive entry of a physical-profile row is the same p_j, its
+    mean is p_j/g times the sum of the indicated physical amplitudes. Counts
+    with the same contributor set have a Poisson sufficient statistic: their
+    sum, with the exposures summed as well. This includes isolated profiles
+    and exact complete overlaps. No tolerance groups near-equal profiles.
+    Other affine predictors are retained as individual observations.
+    """
+    present = profiles > 0
+    peak = profiles.max(axis=1)
+    eligible = (background == 0) & np.all(~present | (profiles == peak[:, None]), axis=1)
+    selected = np.flatnonzero(eligible)
+    if len(selected) < 2:
+        return counts, background, design, 0
+    # Summation must not invent fractional photon counts above float64's exact
+    # integer range. Such data keep their original per-pixel likelihood.
+    if float(counts[selected].sum()) >= 2**52:
+        return counts, background, design, 0
+    keys = np.packbits(present[selected], axis=1)
+    _, groups = np.unique(keys, axis=0, return_inverse=True)
+    number = int(groups.max()) + 1
+    if number == len(selected):
+        return counts, background, design, 0
+    aggregate_design = np.zeros((number, design.shape[1]))
+    np.add.at(aggregate_design, groups, design[selected])
+    aggregate_counts = np.bincount(groups, weights=counts[selected], minlength=number)
+    keep = ~eligible
+    return (np.r_[counts[keep], aggregate_counts],
+            np.r_[background[keep], np.zeros(number)],
+            np.vstack((design[keep], aggregate_design)), len(selected)-number)
+
+
+def _poisson_likelihood_difference(counts, reference, difference, mean=None):
+    """NLL(mu0 + dmu) - NLL(mu0), retaining close-mean likelihood ratios.
+
+    D(mu0,mu) + (mu0-n)*log(mu/mu0) avoids cancellation in dmu-n*log1p(dmu/mu0).
+    The supplied difference comes from the linear predictor, not subtraction
+    of two large complete means. Poisson support endpoints remain exact.
+    """
+    mean = reference + difference if mean is None else mean
+    if np.any(mean < 0):
+        raise ValueError('Poisson likelihood-ratio means must be nonnegative')
+    out = difference.copy()
+    positive = counts > 0
+    supported = positive & (mean > 0) & (reference > 0)
+    out[positive & (mean == 0)] = np.inf
+    if np.any(positive & (reference == 0)):
+        raise ValueError('Likelihood-ratio reference is outside Poisson support')
+    if np.any(supported):
+        base, shift, n = reference[supported], difference[supported], counts[supported]
+        relative = shift / base
+        # D(base, base+shift) loses the supplied shift if rounded means coincide.
+        small = np.abs(relative) <= .125
+        log_ratio = np.empty_like(relative)
+        log_ratio[small] = np.log1p(relative[small])
+        log_ratio[~small] = np.log(mean[supported][~small]) - np.log(base[~small])
+        remainder = np.empty_like(relative)
+        u = relative[small]
+        # u-log1p(u) = u^2 * (1/2-u/3+u^2/4-...).
+        polynomial = np.full_like(u, 1./24)
+        for power in range(23, 1, -1):
+            polynomial = ((-1.) ** power) / power + u * polynomial
+        remainder[small] = base[small] * u * u * polynomial
+        remainder[~small] = shift[~small] - base[~small] * log_ratio[~small]
+        out[supported] = remainder + (base-n) * log_ratio
+    return float(out.sum())
+
+
+def _independent_poisson_profile(counts, background, design, units, mle):
+    """Return an exact nuisance solver for independent measured amplitude sums.
+
+    Each predictor must depend on a disjoint contributor set with exactly equal
+    physical coefficients and zero background. For group totals T_g the model
+    is N_g ~ Poisson(e_g*T_g). A fixed grand total is solved by one scalar dual
+    variable: T_g=N_g/(e_g+lambda), including zero-count boundary groups.
+    No regularizer or approximate profile matching is introduced.
+    """
+    present = design > 0
+    if np.any(background != 0) or np.any(present.sum(axis=0) != 1):
+        return None
+    members = [np.flatnonzero(row) for row in present]
+    physical = design / units
+    exposure = np.empty(len(counts))
+    for group, columns in enumerate(members):
+        if not len(columns):
+            return None
+        coefficients = physical[group, columns]
+        if not np.all(coefficients == coefficients[0]):
+            return None
+        exposure[group] = coefficients[0]
+    unconstrained = counts / exposure
+    owner = np.argmax(present, axis=0)
+    reference = mle * units
+
+    def allocate(totals):
+        amplitudes = np.zeros_like(reference)
+        for group, columns in enumerate(members):
+            previous = reference[columns].sum()
+            fractions = reference[columns]/previous if previous > 0 else np.full(len(columns),1./len(columns))
+            amplitudes[columns] = totals[group]*fractions
+        return amplitudes/units
+
+    def solve(contrast, target):
+        if np.count_nonzero(contrast) == 1:
+            component = int(np.flatnonzero(contrast)[0])
+            group = owner[component]
+            if len(members[group]) != 1:
+                raise ValueError('Individual member of a summed Poisson group is unidentifiable')
+            totals = unconstrained.copy()
+            totals[group] = target
+            return allocate(totals)
+        if target == 0:
+            return np.zeros_like(mle)
+        count_sum = float(counts.sum())
+        cheapest = int(np.argmin(exposure))
+        if count_sum == 0:
+            totals = np.zeros_like(counts)
+            totals[cheapest] = target
+            return allocate(totals)
+        positive = counts > 0
+        # z = (lambda + min exposure) * target / total_count puts the
+        # monotone dual root in [0,1], independent of ADU units and exposure.
+        offsets = (exposure[positive]-exposure[cheapest]) * (target/count_sum)
+        fractions = counts[positive]/count_sum
+        if np.all(offsets > 0):
+            at_zero = float(np.sum(fractions/offsets))
+            if at_zero <= 1:
+                totals = np.zeros_like(counts)
+                totals[positive] = target*fractions/offsets
+                totals[cheapest] = max(target-totals.sum(),0.)
+                return allocate(totals)
+        def mass(z):
+            denominator = offsets+z
+            return float(np.sum(np.divide(fractions,denominator,
+                         out=np.full_like(fractions,np.inf),where=denominator>0)))-1.
+        z = brentq(mass,0.,1.,xtol=np.nextafter(0.,1.),rtol=4*np.finfo(float).eps,maxiter=200)
+        totals = np.zeros_like(counts)
+        totals[positive] = target*fractions/(offsets+z)
+        return allocate(totals)
+
+    return solve
+
+
 def _profile_intervals(fun, mle, units, covariance, nullspace, scales,
-                       confidence_level, converged, gaussian=None):
+                       confidence_level, converged, gaussian=None, centered=None,
+                       exact_poisson=None, poisson_support=False):
     """Reoptimize all other intensities at fixed component or total ADU."""
     k = len(mle)
     threshold = float(chi2.ppf(confidence_level, 1))
-    baseline = fun(mle)[0]
+    if centered is not None:
+        fun, baseline = centered, 0.
+    else:
+        baseline = fun(mle)[0]
     estimates = mle * units
     evaluations = 0
+    exact_solutions = 0
     failures = []
 
     def interval(contrast):
@@ -83,20 +232,42 @@ def _profile_intervals(fun, mle, units, covariance, nullspace, scales,
         cache = {estimate: (0., mle.copy())}
 
         def profile(t):
-            nonlocal evaluations
+            nonlocal evaluations, exact_solutions
             if t in cache:
                 return cache[t][0]
             evaluations += 1
-            if is_component:
-                x = mle.copy()
+            # Convex profile solutions vary continuously between active-set
+            # changes. Reuse the nearest feasible solved state on either side;
+            # never change the objective, stopping criteria or physical bounds.
+            nearby = min((key for key, value in cache.items() if np.isfinite(value[0])),
+                         key=lambda key: abs(key-t))
+            warm = cache[nearby][1].copy()
+            if exact_poisson is not None:
+                x = exact_poisson(contrast,t)
+                value, gradient = fun(x)
+                if np.isfinite(value):
+                    if is_component:
+                        error = _projected_error(x[free],gradient[free])
+                    elif t > 0:
+                        active = np.flatnonzero(x > 0)
+                        multiplier = -float(gradient[active[0]]/units[active[0]]) if len(active) else 0.
+                        error = _projected_error(x,gradient+multiplier*units) if len(active) else np.inf
+                    else:
+                        error = 0.
+                    if error > 2e-6 or abs(float((contrast*units)@x)-t) > 1e-8*max(1.,t):
+                        raise RuntimeError('analytic Poisson nuisance solution did not satisfy equality/KKT')
+                exact_solutions += 1
+            elif is_component:
+                x = warm
                 x[fixed] = t / units[fixed]
                 # Positive nuisance seed distinguishes an impossible fixed
                 # component (Poisson support) from a recoverable zero seed.
-                trial = x.copy()
-                trial[free] = np.maximum(trial[free], 1e-3)
-                if np.isposinf(fun(trial)[0]):
-                    cache[t] = (np.inf, trial)
-                    return np.inf
+                if poisson_support:
+                    trial = x.copy()
+                    trial[free] = np.maximum(trial[free], 1e-3)
+                    if np.isposinf(fun(trial)[0]):
+                        cache[t] = (np.inf, trial)
+                        return np.inf
                 if len(free):
                     if gaussian is not None:
                         A, target = gaussian
@@ -112,7 +283,9 @@ def _profile_intervals(fun, mle, units, covariance, nullspace, scales,
                             return value, gradient[free]
                         # Positive seed keeps a Poisson model in its support even
                         # when fixing a previously positive component to zero.
-                        seed = np.maximum(mle[free], 1e-3)
+                        seed = x[free].copy()
+                        if poisson_support and not np.isfinite(fun(x)[0]):
+                            seed = np.maximum(seed, 1e-3)
                         z, value, ok, _, _ = _minimize_nonnegative(nuisance, seed)
                         x[free] = z
                     if not ok:
@@ -125,7 +298,8 @@ def _profile_intervals(fun, mle, units, covariance, nullspace, scales,
             else:
                 c = units / np.linalg.norm(units)
                 target = t / np.linalg.norm(units)
-                seed = mle * (t / estimate) if estimate > 0 else np.full(k, t / units.sum())
+                warm_total = float(units @ warm)
+                seed = warm * (t / warm_total) if warm_total > 0 else np.full(k, t / units.sum())
                 fit = minimize(fun, seed, jac=True, method='SLSQP', bounds=[(0., None)] * k,
                                constraints={'type': 'eq', 'fun': lambda z: c @ z - target,
                                             'jac': lambda z: c},
@@ -147,10 +321,13 @@ def _profile_intervals(fun, mle, units, covariance, nullspace, scales,
 
         try:
             at_zero = profile(0.)
-            lower = 0. if estimate == 0 or at_zero <= threshold else float(brentq(
-                lambda t: profile(t) - threshold, 0., estimate, xtol=1e-10, rtol=1e-10))
+            # Root tolerances live in dimensionless bracket coordinates, not
+            # arbitrary detector ADU. This preserves precision on unit changes.
+            lower = 0. if estimate == 0 or at_zero <= threshold else float(estimate*brentq(
+                lambda u: profile(estimate*u)-threshold,0.,1.,xtol=1e-12,rtol=1e-12))
+            natural_scale = float(np.hypot.reduce(contrast*units))
             step = max(float(np.sqrt(max(contrast @ covariance @ contrast, 0.))),
-                       .1 * max(estimate, 1.), 1e-3)
+                       .1 * max(estimate,natural_scale),1e-3*natural_scale)
             upper = estimate + step
             for _ in range(60):
                 if profile(upper) >= threshold:
@@ -159,12 +336,17 @@ def _profile_intervals(fun, mle, units, covariance, nullspace, scales,
                 upper = estimate + step
             else:
                 raise RuntimeError('upper profile root not bracketed within 60 expansions')
-            upper = float(brentq(lambda t: profile(t) - threshold, estimate, upper,
-                                 xtol=1e-10, rtol=1e-10))
+            span = upper-estimate
+            upper = float(estimate+span*brentq(lambda u:profile(estimate+span*u)-threshold,
+                                             0.,1.,xtol=1e-12,rtol=1e-12))
+            lower_lr = at_zero if lower == 0 else profile(lower)
+            upper_lr = profile(upper)
+            residual_tolerance = 1e-6*max(1.,threshold)
+            if abs(upper_lr-threshold)>residual_tolerance or (lower>0 and abs(lower_lr-threshold)>residual_tolerance):
+                raise RuntimeError('profile root did not resolve the requested likelihood-ratio threshold')
             return dict(out, status='ok', lower=lower, upper=upper,
                         lower_at_nonnegative_boundary=lower == 0.,
-                        lower_likelihood_ratio=at_zero if lower == 0 else profile(lower),
-                        upper_likelihood_ratio=profile(upper))
+                        lower_likelihood_ratio=lower_lr,upper_likelihood_ratio=upper_lr)
         except LikelihoodBudgetError:
             raise
         except (RuntimeError, ValueError, FloatingPointError) as exc:
@@ -172,11 +354,16 @@ def _profile_intervals(fun, mle, units, covariance, nullspace, scales,
             return dict(out, status='profile_failed', reason=str(exc))
 
     components = [interval(np.eye(k)[i]) for i in range(k)]
-    total = interval(np.ones(k))
+    # The one-component total is precisely the same likelihood contrast.
+    total = components[0].copy() if k == 1 else interval(np.ones(k))
     return components, total, {'profile_evaluations': evaluations, 'profile_failures': failures,
                                'confidence_level': confidence_level, 'lr_threshold': threshold,
                                'threshold_distribution': 'chi-square(1) asymptotic, not exact coverage',
-                               'nuisance': 'all other nonnegative intensities reoptimized; background frozen'}
+                               'nuisance': 'all other nonnegative intensities reoptimized; background frozen',
+                               'initialization': 'nearest solved feasible profile state; exact objective and KKT rechecked',
+                               'analytic_poisson_nuisance_solutions': exact_solutions,
+                               'root_coordinates': 'dimensionless bracket coordinate; endpoint likelihood-ratio residual verified',
+                               'likelihood_ratio_arithmetic': 'MLE-centered per-observation differences' if centered is not None else 'difference of objective sums'}
 
 
 def fit_constrained(y, variance, profiles, valid, basis, noise, method, rcond,
@@ -224,32 +411,45 @@ def fit_constrained(y, variance, profiles, valid, basis, noise, method, rcond,
     background = B @ beta
     if np.any(background < 0):
         raise ValueError('Frozen background predicts negative expectation; revise background model')
-    weighted = P * root_weight[:, None]
+    signal_rows = np.any(P > 0, axis=1)
+    signal_profiles = P[signal_rows]
+    fit_data, fit_background = data[signal_rows], background[signal_rows]
+    fit_root_weight = root_weight[signal_rows]
+    weighted = signal_profiles * fit_root_weight[:, None]
     norms = np.linalg.norm(weighted, axis=0)
     if np.any(norms <= 1e-15):
         raise ValueError('Masked or uninformative component')
     units = 1 / norms
-    A = P * units
-    gaussian = (weighted * units, (data - background) * root_weight)
+    weighted *= units
+    gaussian = (weighted, (fit_data - fit_background) * fit_root_weight)
+    photon_design = signal_profiles * (units/gain)
+    model_background = fit_background / gain
+    model_counts = counts[signal_rows]
+    reduced_rows = 0
+    if discrete:
+        model_counts, model_background, photon_design, reduced_rows = _poisson_predictor_reduction(
+            model_counts, model_background, photon_design, signal_profiles)
     initial = lsq_linear(*gaussian, bounds=(0., np.inf), tol=1e-12, max_iter=1000)
-    pg = PoissonGaussian(data, gain, readout) if method == 'poisson-gaussian' and readout > 0 else None
+    pg = PoissonGaussian(fit_data, gain, readout) if method == 'poisson-gaussian' and readout > 0 else None
 
     def objective_and_gradient(x):
-        expected_adu = background + A @ x
         if method == 'nnls':
-            residual = (expected_adu - data) * root_weight
-            return .5 * float(residual @ residual), (A * root_weight[:, None]).T @ residual
-        mean = expected_adu / gain
+            residual = gaussian[0] @ x - gaussian[1]
+            return .5 * float(residual @ residual), gaussian[0].T @ residual
+        mean = model_background + photon_design @ x
         if pg is not None:
             logs, score, _ = pg.evaluate(mean)
-            return -float(logs.sum()), -(A / gain).T @ score
-        # xlogy(0, 0)=0; zero mean with positive counts has infinite NLL.
-        value = float(np.sum(mean - xlogy(counts, mean) + gammaln(counts + 1)))
-        ratio = np.divide(counts, mean, out=np.zeros_like(mean), where=mean > 0)
-        ratio[(mean == 0) & (counts > 0)] = np.inf
-        terms = np.zeros_like(A)
-        np.multiply(A / gain, (1 - ratio)[:, None], out=terms, where=A > 0)
-        gradient = terms.sum(axis=0)
+            return -float(logs.sum()), -photon_design.T @ score
+        # Parameter-independent factorial terms are unnecessary in optimization.
+        value = float(_poisson_deviance(model_counts, mean).sum())
+        derivative = np.divide(mean-model_counts, mean, out=np.ones_like(mean), where=mean > 0)
+        derivative[(mean == 0) & (model_counts > 0)] = -np.inf
+        if np.all(np.isfinite(derivative)):
+            gradient = photon_design.T @ derivative
+        else:
+            terms = np.zeros_like(photon_design)
+            np.multiply(photon_design, derivative[:, None], out=terms, where=photon_design > 0)
+            gradient = terms.sum(axis=0)
         return value, gradient
 
     if discrete and np.any((counts > 0) & (background == 0) & ~np.any(P > 0, axis=1)):
@@ -263,44 +463,115 @@ def fit_constrained(y, variance, profiles, valid, basis, noise, method, rcond,
                                                                   np.maximum(initial.x, 1e-3))
     intensity = units * x
     expected_adu = background + P @ intensity
+    reference = x.copy()
+    reference_mean = model_background + photon_design @ reference
+    reference_residual = gaussian[0] @ reference - gaussian[1]
+    reference_logs = pg.evaluate(reference_mean)[0] if pg is not None else None
+
+    def centered_objective(trial):
+        """Exact same LR with constants removed before summing observations."""
+        difference = trial-reference
+        if method == 'nnls':
+            change = gaussian[0] @ difference
+            value = float(change @ reference_residual + .5 * (change @ change))
+            return value, gaussian[0].T @ (reference_residual+change)
+        mean = model_background + photon_design @ trial
+        if pg is not None:
+            logs, score, _ = pg.evaluate(mean)
+            return -float((logs-reference_logs).sum()), -photon_design.T @ score
+        value = _poisson_likelihood_difference(model_counts, reference_mean,
+                                               photon_design @ difference, mean)
+        return value, objective_and_gradient(trial)[1]
+
+    covariance_status, covariance_reason = 'resolved', None
+    information_diagnostics = None
+    constant_convolution = None
     if method == 'nnls':
-        fit_weight = root_weight
+        fit_weight = fit_root_weight
+        residual = (expected_adu-data) * root_weight
+        minimum = .5 * float(residual @ residual)
         objective = 2 * minimum
         objective_kind = 'Gaussian chi-square with supplied fixed variances'
     elif discrete:
         mean = expected_adu / gain
-        ratio = np.divide(counts, mean, out=np.ones_like(mean), where=mean > 0)
-        objective = float(2 * np.sum(xlogy(counts, ratio) - counts + mean))
+        minimum = -float(_poisson_logpmf(counts, mean).sum())
+        objective = float(2 * _poisson_deviance(counts, mean).sum())
         # At zero mean Fisher weights are singular. Keep a finite diagnostic
         # covariance using supplied variances there; intervals do not use it.
         var_proxy = gain * expected_adu
-        fit_weight = 1 / np.sqrt(np.where(var_proxy > 0, var_proxy, variance[valid]))
+        fit_weight = 1 / np.sqrt(np.where(var_proxy > 0, var_proxy, variance[valid]))[signal_rows]
         objective_kind = 'Poisson deviance'
     else:
-        fit_weight = 1 / np.sqrt(gain * expected_adu + readout)
+        fit_weight = 1 / np.sqrt(gain * expected_adu[signal_rows] + readout)
+        # Frozen zero-profile pixels contribute once to the absolute diagnostic,
+        # never to derivatives, profile likelihood ratios or nonlinear iterations.
+        minimum = -float(reference_logs.sum())
+        if np.any(~signal_rows):
+            constant_pg = PoissonGaussian(data[~signal_rows], gain, readout)
+            logs, _, _ = constant_pg.evaluate(background[~signal_rows] / gain)
+            minimum -= float(logs.sum())
+            constant_convolution = constant_pg.diagnostics()
+            del constant_pg, logs
         objective = 2 * minimum
         objective_kind = 'minus twice normalized PG log density; NOT chi-square or deviance'
-    design = P * fit_weight[:, None]
+        # The curvature of the fitted likelihood, rather than only its first
+        # two moments, supplies the interior uncertainty. A proxy remains an
+        # internal numerical scale when curvature cannot be resolved; callers
+        # must not publish that proxy as an observed-information standard error.
+        information, information_quality = pg.observed_information(expected_adu[signal_rows] / gain)
+        unresolved = ~information_quality['reliable_positive']
+        information_diagnostics = {
+            'method': 'exact PG observed information (f1/f0)^2-f2/f0',
+            'unresolved_signal_pixels': int(np.count_nonzero(unresolved)),
+            'minimum_signal_information_per_count2': float(information.min()),
+            'maximum_absolute_truncation_bound': float(information_quality['absolute_truncation_bound'].max()),
+            'maximum_roundoff_resolution': float(information_quality['roundoff_resolution'].max()),
+        }
+        if np.any(unresolved):
+            covariance_status = 'unresolved'
+            covariance_reason = 'PG local curvature is nonpositive or below truncation/roundoff resolution'
+        else:
+            fit_weight = np.sqrt(np.maximum(information, 0.)) / gain
+    design = signal_profiles * fit_weight[:, None]
     scales = np.linalg.norm(design, axis=0)
     _, singular, Vh = np.linalg.svd(design / scales, full_matrices=design.shape[0] < design.shape[1])
     rank = int(np.sum(singular > singular[0] * rcond))
     retained = Vh[:rank].T
     covariance = ((retained / singular[:rank]) @ (retained / singular[:rank]).T) / scales[:, None] / scales[None, :]
     nullspace = Vh[rank:]
+    exact_poisson = (_independent_poisson_profile(model_counts,model_background,photon_design,units,x)
+                     if discrete else None)
     intervals, total, diagnostics = _profile_intervals(
         objective_and_gradient, x, units, covariance, nullspace, scales,
-        confidence_level, converged, gaussian if method == 'nnls' else None)
+        confidence_level, converged, gaussian if method == 'nnls' else None,
+        centered=centered_objective,exact_poisson=exact_poisson,poisson_support=discrete)
     diagnostics.update({'method': method, 'scope': _SCOPE, 'negative_adu_allowed': pg is not None,
                         'objective_kind': objective_kind, 'minimum_negative_log_likelihood': minimum,
                         'optimizer_message': message, 'projected_gradient_inf_norm': kkt,
                         'optimizer_kkt_tolerance': 1e-6, 'rank_rcond': rcond,
+                        'likelihood_factorization': {
+                            'valid_pixels': len(data),
+                            'parameter_dependent_pixels': int(signal_rows.sum()),
+                            'parameter_independent_pixels': int((~signal_rows).sum()),
+                            'optimization_observations': len(model_background),
+                            'poisson_sufficient_statistics_rows_removed': reduced_rows,
+                            'scope': 'exact zero-profile factor separation; exact equal-contributor zero-background Poisson sums; no weak-pixel threshold'},
                         'gain_unit': 'ADU/count', 'readout_variance_unit': 'ADU^2',
                         'noise_provenance': noise.get('provenance', noise.get('source')) if noise else None,
-                        'covariance_approximation': 'moment-weighted Gaussian proxy for PG; Fisher for Poisson except zero-mean rows use supplied variance'})
+                        'covariance_information_status': covariance_status,
+                        'covariance_information_reason': covariance_reason,
+                        'covariance_estimate_usable': covariance_status == 'resolved',
+                        'covariance_approximation': (
+                            'exact PG observed-information interior approximation' if pg is not None and covariance_status == 'resolved'
+                            else 'INTERNAL moment-weighted PG proxy; observed-information covariance unresolved, do not publish sigma' if pg is not None
+                            else 'fixed-variance Gaussian' if method == 'nnls'
+                            else 'Poisson Fisher except zero-mean rows use supplied variance; exact likelihood intervals remain authoritative')})
     if pg is not None:
+        diagnostics['observed_information'] = information_diagnostics
         diagnostics['convolution'] = pg.diagnostics()
+        diagnostics['constant_pixel_convolution'] = constant_convolution
         diagnostics['scaled_gradient_truncation_bound'] = (pg.max_score_error
-            * float(np.max(np.sum(np.abs(A / gain), axis=0))))
+            * float(np.max(np.sum(photon_design, axis=0))))
     elif discrete:
         diagnostics['convolution'] = {'evaluation': 'exact discrete Poisson (zero readout variance)'}
     boundary = np.flatnonzero(x <= 1e-9).tolist()

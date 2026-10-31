@@ -1,0 +1,37 @@
+{
+  "schema": "ariadne-delivery/2",
+  "revision": "deep-optimization-round2-20261029",
+  "baseline_commit": "797ac22ffa9b81da2dd977e013bea8f114b49eb2",
+  "comparison_baseline": "first-principles delivery of 2026-10-29",
+  "comparison_archive": "benchmarks/baseline-first-principles.zip",
+  "entrypoint": "ROUND2_OPTIMIZATION.md",
+  "native_regression": {
+    "tests_run": 201,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "successful": true
+  },
+  "native_validation_record": "reports/round2_validation.json",
+  "report": {
+    "latex": "reports/ariadne_round2.tex",
+    "pdf": "reports/ariadne_round2.pdf",
+    "pdf_pages": 14,
+    "latex_compiled": true,
+    "visual_review_completed": true
+  },
+  "patches": {
+    "from_original_git_baseline": "patches/ariadne-first-principles.patch",
+    "from_first_delivery": "patches/ariadne-round2.patch"
+  },
+  "package_patch_verification_record": "verification/round2_patch_verification.json",
+  "historical_first_round": {
+    "native_tests": 151,
+    "pdf_pages": 20,
+    "guide": "FIRST_PRINCIPLES_UPDATE.md"
+  },
+  "experimental_raw_data_used": false,
+  "synthetic_native_raw_frame_fixtures_used": true,
+  "data_scope": "independent mathematical references, synthetic numerical and native DIALS interface regressions; no experimental weak-reflection recovery claim",
+  "benchmark_memory_scope": "additional traced Python/NumPy allocations during calls, not process RSS; per-benchmark input/output scopes recorded in JSON"
+}

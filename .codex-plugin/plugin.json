@@ -1,19 +1,32 @@
 {
   "name": "ariadne",
-  "version": "0.5.0",
+  "version": "0.7.0",
   "description": "Agent-driven single-crystal diffraction reduction from Bruker/Rigaku frames to evidence-linked INS/HKL and solve-single-crystal handoff.",
-  "author": {"name": "Local developer"},
+  "author": {
+    "name": "Local developer"
+  },
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "requires_local_executor": true,
-  "keywords": ["single-crystal", "diffraction", "Bruker", "Rigaku", "twinning", "DIALS"],
+  "keywords": [
+    "single-crystal",
+    "diffraction",
+    "Bruker",
+    "Rigaku",
+    "twinning",
+    "DIALS"
+  ],
   "interface": {
     "displayName": "Ariadne",
-    "shortDescription": "Multi-lattice hypotheses, joint pixel fitting and structure handoff.",
-    "longDescription": "Open-source-first single-crystal reduction with nonexclusive reciprocal/detector compatibility, unique-anchor joint DIALS refinement, scan-block holdouts, NNLS/Poisson overlap fitting and identifiability-aware composite observations. Includes immutable hypotheses, event records, asynchronous scientific MCP tools and INS/HKL handoff to solve-single-crystal. Experimental and untested; global composite absorption/scaling remains incomplete.",
+    "shortDescription": "Persistent crystallography agent with signed integration and structure-feedback inference.",
+    "longDescription": "DIALS reduction kernels, registered scientific tools, persistent typed action graphs, real candidate RES/HKL pairing, native CIF validation, and held-out structure feedback. Reconstructed 0.7.0; real experimental end-to-end accuracy requires local validation.",
     "developerName": "Local developer",
     "category": "Productivity",
-    "capabilities": ["MCP tools", "Diffraction reduction", "DIALS source extensions"],
+    "capabilities": [
+      "MCP tools",
+      "Diffraction reduction",
+      "DIALS source extensions"
+    ],
     "defaultPrompt": "Use $ariadne-reduction to process my Bruker or Rigaku diffraction data, inspect scientific evidence before accepting each stage, and continue through solve-single-crystal when INS/HKL handoff is ready."
   }
 }

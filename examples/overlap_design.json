@@ -1,0 +1,53 @@
+{
+  "current": {
+    "design": [
+      [
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        1,
+        1
+      ]
+    ],
+    "variance": [
+      1,
+      1
+    ]
+  },
+  "candidates": [
+    {
+      "id": "repeat_01",
+      "design": [
+        [
+          1,
+          1,
+          0
+        ]
+      ],
+      "variance": [
+        0.01
+      ]
+    },
+    {
+      "id": "close_triangle_02",
+      "design": [
+        [
+          1,
+          0,
+          1
+        ]
+      ],
+      "variance": [
+        4
+      ]
+    }
+  ],
+  "parameter_scales": [
+    1,
+    1,
+    1
+  ]
+}

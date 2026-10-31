@@ -1,0 +1,526 @@
+{
+  "project": "Ariadne-Xtal",
+  "version": "0.1.0",
+  "release_date": "2026-10-30",
+  "scope": "Independent numerical implementation with an explicit optional official-engine execution bridge; not full standalone SHELXT/SHELXL parity.",
+  "report": {
+    "pages": 47,
+    "chapters": 12,
+    "appendices": 3,
+    "numbered_equation_environments": 135
+  },
+  "verification": {
+    "full_suite_passed": 137,
+    "full_suite_skipped": 0,
+    "mcp_stdio_test_enabled": true,
+    "official_shelx_binary_executed": false,
+    "installation_verification": "validation/packaging_report.json"
+  },
+  "files": [
+    {
+      "path": "API_CONTRACT.md",
+      "bytes": 5608,
+      "sha256": "65f41c309c4208f218433a34872dcad82c3ba2297e4b50c15d90b52736726b86"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1280,
+      "sha256": "9f8764e9bb08a0cff3f57b256392d48c4c640bde2ef61c9d74c6bd3126780d25"
+    },
+    {
+      "path": "MANIFEST.in",
+      "bytes": 514,
+      "sha256": "eeb1824555153f9b312ffd8933a7af2f756dd565975953808892a49fd2cf6f95"
+    },
+    {
+      "path": "README.md",
+      "bytes": 11955,
+      "sha256": "f79917e269a2a3ce20a44dffa066c72aa75b5fc1791f60db790236e8def37de0"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "bytes": 2967,
+      "sha256": "991b9c8ae32b60ea0d2e102b7d7a036014c9786c71c7b71940e52bf2b48f649d"
+    },
+    {
+      "path": "docs/API.md",
+      "bytes": 21018,
+      "sha256": "7ea2348bf1525f26b1ae2398ca937ba5c9352d520179d320ee293fad91fc4a13"
+    },
+    {
+      "path": "docs/BUILD.md",
+      "bytes": 2788,
+      "sha256": "6f99a4e11458cb998bd525343dc4e3524d00d43c0ca24696983359b17f1aa5f5"
+    },
+    {
+      "path": "docs/COMPATIBILITY.md",
+      "bytes": 11259,
+      "sha256": "ddaa53f701fed64cf1813f98fd5f288dbeb20f26f3e39dcb583c0342ace79f7d"
+    },
+    {
+      "path": "docs/chapters/01_scattering.tex",
+      "bytes": 6114,
+      "sha256": "6ce1cdaee209f7d391d8ad2b6e0b00d935579d015611930806efbd65e7eb5a50"
+    },
+    {
+      "path": "docs/chapters/02_geometry_symmetry.tex",
+      "bytes": 5429,
+      "sha256": "32ff0903409661ceba2e221f454039bc1702d6d9b71dfb3db0caf806ce7b82d0"
+    },
+    {
+      "path": "docs/chapters/03_statistics.tex",
+      "bytes": 5298,
+      "sha256": "7a41151b4f5da80f4e27a87eecf9f5545508083449b8a8c153ca88a8683b631c"
+    },
+    {
+      "path": "docs/chapters/04_phasing.tex",
+      "bytes": 8270,
+      "sha256": "8d9106a31ff01d98a3dc2285e51c5d4fc2591f558306a6e9c13325f6eed34818"
+    },
+    {
+      "path": "docs/chapters/05_refinement.tex",
+      "bytes": 6280,
+      "sha256": "53352f0baf133c31b285ffa408f0f5b9bafab33a1f336ed8ff331e004c2a466a"
+    },
+    {
+      "path": "docs/chapters/06_constraints.tex",
+      "bytes": 6685,
+      "sha256": "158b76d52a747cd6172d55954e9fb81a583fdbeabd9626de3da2d23a2110f773"
+    },
+    {
+      "path": "docs/chapters/07_disorder_twins.tex",
+      "bytes": 6559,
+      "sha256": "cfa8bf9b35053340f9df1b8fd52d8938ac938d8b531d2890d8c2327a68a4bba0"
+    },
+    {
+      "path": "docs/chapters/08_uncertainty.tex",
+      "bytes": 6236,
+      "sha256": "f1fb749996487414d049a25e419f3e4988414a766eb2e4e3eadaf6b6b39ef775"
+    },
+    {
+      "path": "docs/chapters/09_agent.tex",
+      "bytes": 6273,
+      "sha256": "f688ca400c5e10738351f99f03b91f1a42914e1ac7749746260441a9354066a5"
+    },
+    {
+      "path": "docs/chapters/10_feedback.tex",
+      "bytes": 5637,
+      "sha256": "b93ce8655b5117ed5288b457e9534c7c902d2303c49784217ec40f4e09792419"
+    },
+    {
+      "path": "docs/chapters/11_visualization.tex",
+      "bytes": 5523,
+      "sha256": "416ebec037761b2789f7836976500fd76c5af2e86f6a0a03f7d0c796059a0257"
+    },
+    {
+      "path": "docs/chapters/12_implementation.tex",
+      "bytes": 5429,
+      "sha256": "b61d7f87c4199b364eec00b6a0070b1f0b769e440eb63cf2f89319c976e93aab"
+    },
+    {
+      "path": "docs/chapters/appendix_capabilities.tex",
+      "bytes": 4282,
+      "sha256": "71ada503e749d5f516fe9a53de2178bde49710dc22fa1bacdd0c6597bfe808c0"
+    },
+    {
+      "path": "docs/chapters/appendix_usage.tex",
+      "bytes": 4134,
+      "sha256": "692d7bcc9147fd0de81e710477b42740342c29bb4276d763d8aa1be277b8d59c"
+    },
+    {
+      "path": "docs/chapters/appendix_validation.tex",
+      "bytes": 6670,
+      "sha256": "bb2f4bc02a133b3c463e972bd3776204e0003f247a22a31e8236aea48425ed31"
+    },
+    {
+      "path": "docs/figures/density_sections.pdf",
+      "bytes": 22822,
+      "sha256": "a45d91bcf16973619be8b7255f26fa676717a0c3322ff9ee5f82018c8a32de97"
+    },
+    {
+      "path": "docs/figures/fen4_density_sections.pdf",
+      "bytes": 19831,
+      "sha256": "2463e3c7717091bf32cd2168df22953cad87c962bda957b76242a31892265bb7"
+    },
+    {
+      "path": "docs/figures/fen4_refinement_diagnostics.pdf",
+      "bytes": 31132,
+      "sha256": "e779346ce627aa7a50e53f8398544f4a2894ae5250908d6665226ce50598ab82"
+    },
+    {
+      "path": "docs/figures/fen4_structure_ellipsoids.pdf",
+      "bytes": 28227,
+      "sha256": "0c6732ed0e0cfff0ff1567dbdadddbfb5c5d468d2fffb6a284c89576c552ebaf"
+    },
+    {
+      "path": "docs/figures/parameter_correlation.pdf",
+      "bytes": 16373,
+      "sha256": "f01b5cdcfa0821cecda9ac9a6bb639975a9568fbcba4ad7ba27c981f4ded0b5e"
+    },
+    {
+      "path": "docs/figures/refinement_diagnostics.pdf",
+      "bytes": 146611,
+      "sha256": "3009f93fdb45164cf85714ee690d1394b629d81c3e5b09a9d37112b616723ba3"
+    },
+    {
+      "path": "docs/figures/structure_ellipsoids.pdf",
+      "bytes": 41071,
+      "sha256": "b13f8473cffa5fc909e6ddee427ad63123693e4a6a054988bd47e87c62d255d5"
+    },
+    {
+      "path": "docs/references.tex",
+      "bytes": 3883,
+      "sha256": "3297e7b908a6f3ffa6c13ca80521684b367b6373e93231f891522e694afcc928"
+    },
+    {
+      "path": "docs/report.pdf",
+      "bytes": 774996,
+      "sha256": "e269525674e01374016a708d733af22d0831879017024461e84f97a591617cfe"
+    },
+    {
+      "path": "docs/report.tex",
+      "bytes": 7957,
+      "sha256": "e4c96386a2bdbe569379ca1f22058653bee8c68041944968fafdf2047675b238"
+    },
+    {
+      "path": "examples/PROVENANCE.json",
+      "bytes": 466,
+      "sha256": "e7824341170eed25d6badc5ad7ae4c4f1bae42b64a2b8e71c34b706ab288fb06"
+    },
+    {
+      "path": "examples/demo_reflections.hkl",
+      "bytes": 146751,
+      "sha256": "c13507f9ba514ea420a51bdfb554ea989db6acc3655cb7c827c0567245a1aa3c"
+    },
+    {
+      "path": "examples/demo_reflections.json",
+      "bytes": 436087,
+      "sha256": "a4c57b7c4dfadd49a2bdd6d227fbb42e98b5e864960d69c0c3cd755f4db45249"
+    },
+    {
+      "path": "examples/demo_start.cif",
+      "bytes": 2079,
+      "sha256": "1a75237e39341c27429fc92ac4350cdaad26bb1eff2d3d32ec84b3b645c2e416"
+    },
+    {
+      "path": "examples/demo_start.json",
+      "bytes": 4440,
+      "sha256": "687b1a75ace04c76b2472cc8272b4ba3fa8e65fad7a57b9b231c005fddfce2ce"
+    },
+    {
+      "path": "examples/demo_truth.json",
+      "bytes": 4612,
+      "sha256": "21a565ca7ebf69d7fc96dcbb2566e6b53868f88a4c090a778b4bd83447b8e065"
+    },
+    {
+      "path": "examples/generate_examples.py",
+      "bytes": 3638,
+      "sha256": "413d08dd675dab8c4e5ba66e29aa9d4851a9b5ea8360bb2da95748413be849e7"
+    },
+    {
+      "path": "examples/refine_job.json",
+      "bytes": 207,
+      "sha256": "42e4ad4472c7e573cfc595223bd0b8a59550255a62644bd6752b3f6b5b8b48e2"
+    },
+    {
+      "path": "pyproject.toml",
+      "bytes": 977,
+      "sha256": "2c057f45533ff8e82df4bca6f0c7dc65cefe6cae3da711a2d8b7ed553ccdeb18"
+    },
+    {
+      "path": "shelx_instruction_matrix.json",
+      "bytes": 38968,
+      "sha256": "ab23e28cf8179742280c3091d58e8d7d4b29cf55cd061cbd76359e235c099703"
+    },
+    {
+      "path": "src/ariadne_xtal/__init__.py",
+      "bytes": 470,
+      "sha256": "e0030baa4858ea0cf00adf80488dedc8714eedf22a215cd838f2ac795eb5781b"
+    },
+    {
+      "path": "src/ariadne_xtal/__main__.py",
+      "bytes": 48,
+      "sha256": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d"
+    },
+    {
+      "path": "src/ariadne_xtal/absolute.py",
+      "bytes": 3704,
+      "sha256": "e92e20955a9796c2122b052ddb248172ff6bd6c3222e8bec70cd919dff04bd91"
+    },
+    {
+      "path": "src/ariadne_xtal/agent.py",
+      "bytes": 14720,
+      "sha256": "1a5e452b1c96e4a6a967b27ca36457f942f6b887a6e4ea80987bc923e7348d34"
+    },
+    {
+      "path": "src/ariadne_xtal/capabilities.py",
+      "bytes": 3046,
+      "sha256": "aeb361865111ed33d16134211d1a619115b92584db308f958b10debff3f4721e"
+    },
+    {
+      "path": "src/ariadne_xtal/cli.py",
+      "bytes": 3794,
+      "sha256": "4fe70be9f1b68e48d6274ada0899c3764b8a4d64b8ceb518fa7364b19b49bc21"
+    },
+    {
+      "path": "src/ariadne_xtal/compat.py",
+      "bytes": 11026,
+      "sha256": "21a39e0762d21145181433f1cab054adf4ac0f77049ae0cbf7b6ffd337d1510f"
+    },
+    {
+      "path": "src/ariadne_xtal/feedback.py",
+      "bytes": 5335,
+      "sha256": "bb7c21e408a075418901c0d09e7b03a52eee862a216777aeeb84b3254a55e27a"
+    },
+    {
+      "path": "src/ariadne_xtal/io.py",
+      "bytes": 19626,
+      "sha256": "b458a3beb72a04c7cb8cb1e3e9060441ef78a22221a5455217e021bac68446ca"
+    },
+    {
+      "path": "src/ariadne_xtal/maps.py",
+      "bytes": 9857,
+      "sha256": "75d52b5c2ec5302eb4b9a7ee6969393b8d3bf3e1dd3253099f45bcd8680303ea"
+    },
+    {
+      "path": "src/ariadne_xtal/mcp_server.py",
+      "bytes": 1912,
+      "sha256": "237cb2de24fbc084b78ccfd5c3f0475a6cd42f4481407a6835fe7ee7a039e843"
+    },
+    {
+      "path": "src/ariadne_xtal/model.py",
+      "bytes": 13761,
+      "sha256": "71486c3515af683bd75948ec60ad71b2a27e7fa7a669b6786e402c09f0fbee03"
+    },
+    {
+      "path": "src/ariadne_xtal/phasing.py",
+      "bytes": 9232,
+      "sha256": "9a2fb8f8156790427a2754082403ab8cd9e459f376380ace6a5a8918ff63607e"
+    },
+    {
+      "path": "src/ariadne_xtal/refinement.py",
+      "bytes": 40734,
+      "sha256": "c6c31c2acdfb5a0dd705f98c11a03dbcf397c76c20ab49e87e6e2a3d034f3fbb"
+    },
+    {
+      "path": "src/ariadne_xtal/restraints.py",
+      "bytes": 11209,
+      "sha256": "5734ef90824c5703752a964ba1b41d01fef49cee5e1678e57783ec8bf63a31f2"
+    },
+    {
+      "path": "src/ariadne_xtal/scattering.py",
+      "bytes": 7333,
+      "sha256": "b021d5a9236c75c07a80eeb6a84ac88454ffa78f79b289fd8f8f96fbaf6fd983"
+    },
+    {
+      "path": "src/ariadne_xtal/shelx.py",
+      "bytes": 19782,
+      "sha256": "38c76b5b9812133959485aa69248931bcade3486f6778a843be06bfb65a5bf90"
+    },
+    {
+      "path": "src/ariadne_xtal/symmetry.py",
+      "bytes": 9392,
+      "sha256": "b33452cd8d00e38ca355c1d9f1d3b6e10e0409d9a7e6fe5dd027a157d75f9332"
+    },
+    {
+      "path": "src/ariadne_xtal/validation.py",
+      "bytes": 3834,
+      "sha256": "db5f38c78752cace0cd0c1a563a0779760fba3dd8d835d4d3faac28fb541c8a1"
+    },
+    {
+      "path": "src/ariadne_xtal/visualization.py",
+      "bytes": 29665,
+      "sha256": "451fd8ac83877536b1bef1510575ac479e6008867c2da5c105350f38c56dc28c"
+    },
+    {
+      "path": "tests/test_agent.py",
+      "bytes": 16438,
+      "sha256": "bd1117575a1d1399e05da89eed6491487d3bd299369f6da9f1f8df85dea56dc3"
+    },
+    {
+      "path": "tests/test_core.py",
+      "bytes": 11127,
+      "sha256": "966ad53a9ded4e356f8bfea3b6103ebfc0757fd57b1e46380f6f875bab5de1c3"
+    },
+    {
+      "path": "tests/test_io.py",
+      "bytes": 13545,
+      "sha256": "e5f9d1a98c0c629f2fbd6b0325cfa6470e46f0cd96ec892b872ec7fa87d6e3e2"
+    },
+    {
+      "path": "tests/test_refinement.py",
+      "bytes": 16828,
+      "sha256": "20e33406db5c3c93d982809d5d23363d5737974b2061373cb80303d050beb368"
+    },
+    {
+      "path": "tests/test_visualization.py",
+      "bytes": 4700,
+      "sha256": "3b6c72c23880744e83c3fbdaad184b1811aa562137b5874491b861c8cec1f1c3"
+    },
+    {
+      "path": "tests/test_workflows_audit.py",
+      "bytes": 13762,
+      "sha256": "12e92c6d1da3823f7c54f2fc8b3438bf1fb04c91c80a7d9d71535ff0930bc1dc"
+    },
+    {
+      "path": "tools/check_release.py",
+      "bytes": 8848,
+      "sha256": "025d18fb62ee64bbe88cebab09bf4c53ec8fa3571d7026617bbcad1bce0df4b9"
+    },
+    {
+      "path": "tools/fetch_report_fonts.py",
+      "bytes": 1086,
+      "sha256": "1e4da476ccd03f4af757e6cab692872fbcd251fc7741f058cc4350be66381fac"
+    },
+    {
+      "path": "validation/packaging_report.json",
+      "bytes": 1512,
+      "sha256": "9a7789c72046d1b7dd78b593ef6c3d0fee9b9de8d40144f80883598467e1e717"
+    },
+    {
+      "path": "validation/phasing_recovery/candidate_1.json",
+      "bytes": 1686,
+      "sha256": "33b868af5c89b6351f5b70d880f5b5116f8a6b28e32542dce088dbfc726aca94"
+    },
+    {
+      "path": "validation/phasing_recovery/candidate_2.json",
+      "bytes": 1689,
+      "sha256": "013d99291d4e6e5a48e5da06df68d1d1084be06066e5adab4481fc3668567eb5"
+    },
+    {
+      "path": "validation/phasing_recovery/candidate_3.json",
+      "bytes": 1688,
+      "sha256": "b58d4f0fc70ab9a9decee3442f9f4b88cb4d82573d82f7e486c9251251cb6d92"
+    },
+    {
+      "path": "validation/phasing_recovery/candidate_4.json",
+      "bytes": 1688,
+      "sha256": "39b5faa1cf935fc5d91747a339f3aea005fafeac0b99b60387ad3114e5a2bb65"
+    },
+    {
+      "path": "validation/phasing_recovery/refined_1.cif",
+      "bytes": 986,
+      "sha256": "62d5b63a73147d205d27541232b5519853f0269385b0880df456748362b23a21"
+    },
+    {
+      "path": "validation/phasing_recovery/refined_2.cif",
+      "bytes": 990,
+      "sha256": "102d8ab0135e015248f51ba8e99a8b80ae89e10216951bb822068ae02758fb24"
+    },
+    {
+      "path": "validation/phasing_recovery/refined_3.cif",
+      "bytes": 995,
+      "sha256": "dfd72e66861dc65497a9f499067c17dd1cd8a0b7a8909389a3a21ed889813c7c"
+    },
+    {
+      "path": "validation/phasing_recovery/refined_4.cif",
+      "bytes": 990,
+      "sha256": "2417eca89076d6433c40ec5cd6d39fb76a06d3c5dec6c13f3fd65912a15f219e"
+    },
+    {
+      "path": "validation/phasing_recovery/result.json",
+      "bytes": 635290,
+      "sha256": "2426e60b697bf7319c567f5a56df795939c4c91f8ee54ad90d6b9b533b8c867c"
+    },
+    {
+      "path": "validation/phasing_recovery/synthetic_reflections.json",
+      "bytes": 332019,
+      "sha256": "23ff5e9c621caf7ddeb282f837f9cf87538bbe8ebf38bb1a0ff912548d8b87f4"
+    },
+    {
+      "path": "validation/phasing_recovery/truth.json",
+      "bytes": 1532,
+      "sha256": "bc6fadf9faacc3b15f17b76579784fa8ec8fb463a838e47fdbdfdce49212f01e"
+    },
+    {
+      "path": "validation/public_data/2242624.cif",
+      "bytes": 13833,
+      "sha256": "4fadc4d14afa29b9081d0991a69c557a6bccf5cfc0098fa82e873154c242cbcc"
+    },
+    {
+      "path": "validation/public_data/2242624.hkl",
+      "bytes": 3328,
+      "sha256": "317607fe31087802a10faa271a4466019370b554902f12505afc84757a014121"
+    },
+    {
+      "path": "validation/public_data/4003024.cif",
+      "bytes": 36221,
+      "sha256": "4d275080e6064c946f08d19b0f1fa21c630a82e4c8907f65ba6aed0097aaeb3b"
+    },
+    {
+      "path": "validation/public_data/README.md",
+      "bytes": 1899,
+      "sha256": "66d6bb4d3fbbd21b00748d422260ddfe47fd025ed995d46fc4da20195dfddec5"
+    },
+    {
+      "path": "validation/real_fen4/figures/density_sections.pdf",
+      "bytes": 19831,
+      "sha256": "2463e3c7717091bf32cd2168df22953cad87c962bda957b76242a31892265bb7"
+    },
+    {
+      "path": "validation/real_fen4/figures/density_sections.svg",
+      "bytes": 31825,
+      "sha256": "91d18ed3259cb99bd934a84cea686cfc6751a0a594b8aa87cfce7c877258237f"
+    },
+    {
+      "path": "validation/real_fen4/figures/refinement_diagnostics.pdf",
+      "bytes": 31132,
+      "sha256": "e779346ce627aa7a50e53f8398544f4a2894ae5250908d6665226ce50598ab82"
+    },
+    {
+      "path": "validation/real_fen4/figures/refinement_diagnostics.svg",
+      "bytes": 75324,
+      "sha256": "53dcee66260fb0171b772bfad142ecfec034d531f82aa505cb22346c6e997354"
+    },
+    {
+      "path": "validation/real_fen4/figures/structure_ellipsoids.pdf",
+      "bytes": 28227,
+      "sha256": "0c6732ed0e0cfff0ff1567dbdadddbfb5c5d468d2fffb6a284c89576c552ebaf"
+    },
+    {
+      "path": "validation/real_fen4/figures/structure_ellipsoids.svg",
+      "bytes": 204176,
+      "sha256": "9585793cf27d2f2ba3db619b82c690a78d9f1a48e15ea1e0596cda15c8c3aa81"
+    },
+    {
+      "path": "validation/real_fen4/input_model.json",
+      "bytes": 1276,
+      "sha256": "362c5800c65e0a5b82773430e70cc0fe253e2e2c1c1462c0148771cecb42cd4a"
+    },
+    {
+      "path": "validation/real_fen4/measured_reflections.json",
+      "bytes": 4424,
+      "sha256": "88cb053168dd196b3bef44ef336daae17ad152fc0c533410ee208c18b310b175"
+    },
+    {
+      "path": "validation/real_fen4/refined.cif",
+      "bytes": 976,
+      "sha256": "ee7ea8803e97fe3bf3b17e7ed555cd36bc5b6c1c528b4452651fb411c6c9339e"
+    },
+    {
+      "path": "validation/real_fen4/result.json",
+      "bytes": 19595,
+      "sha256": "d7ac94bc16d29469d79d6fb60cf49a1173448fd77b1f6ac4e681a974f244e26d"
+    },
+    {
+      "path": "validation/run_phasing_recovery.py",
+      "bytes": 5315,
+      "sha256": "cb8239589df72caa2b2e59c754af10786a4020bb6f67f0e53da7af7be0a171d4"
+    },
+    {
+      "path": "validation/run_real_fen4.py",
+      "bytes": 5813,
+      "sha256": "207d3e91e21b8177d10e5d040b9d2e7f04f06f8b645b2d7068edf775bd87cd9a"
+    }
+  ],
+  "current_verification": {
+    "date": "2026-10-31",
+    "full_suite_passed": 138,
+    "cross_package_checks_passed": 5,
+    "mcp_stdio_test_enabled": true,
+    "official_shelxl_binary_executed": true,
+    "official_shelxt_binary_executed": true,
+    "report": "../reports/current_validation/README.zh-CN.md",
+    "fix": "SHELXL DISP export includes required mu field; zero explicitly disables absorption in this model"
+  }
+}

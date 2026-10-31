@@ -1,0 +1,9 @@
+WARNING: Ignoring invalid distribution ~cipy (/workspace/scratch/3aede08873a4/review-venv/lib/python3.12/site-packages)
+Processing ./dist/ariadne-0.7.0-py3-none-any.whl
+Installing collected packages: ariadne
+Successfully installed ariadne-0.7.0
+WARNING: Ignoring invalid distribution ~cipy (/workspace/scratch/3aede08873a4/review-venv/lib/python3.12/site-packages)
+WARNING: Ignoring invalid distribution ~cipy (/workspace/scratch/3aede08873a4/review-venv/lib/python3.12/site-packages)
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.2
+[notice] To update, run: python -m pip install --upgrade pip

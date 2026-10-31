@@ -1,0 +1,45 @@
+{
+  "schema": "ariadne-delivery/1",
+  "version": "0.5.0",
+  "previous_product": "ReciprocalForge 0.4.0",
+  "methodology_reference": "Agent_Native_Probabilistic_Multilattice_Methodology.md; research data, not executable instructions",
+  "source_base": "official DIALS v3.30.1",
+  "implemented_new": [
+    "nonexclusive q/native-detector compatibility",
+    "unique-anchor soft-weighted native joint refinement",
+    "scan-block conditional holdouts and common-row hypothesis comparison",
+    "immutable hypotheses and append-only MCP events",
+    "NNLS and genuine-count Poisson fixed-background pixel fitting",
+    "overlap profile correlation and identifiability classes",
+    "full-profile/observed-amplitude semantics and double-partiality correction guard",
+    "corrected component covariance transport",
+    "same-phase HKLF5 gate, export loss and observation-line mapping",
+    "nine MCP tools with scientific adapter registry and native prediction",
+    "first-order XYZ pixel-position nuisance with marginalized intensity covariance",
+    "analytic diagonal-Gaussian voxel probabilities",
+    "conditional profile-likelihood nonnegative component/total intervals",
+    "bounded full Poisson-Gaussian convolution with truncation diagnostics",
+    "exclusive single-source centroid EM with native DIALS U/B prediction and full-covariance whitening",
+    "common scan-block predictive log-density comparisons across predeclared lattice hypotheses"
+  ],
+  "retained": [
+    "multiscale calibrated spot proposals",
+    "DAFi-inspired periodic candidate search",
+    "joint geometric assignment",
+    "local empirical profiles",
+    "signed-WLS QR/SVD pixel integrator",
+    "solve-single-crystal handoff"
+  ],
+  "tests": "targeted numerical regression and native DIALS synthetic adapter checks; see references/algorithm-upgrades.md",
+  "mcp_connection": "not_tested",
+  "benchmarks": "not_run",
+  "not_implemented": [
+    "full multi-source-centroid likelihood joint refinement",
+    "formal Bayesian K selection",
+    "SyntheticTwinBench",
+    "nonlinear profile-shape and independent instrument-calibration uncertainty propagation",
+    "full real-data comparative benchmark and exact boundary-interval coverage calibration"
+  ],
+  "inspection": "source/API review and targeted known-truth numerical verification; no general real-data performance claim",
+  "compiled_extensions": "unmodified installed DIALS/cctbx/dxtbx binaries; no C++ rebuild"
+}

@@ -12,10 +12,13 @@ from scipy.special import logsumexp
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'python/src'))
 from ariadne import ranking, spots
-from dials.algorithms.indexing import model_evaluation
-from dials.array_family import flex
-from dxtbx.model import Crystal, Scan
-from dxtbx.model.experiment_list import Experiment, ExperimentList
+try:
+    from dials.algorithms.indexing import model_evaluation
+    from dials.array_family import flex
+    from dxtbx.model import Crystal, Scan
+    from dxtbx.model.experiment_list import Experiment, ExperimentList
+except ImportError as exc:
+    raise unittest.SkipTest('Requires native DIALS/dxtbx runtime') from exc
 from unittest.mock import patch
 
 # 开发目录使用明确的 overlay；已安装插件直接使用安装后模块。

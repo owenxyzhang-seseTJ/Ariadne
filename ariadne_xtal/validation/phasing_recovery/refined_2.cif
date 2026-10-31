@@ -1,0 +1,34 @@
+data_ariadne_xtal
+_cell_length_a 5.2
+_cell_length_b 5.7
+_cell_length_c 6.1
+_cell_angle_alpha 90
+_cell_angle_beta 90
+_cell_angle_gamma 90
+_space_group_name_H-M_alt 'P 1'
+_diffrn_radiation_wavelength 0.71073
+_audit_creation_method 'Ariadne-Xtal native structural export'
+
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_U_iso_or_equiv
+_atom_site_adp_type
+_ariadne_atom_site_refine_xyz
+_ariadne_atom_site_refine_u
+_ariadne_atom_site_refine_occupancy
+_ariadne_atom_site_f_prime
+_ariadne_atom_site_f_double_prime
+C1 C 0.03909428958787 0.440709028981409 0.717273284243935 1 0.012 Uiso 1 1 0 0 0
+C2 C 0.42709428958787 0.520709028981409 0.491273284243935 1 0.012 Uiso 1 1 0 0 0
+C3 C 0.15609428958787 0.0527090289814093 0.342273284243935 1 0.012 Uiso 1 1 0 0 0
+C4 C 0.68509428958787 0.909709028981409 0.947273284243935 1 0.012 Uiso 1 1 0 0 0

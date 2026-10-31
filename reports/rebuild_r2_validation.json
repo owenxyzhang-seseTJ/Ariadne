@@ -1,0 +1,84 @@
+{
+  "schema": "ariadne-first-principles-validation/1",
+  "revision": "deep-optimization-round2-20261029",
+  "comparison_baseline": "first-principles delivery of 2026-10-29",
+  "baseline_commit": "797ac22ffa9b81da2dd977e013bea8f114b49eb2",
+  "scope": "numerical",
+  "tests_run": 173,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 6,
+  "successful": true,
+  "elapsed_seconds": 1.7770615700000008,
+  "environment": {
+    "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "executable": "/opt/pyvenv/bin/python",
+    "version_evidence": {
+      "numpy": {
+        "distribution": "2.3.5",
+        "conda": null,
+        "resolved": "2.3.5"
+      },
+      "scipy": {
+        "distribution": "1.17.0",
+        "conda": null,
+        "resolved": "1.17.0"
+      },
+      "dials": {
+        "distribution": null,
+        "conda": null,
+        "resolved": null
+      },
+      "dxtbx": {
+        "distribution": null,
+        "conda": null,
+        "resolved": null
+      },
+      "cctbx-base": {
+        "distribution": null,
+        "conda": null,
+        "resolved": null
+      },
+      "mcp": {
+        "distribution": null,
+        "conda": null,
+        "resolved": null
+      }
+    },
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "dials": null,
+    "dxtbx": null,
+    "cctbx-base": null,
+    "mcp": null
+  },
+  "failure_details": [],
+  "skipped_details": [
+    {
+      "test": "test_cli_output_composite_exclusion_and_holdout_comparison (test_centroid_em.DialsAdapterTests.test_cli_output_composite_exclusion_and_holdout_comparison)",
+      "reason": "Requires native DIALS environment"
+    },
+    {
+      "test": "test_native_prediction_whitening_joint_refinement (test_centroid_em.DialsAdapterTests.test_native_prediction_whitening_joint_refinement)",
+      "reason": "Requires native DIALS environment"
+    },
+    {
+      "test": "test_analytic_jacobian_matches_native_central_differences (test_geometry_round2.NativeDerivativeTests.test_analytic_jacobian_matches_native_central_differences)",
+      "reason": "Requires native DIALS environment"
+    },
+    {
+      "test": "test_nontriclinic_parameter_blocks_and_multiple_panels (test_geometry_round2.NativeDerivativeTests.test_nontriclinic_parameter_blocks_and_multiple_panels)",
+      "reason": "Requires native DIALS environment"
+    },
+    {
+      "test": "test_prediction_cache_is_defensive_and_tracks_instrument_changes (test_geometry_round2.NativeDerivativeTests.test_prediction_cache_is_defensive_and_tracks_instrument_changes)",
+      "reason": "Requires native DIALS environment"
+    },
+    {
+      "test": "test_native_raw_frames_gaussian_flux_and_empirical_derivative_provenance (test_profiles_round2.NativeProfilePrepareTests.test_native_raw_frames_gaussian_flux_and_empirical_derivative_provenance)",
+      "reason": "Requires native DIALS/dxtbx raw-image readers"
+    }
+  ],
+  "data_scope": "synthetic numerical and native-interface regressions; no experimental raw-frame accuracy claim"
+}

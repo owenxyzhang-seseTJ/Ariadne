@@ -1,0 +1,29 @@
+{
+  "fixture": "synthetic repeated HKL with explicit index transforms",
+  "rows": 6000,
+  "unique_hkl": 120,
+  "candidates": 4,
+  "repeats": 3,
+  "numerical_equivalence": "exact equality of every returned intensity",
+  "baseline_commit": "d2da06166f8ec34f89472c47ee3d7a1f5889a8c2",
+  "before": {
+    "median_seconds": 0.3468947919900529,
+    "seconds": [
+      0.3468947919900529,
+      0.34402745799161494,
+      0.34709012499661185
+    ],
+    "peak_python_bytes": 2184740
+  },
+  "after": {
+    "median_seconds": 0.09149649998289533,
+    "seconds": [
+      0.09258066702750511,
+      0.08850075001828372,
+      0.09149649998289533
+    ],
+    "peak_python_bytes": 1938628
+  },
+  "speedup": 3.791344937291619,
+  "scope": "repeated-HKL prediction only; no general refinement or experimental speed claim"
+}

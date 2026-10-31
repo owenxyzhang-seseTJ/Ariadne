@@ -1,0 +1,43 @@
+........ss....................................................sssssss.. [ 21%]
+........................................................................ [ 42%]
+......s.......................................................................... [ 67%]
+........................................................................ [ 88%]
+.....................................                                    [100%]
+=============================== warnings summary ===============================
+../review-venv/lib/python3.12/site-packages/numpy/ma/core.py:3129
+  /workspace/scratch/3aede08873a4/review-venv/lib/python3.12/site-packages/numpy/ma/core.py:3129: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.
+  As an alternative, you can create a new view using np.reshape (with copy=False if needed).
+    self._mask.shape = self.shape
+
+tests/test_composite_scaling.py: 6 warnings
+tests/test_numeric_optimization.py: 6 warnings
+tests/test_variable_projection.py: 30 warnings
+  /workspace/scratch/3aede08873a4/Ariadne/tests/test_composite_scaling.py:45: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.
+  As an alternative, you can create a new view using np.reshape (with copy=False if needed).
+    b['y'] += rng.multivariate_normal(np.zeros(2), b['covariance']) * .15
+
+tests/test_profiles_round2.py::StreamingProfileTests::test_streamed_pooled_and_shrunk_statistics_match_full_stack
+tests/test_profiles_round2.py::StreamingProfileTests::test_streamed_pooled_and_shrunk_statistics_match_full_stack
+tests/test_profiles_round2.py::StreamingProfileTests::test_streamed_pooled_and_shrunk_statistics_match_full_stack
+tests/test_profiles_round2.py::StreamingProfileTests::test_streamed_pooled_and_shrunk_statistics_match_full_stack
+tests/test_profiles_round2.py::StreamingProfileTests::test_streamed_pooled_and_shrunk_statistics_match_full_stack
+tests/test_profiles_round2.py::StreamingProfileTests::test_streamed_pooled_and_shrunk_statistics_match_full_stack
+tests/test_profiles_round2.py::StreamingProfileTests::test_streamed_pooled_and_shrunk_statistics_match_full_stack
+tests/test_profiles_round2.py::StreamingProfileTests::test_streamed_pooled_and_shrunk_statistics_match_full_stack
+tests/test_profiles_round2.py::StreamingProfileTests::test_streamed_pooled_and_shrunk_statistics_match_full_stack
+  /workspace/scratch/3aede08873a4/review-venv/lib/python3.12/site-packages/numpy/lib/format.py:859: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.
+  As an alternative, you can create a new view using np.reshape (with copy=False if needed).
+    array.shape = shape
+
+tests/test_scaling_principles.py::ScalingPrincipleTests::test_noisy_fit_reaches_strict_stationarity_without_positive_clipping
+tests/test_scaling_principles.py::ScalingPrincipleTests::test_noisy_fit_reaches_strict_stationarity_without_positive_clipping
+tests/test_scaling_principles.py::ScalingPrincipleTests::test_noisy_fit_reaches_strict_stationarity_without_positive_clipping
+tests/test_scaling_principles.py::ScalingPrincipleTests::test_noisy_fit_reaches_strict_stationarity_without_positive_clipping
+tests/test_scaling_principles.py::ScalingPrincipleTests::test_noisy_fit_reaches_strict_stationarity_without_positive_clipping
+tests/test_scaling_principles.py::ScalingPrincipleTests::test_noisy_fit_reaches_strict_stationarity_without_positive_clipping
+  /workspace/scratch/3aede08873a4/Ariadne/tests/test_scaling_principles.py:231: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.
+  As an alternative, you can create a new view using np.reshape (with copy=False if needed).
+    block['y'] += rng.multivariate_normal(np.zeros(2), block['covariance']) * .3
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+323 passed, 11 skipped, 58 warnings, 136 subtests passed in 9.35s

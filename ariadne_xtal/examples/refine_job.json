@@ -1,0 +1,10 @@
+{
+  "action": "refine",
+  "structure": "examples/demo_start.json",
+  "hkl": "examples/demo_reflections.json",
+  "graphics": true,
+  "options": {
+    "max_nfev": 150,
+    "covariance_scale": "absolute"
+  }
+}

@@ -1,0 +1,149 @@
+% Compile from this directory: xelatex -interaction=nonstopmode report.tex (twice).
+% Run ../tools/fetch_report_fonts.py if Noto Serif CJK SC is not installed.
+\documentclass[11pt,a4paper,oneside,openany]{book}
+\usepackage[margin=24mm,headheight=15pt,footskip=12mm]{geometry}
+\usepackage{fontspec}
+\IfFontExistsTF{Noto Serif CJK SC}{
+  \setmainfont{Noto Serif CJK SC}
+  \setsansfont{Noto Serif CJK SC}
+}{
+  \setmainfont[Path=fonts/,BoldFont=NotoSerifCJKsc-Bold.otf]{NotoSerifCJKsc-Regular.otf}
+  \setsansfont[Path=fonts/,BoldFont=NotoSerifCJKsc-Bold.otf]{NotoSerifCJKsc-Regular.otf}
+}
+\setmonofont{Latin Modern Mono}[Scale=0.9]
+\newfontfamily\latinfont{Latin Modern Roman}
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip=0pt plus 0.08em
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{graphicx,booktabs,longtable,array,tabularx,multirow}
+\usepackage{xcolor,enumitem,fancyhdr,titlesec}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usepackage[unicode,colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue!35!black]{hyperref}
+\usepackage{listings}
+\definecolor{wine}{HTML}{763A42}
+\definecolor{ochre}{HTML}{A47B3B}
+\definecolor{papergray}{HTML}{F4F3EF}
+\definecolor{ink}{HTML}{25272B}
+\hypersetup{pdftitle={单晶结构求解与精修的数学基础：面向智能体的 Ariadne-Xtal 计算体系},pdfauthor={Ariadne-Xtal technical documentation},pdfsubject={Diffraction physics, phase retrieval, constrained refinement and auditable automation}}
+\titleformat{\chapter}[display]{\Large\bfseries\color{ink}}{\large 第\thechapter 章}{8pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-5pt}{22pt}
+\titleformat{\section}{\large\bfseries}{\thesection}{0.6em}{}
+\titlespacing*{\section}{0pt}{12pt plus 3pt minus 2pt}{6pt}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\renewcommand{\contentsname}{目录}
+\renewcommand{\bibname}{参考文献}
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+\renewcommand{\appendixname}{附录}
+\setcounter{tocdepth}{1}
+\setcounter{secnumdepth}{2}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{3pt}
+\linespread{1.12}
+\setlist{itemsep=3pt,topsep=6pt,leftmargin=2em}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small 单晶结构求解与精修的数学基础}
+\fancyhead[R]{\small Ariadne-Xtal}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\newcommand{\vct}[1]{\bm{#1}}
+\newcommand{\mat}[1]{\mathbf{#1}}
+\newcommand{\iu}{\mathrm{i}}
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\Real}{\operatorname{Re}}
+\newcommand{\Imag}{\operatorname{Im}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\angstrom}{\text{\AA}}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newenvironment{principle}{\begin{quote}\small\color{ink}}{\end{quote}}
+\lstset{basicstyle=\small\ttfamily,breaklines=true,frame=single,rulecolor=\color{black!15},backgroundcolor=\color{papergray},columns=fullflexible,keepspaces=true,showstringspaces=false}
+\renewcommand{\topfraction}{0.88}
+\renewcommand{\bottomfraction}{0.80}
+\renewcommand{\textfraction}{0.10}
+\renewcommand{\floatpagefraction}{0.80}
+\allowdisplaybreaks
+\emergencystretch=3em
+\begin{document}
+\setlength{\abovedisplayskip}{7pt plus 2pt minus 2pt}
+\setlength{\belowdisplayskip}{7pt plus 2pt minus 2pt}
+\setlength{\abovedisplayshortskip}{4pt plus 2pt}
+\setlength{\belowdisplayshortskip}{4pt plus 2pt minus 2pt}
+\frontmatter
+\begin{titlepage}
+\vspace*{18mm}
+\noindent{\large\color{wine} 技术报告}\par
+\vspace{16mm}
+\noindent{\Huge\bfseries 单晶结构求解与精修\\[7pt]的数学基础}\par
+\vspace{12mm}
+\noindent{\Large 面向智能体的 Ariadne-Xtal 计算体系}\par
+\vspace{18mm}
+\noindent\rule{\textwidth}{0.7pt}\par
+\vspace{5mm}
+\noindent{\large 散射物理\quad 相位恢复\quad 约束估计\quad 可追溯计算}\par
+\vfill
+\noindent 配套交付：独立 Python 源码、验证用例、交互绘图与本报告的 LaTeX 源文件\par
+\vspace{8mm}
+\noindent 2026 年 10 月 30 日\par
+\end{titlepage}
+\chapter*{内容提要}
+\addcontentsline{toc}{chapter}{内容提要}
+单晶衍射结构分析把强度观测转化为周期性电子密度，再以原子模型解释电子密度。其核心是带有对称性、离散元素类型和连续结构参数的统计反问题。相位缺失使结构求解具有非唯一性；尺度、占有率、热运动和孪晶分数之间的相关性，使结构精修同时受到可辨识性与数据质量的限制。自动化系统必须把这些数学性质作为执行规则的一部分。
+
+本报告从电子的弹性散射、晶格求和和傅里叶变换出发，建立结构因子与衍射强度的正向模型；继而推导 Patterson 函数、直接法的基本关系、实空间与倒易空间交替迭代、空间群的相位条件以及加权最小二乘精修。约束、限制、特殊位置、极性原点、位移张量、无序与孪晶均在统一的参数估计框架下讨论。最后给出面向智能体的运行模型、与衍射积分相衔接的交叉拟合反馈方法，以及具有物理标度的电子密度和概率椭球绘图方法。
+
+配套软件 Ariadne-Xtal 将散射、精修、地图和绘图计算实现为可单独调用的模块，并提供 JSON、命令行和 MCP 接口。其原生求解器采用已知组成下的 $P1$ 多起点相位恢复；原生精修器覆盖明确列出的参数与约束模型。完整 SHELXT/SHELXL 指令行为通过独立安装的官方程序接口继续使用。两条计算路径均记录输入与输出，不把互操作接口计作算法重实现。功能边界、数值验证和复现实验集中列于附录，正文按数学与物理逻辑展开。
+
+\begin{principle}
+阅读前提：线性代数、多元微积分和初等概率论。长度采用 $\angstrom$，位移协方差采用 $\angstrom^2$；倒易基矢不包含 $2\pi$。全部公式遵循统一的傅里叶正负号约定。
+\end{principle}
+{\small\tableofcontents}
+\chapter*{主要符号}
+\addcontentsline{toc}{chapter}{主要符号}
+\begin{longtable}{p{28mm}p{108mm}}
+\toprule 符号 & 定义与单位\\\midrule
+$\mat A$ & 以直接基矢为列的晶胞矩阵，$\angstrom$\\
+$\mat B=\mat A^{-\mathsf T}$ & 倒易基矢矩阵，$\angstrom^{-1}$\\
+$\vct x,\vct r$ & 分数坐标与笛卡尔坐标，$\vct r=\mat A\vct x$\\
+$\vct h=(h,k,l)^{\mathsf T}$ & Miller 指数列向量\\
+$\vct g=\mat B\vct h$ & 不含 $2\pi$ 的倒易矢量\\
+$s=\sin\theta/\lambda$ & 散射变量，$2s=\lVert\vct g\rVert$\\
+$f_j,F_{\vct h}$ & 原子散射因子与晶胞结构因子，电子数单位\\
+$\rho(\vct r)$ & 电子数密度，$e\,\angstrom^{-3}$\\
+$o_j$ & 原子物理占有率；完整占据的位置为 1\\
+$\mat U_j$ & 笛卡尔位移协方差张量，$\angstrom^2$\\
+$y_{\vct h},\sigma_{\vct h}$ & 观测强度及其标准不确定度；允许 $y_{\vct h}<0$\\
+$k,\alpha_d$ & 强度尺度与第 $d$ 个孪晶畴的体积分数\\
+$\vct p,\vct z$ & 物理参数与满足约束的独立优化变量\\
+$\mat J,\mat C$ & 残差 Jacobian 与参数协方差\\
+$G,H_j$ & 空间群操作集合与位置 $j$ 的稳定子群\\
+\bottomrule
+\end{longtable}
+\mainmatter
+\input{chapters/01_scattering}
+\input{chapters/02_geometry_symmetry}
+\input{chapters/03_statistics}
+\input{chapters/04_phasing}
+\input{chapters/05_refinement}
+\input{chapters/06_constraints}
+\input{chapters/07_disorder_twins}
+\input{chapters/08_uncertainty}
+\input{chapters/09_agent}
+\input{chapters/10_feedback}
+\input{chapters/11_visualization}
+\input{chapters/12_implementation}
+\appendix
+\titleformat{\chapter}[display]{\Large\bfseries\color{ink}}{\large 附录\thechapter}{8pt}{\Huge}
+\input{chapters/appendix_capabilities}
+\input{chapters/appendix_validation}
+\input{chapters/appendix_usage}
+\backmatter
+\input{references}
+\end{document}
