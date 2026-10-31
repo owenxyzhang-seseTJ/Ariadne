@@ -47,11 +47,138 @@ def solve_joint(data, variance, profiles, valid, background, rcond, *, chunk_row
     P, B = profiles[valid], background[valid]
     if len(y) <= P.shape[1] + B.shape[1] + 2:
         raise ValueError('Too few valid pixels for joint signal/background fit')
+    if B.shape[1] == 0:
+        fast = _solve_known_background(y, v, P, profiles, rcond)
+        if fast is not None:
+            return fast
     weight = 1 / np.sqrt(v)
     Pw, Bw, yw = P * weight[:, None], B * weight[:, None], y * weight
     # QR 消去背景，避免构造像素数平方大小的投影矩阵。
     Q, R = qr(Bw, mode='economic')
     return _solve_joint_from_qr(y, v, Pw, yw, profiles, valid, background, rcond, Q, R)
+
+
+def _solve_known_background(y, v, weighted_profiles, profiles, rcond):
+    """Small well-conditioned fixed-background fits without an O(NK) SVD.
+
+    The normal matrix is formed in column-equilibrated space. Its eigenvalues
+    reproduce the singular-value rank test, and Cholesky is accepted only when
+    that test has full rank. The original QR/SVD path remains the fallback for
+    near-collinear components and for every fitted nuisance background.
+    """
+    components = weighted_profiles.shape[1]
+    if components > 32:
+        return None
+    try:
+        from ariadne._native import known_background_wls
+    except ImportError:
+        known_background_wls = None
+    if known_background_wls is not None:
+        native = known_background_wls(y, v, weighted_profiles, rcond)
+        if native is None:
+            return None
+        intensities, covariance, _filtered_fitted, chi2, singular, upper, modes_y, scales, constant = native
+        fitted = profiles @ intensities
+        dof = len(y) - components
+        return {
+            'intensities_internal': intensities,
+            'covariance_identifiable_subspace': covariance,
+            'nullspace': np.empty((0, components)),
+            'column_scales': scales,
+            'rank': components,
+            'singular_values': singular,
+            'background_coefficients': np.empty(0),
+            'fitted': fitted,
+            'chi2': float(chi2),
+            'dof': dof,
+            'reduced_chi2': float(chi2) / dof if dof > 0 else None,
+            'information_modes': {
+                'schema': 'ariadne-information-modes/1',
+                'y': modes_y.tolist(),
+                'design': (upper * scales[None, :]).tolist(),
+                'covariance': np.eye(components).tolist(),
+                'rank': components,
+                'variance_model': 'fixed',
+                'valid_pixels': len(y),
+                'nuisance_rank': 0,
+                'rank_cutoff': float(singular[0] * rcond),
+                'discarded_singular_values': [],
+                'discarded_normalized_operator_norm': 0.,
+                'pixel_chi2_constant': float(constant),
+                'likelihood_scope': (
+                    'fixed-weight Gaussian quadratic after eliminating known background; '
+                    'conditional on profiles, geometry and supplied variance'),
+                'intensity_semantics': (
+                    'design acts on original ordered full-profile contributor amplitudes'),
+                'interpretation': (
+                    'observable linear combinations, not separately measured component intensities'),
+                'solver': 'native Eigendecomposition rank gate and Cholesky covariance',
+            },
+        }
+    weight = 1 / np.sqrt(v)
+    design = weighted_profiles * weight[:, None]
+    target = y * weight
+    scales = np.linalg.norm(design, axis=0)
+    if np.any(scales <= 1e-15):
+        return None
+    normalized = design / scales
+    gram = normalized.T @ normalized
+    eigenvalues = np.linalg.eigvalsh(gram)[::-1]
+    singular = np.sqrt(np.maximum(eigenvalues, 0.))
+    if singular.size == 0 or singular[-1] <= singular[0] * rcond:
+        return None
+    try:
+        upper = np.linalg.cholesky(gram).T
+    except np.linalg.LinAlgError:
+        return None
+    rhs = normalized.T @ target
+    modes_y = solve_triangular(upper.T, rhs, lower=True, check_finite=False)
+    coefficients = solve_triangular(upper, modes_y, check_finite=False)
+    scaled_covariance = solve_triangular(
+        upper, solve_triangular(upper.T, np.eye(components), lower=True,
+                                check_finite=False),
+        check_finite=False)
+    intensities = coefficients / scales
+    covariance = scaled_covariance / scales[:, None] / scales[None, :]
+    residual = target - normalized @ coefficients
+    chi2 = float(residual @ residual)
+    dof = len(y) - components
+    modes = {
+        'schema': 'ariadne-information-modes/1',
+        'y': modes_y.tolist(),
+        'design': (upper * scales[None, :]).tolist(),
+        'covariance': np.eye(components).tolist(),
+        'rank': components,
+        'variance_model': 'fixed',
+        'valid_pixels': len(y),
+        'nuisance_rank': 0,
+        'rank_cutoff': float(singular[0] * rcond),
+        'discarded_singular_values': [],
+        'discarded_normalized_operator_norm': 0.,
+        'pixel_chi2_constant': float(max(target @ target - modes_y @ modes_y, 0.)),
+        'likelihood_scope': (
+            'fixed-weight Gaussian quadratic after eliminating known background; '
+            'conditional on profiles, geometry and supplied variance'),
+        'intensity_semantics': (
+            'design acts on original ordered full-profile contributor amplitudes'),
+        'interpretation': (
+            'observable linear combinations, not separately measured component intensities'),
+        'solver': 'normal-equation Cholesky after eigenvalue rank gate',
+    }
+    return {
+        'intensities_internal': intensities,
+        'covariance_identifiable_subspace': covariance,
+        'nullspace': np.empty((0, components)),
+        'column_scales': scales,
+        'rank': components,
+        'singular_values': singular,
+        'background_coefficients': np.empty(0),
+        'fitted': profiles @ intensities,
+        'chi2': chi2,
+        'dof': dof,
+        'reduced_chi2': chi2 / dof if dof > 0 else None,
+        'information_modes': modes,
+    }
 
 
 def _solve_streamed(data, variance, profiles, valid, background, rcond, chunk_rows):

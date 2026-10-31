@@ -1,0 +1,142 @@
+{
+  "schema": "ariadne-gpu-spot-comparison/1",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "machine": "arm64",
+  "python": "3.12.15 (main, Oct 13 2026, 16:47:20) [Clang 21.1.8 ]",
+  "backend": "Apple MLX/Metal float32",
+  "reference": "exact Ariadne C++17 float64 proposal kernel",
+  "status": "experimental_nonproduction",
+  "reason_not_default": "float32 Metal changes a small number of thresholded weak-spot pixels; production defaults require the exact reference mask",
+  "timing_scope": "preloaded kernels; includes Metal transfers and synchronisation for GPU",
+  "measurements": [
+    {
+      "shape": [
+        512,
+        512
+      ],
+      "cpu_exact_cpp": {
+        "seconds": [
+          0.008919874991988763,
+          0.00881850000587292,
+          0.008779958006925881,
+          0.008176875009667128,
+          0.009047708008438349
+        ],
+        "median_seconds": 0.00881850000587292
+      },
+      "apple_gpu_mlx_float32": {
+        "seconds": [
+          0.005445166025310755,
+          0.0048907500167842954,
+          0.005258541990770027,
+          0.0047927080013323575,
+          0.005506874993443489
+        ],
+        "median_seconds": 0.005258541990770027
+      },
+      "cpu_over_gpu": 1.6769857541028395,
+      "decision_pixels_equal": false,
+      "differing_pixels": 11,
+      "cpu_quality": {
+        "true_spots": 64,
+        "detected_components": 45,
+        "true_positive": 44,
+        "recall": 0.6875,
+        "precision": 0.9777777777777777
+      },
+      "gpu_quality": {
+        "true_spots": 64,
+        "detected_components": 45,
+        "true_positive": 44,
+        "recall": 0.6875,
+        "precision": 0.9777777777777777
+      }
+    },
+    {
+      "shape": [
+        1024,
+        1024
+      ],
+      "cpu_exact_cpp": {
+        "seconds": [
+          0.037804874998982996,
+          0.03645649997633882,
+          0.03613033299916424,
+          0.033231125009479,
+          0.03257954100263305
+        ],
+        "median_seconds": 0.03613033299916424
+      },
+      "apple_gpu_mlx_float32": {
+        "seconds": [
+          0.021625207999022678,
+          0.021595166996121407,
+          0.0236534170107916,
+          0.02137816700269468,
+          0.020818291988689452
+        ],
+        "median_seconds": 0.021595166996121407
+      },
+      "cpu_over_gpu": 1.673074952634236,
+      "decision_pixels_equal": false,
+      "differing_pixels": 4,
+      "cpu_quality": {
+        "true_spots": 64,
+        "detected_components": 44,
+        "true_positive": 44,
+        "recall": 0.6875,
+        "precision": 1.0
+      },
+      "gpu_quality": {
+        "true_spots": 64,
+        "detected_components": 44,
+        "true_positive": 44,
+        "recall": 0.6875,
+        "precision": 1.0
+      }
+    },
+    {
+      "shape": [
+        2048,
+        2048
+      ],
+      "cpu_exact_cpp": {
+        "seconds": [
+          0.1391294169879984,
+          0.14164424999034964,
+          0.142211958009284,
+          0.14231245798873715,
+          0.13725466700270772
+        ],
+        "median_seconds": 0.14164424999034964
+      },
+      "apple_gpu_mlx_float32": {
+        "seconds": [
+          0.0946786249987781,
+          0.09161816598498262,
+          0.09149900000193156,
+          0.09450445798574947,
+          0.09212966600898653
+        ],
+        "median_seconds": 0.09212966600898653
+      },
+      "cpu_over_gpu": 1.5374445184305057,
+      "decision_pixels_equal": false,
+      "differing_pixels": 5,
+      "cpu_quality": {
+        "true_spots": 64,
+        "detected_components": 47,
+        "true_positive": 47,
+        "recall": 0.734375,
+        "precision": 1.0
+      },
+      "gpu_quality": {
+        "true_spots": 64,
+        "detected_components": 47,
+        "true_positive": 47,
+        "recall": 0.734375,
+        "precision": 1.0
+      }
+    }
+  ]
+}

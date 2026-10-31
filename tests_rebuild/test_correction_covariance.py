@@ -52,3 +52,50 @@ def test_joint_fit_accepts_independently_known_background(chunk_rows):
     np.testing.assert_allclose(result['covariance_identifiable_subspace'],
                                np.linalg.inv(weighted.T@weighted),rtol=1e-12)
     assert result['dof']==148 and result['background_coefficients'].size==0
+
+
+@pytest.mark.parametrize('components',[1,2,8])
+def test_known_background_cholesky_matches_qr_svd(monkeypatch,components):
+    import overlap_integrator
+    rng=np.random.default_rng(929+components)
+    profiles=rng.uniform(.1,1,(1700,components))
+    profiles/=profiles.sum(axis=0)
+    variance=rng.uniform(.7,3.2,len(profiles))
+    data=profiles@np.geomspace(800.,3.,components)+rng.normal(0,.08,len(profiles))
+    valid=rng.random(len(profiles))>.03
+    fast=overlap_integrator.solve_joint(data,variance,profiles,valid,np.empty((len(data),0)),1e-9)
+    with monkeypatch.context() as patch:
+        patch.setattr(overlap_integrator,'_solve_known_background',lambda *args:None)
+        reference=overlap_integrator.solve_joint(
+            data,variance,profiles,valid,np.empty((len(data),0)),1e-9)
+    np.testing.assert_allclose(fast['intensities_internal'],reference['intensities_internal'],
+                               rtol=3e-12,atol=3e-11)
+    np.testing.assert_allclose(fast['covariance_identifiable_subspace'],
+                               reference['covariance_identifiable_subspace'],rtol=3e-11)
+    np.testing.assert_allclose(fast['fitted'],reference['fitted'],rtol=3e-12,atol=3e-11)
+    assert fast['chi2']==pytest.approx(reference['chi2'],rel=3e-12)
+    assert fast['rank']==reference['rank']==components
+    assert fast['information_modes']['rank']==components
+    chi2=np.sum((fast['information_modes']['y']
+                 -np.asarray(fast['information_modes']['design'])
+                 @fast['intensities_internal'])**2)
+    total=chi2+fast['information_modes']['pixel_chi2_constant']
+    assert total==pytest.approx(fast['chi2'],rel=3e-12)
+
+
+def test_known_background_near_collinearity_uses_conservative_fallback(monkeypatch):
+    import overlap_integrator
+    rng=np.random.default_rng(937)
+    source=rng.uniform(.1,1,(500,1))
+    profiles=np.column_stack((source,source+1e-9*rng.uniform(.1,1,(500,1))))
+    variance=np.ones(500)
+    data=profiles@np.array([20.,7.])
+    captured=[]
+    original=overlap_integrator._solve_joint_from_qr
+    def record(*args):
+        captured.append(True)
+        return original(*args)
+    monkeypatch.setattr(overlap_integrator,'_solve_joint_from_qr',record)
+    result=overlap_integrator.solve_joint(data,variance,profiles,np.ones(500,bool),
+                                           np.empty((500,0)),1e-7)
+    assert captured and result['rank']<2

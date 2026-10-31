@@ -138,7 +138,184 @@ PyObject* spot_proposals(PyObject*,PyObject* args) {
   return reinterpret_cast<PyObject*>(output);
 }
 
+inline void solve_lower(const std::vector<double>& lower, const std::vector<double>& rhs,
+                        int size, std::vector<double>& result) {
+  for(int i=0;i<size;++i) {
+    double value=rhs[i];
+    for(int j=0;j<i;++j)value-=lower[i*size+j]*result[j];
+    result[i]=value/lower[i*size+i];
+  }
+}
+
+inline void solve_upper(const std::vector<double>& upper, const std::vector<double>& rhs,
+                        int size, std::vector<double>& result) {
+  for(int i=size-1;i>=0;--i) {
+    double value=rhs[i];
+    for(int j=i+1;j<size;++j)value-=upper[i*size+j]*result[j];
+    result[i]=value/upper[i*size+i];
+  }
+}
+
+void symmetric_eigenvalues(std::vector<double> matrix, int size, std::vector<double>& values) {
+  for(int iteration=0;iteration<64*size*size;++iteration) {
+    int p=0,q=1;double largest=0;
+    for(int i=0;i<size;++i)for(int j=i+1;j<size;++j) {
+      const double value=std::abs(matrix[i*size+j]);
+      if(value>largest){largest=value;p=i;q=j;}
+    }
+    double scale=0;
+    for(int i=0;i<size;++i)scale=std::max(scale,std::abs(matrix[i*size+i]));
+    if(largest<=1e-14*std::max(scale,1e-300))break;
+    const double app=matrix[p*size+p],aqq=matrix[q*size+q],apq=matrix[p*size+q];
+    const double angle=.5*std::atan2(2*apq,aqq-app);
+    const double c=std::cos(angle),s=std::sin(angle);
+    for(int i=0;i<size;++i) {
+      if(i==p || i==q)continue;
+      const double aip=matrix[i*size+p],aiq=matrix[i*size+q];
+      const double nip=c*aip-s*aiq,niq=s*aip+c*aiq;
+      matrix[i*size+p]=matrix[p*size+i]=nip;
+      matrix[i*size+q]=matrix[q*size+i]=niq;
+    }
+    matrix[p*size+p]=c*c*app-2*s*c*apq+s*s*aqq;
+    matrix[q*size+q]=s*s*app+2*s*c*apq+c*c*aqq;
+    matrix[p*size+q]=matrix[q*size+p]=0.;
+  }
+  values.resize(size);
+  for(int i=0;i<size;++i)values[i]=matrix[i*size+i];
+  std::sort(values.begin(),values.end(),std::greater<double>());
+}
+
+PyObject* array_from_vector(const std::vector<double>& values,npy_intp rows,npy_intp columns) {
+  npy_intp shape[2]={rows,columns};
+  PyObject* result=columns==0?PyArray_SimpleNew(1,shape,NPY_DOUBLE)
+                              :PyArray_SimpleNew(2,shape,NPY_DOUBLE);
+  if(!result)return nullptr;
+  if(!values.empty())std::copy(values.begin(),values.end(),
+      static_cast<double*>(PyArray_DATA(reinterpret_cast<PyArrayObject*>(result))));
+  return result;
+}
+
+PyObject* known_background_wls(PyObject*,PyObject* args) {
+  PyObject *data_obj,*variance_obj,*profiles_obj;
+  double rcond;
+  if(!PyArg_ParseTuple(args,"OOOd",&data_obj,&variance_obj,&profiles_obj,&rcond))return nullptr;
+  PyArrayObject* data=reinterpret_cast<PyArrayObject*>(PyArray_FROM_OTF(
+      data_obj,NPY_DOUBLE,NPY_ARRAY_IN_ARRAY));
+  PyArrayObject* variance=reinterpret_cast<PyArrayObject*>(PyArray_FROM_OTF(
+      variance_obj,NPY_DOUBLE,NPY_ARRAY_IN_ARRAY));
+  PyArrayObject* profiles=reinterpret_cast<PyArrayObject*>(PyArray_FROM_OTF(
+      profiles_obj,NPY_DOUBLE,NPY_ARRAY_IN_ARRAY));
+  if(!data || !variance || !profiles) {
+    Py_XDECREF(data);Py_XDECREF(variance);Py_XDECREF(profiles);return nullptr;
+  }
+  const int rows=PyArray_DIM(profiles,0),components=PyArray_DIM(profiles,1);
+  if(PyArray_NDIM(data)!=1 || PyArray_NDIM(variance)!=1 || PyArray_NDIM(profiles)!=2
+      || PyArray_DIM(data,0)!=rows || PyArray_DIM(variance,0)!=rows
+      || components<1 || components>32 || rows<=components+2
+      || !std::isfinite(rcond) || rcond<=0 || rcond>=1) {
+    Py_DECREF(data);Py_DECREF(variance);Py_DECREF(profiles);
+    PyErr_SetString(PyExc_ValueError,"Invalid known-background fit dimensions");return nullptr;
+  }
+  const double* d=static_cast<const double*>(PyArray_DATA(data));
+  const double* v=static_cast<const double*>(PyArray_DATA(variance));
+  const double* p=static_cast<const double*>(PyArray_DATA(profiles));
+  std::vector<double> scales(components),gram(components*components,0.),
+      rhs(components,0.),target_norm=std::vector<double>(1,0.);
+  std::vector<double> eigenvalues,lower(components*components,0.),
+      upper(components*components,0.),modes_y(components),coefficients(components),
+      intensities(components),covariance(components*components),singular(components);
+  bool failure=false,rank_fallback=false;
+  Py_BEGIN_ALLOW_THREADS
+  for(int row=0;row<rows;++row) {
+    if(!std::isfinite(d[row]) || !std::isfinite(v[row]) || v[row]<=0) {
+      failure=true;break;
+    }
+    for(int column=0;column<components;++column) {
+      const double value=p[row*components+column];
+      if(!std::isfinite(value)){failure=true;break;}
+      const double weighted=value/std::sqrt(v[row]);
+      scales[column]+=weighted*weighted;
+    }
+    if(failure)break;
+    target_norm[0]+=d[row]*d[row]/v[row];
+  }
+  if(!failure)for(int column=0;column<components;++column) {
+    scales[column]=std::sqrt(scales[column]);
+    if(scales[column]<=1e-15)failure=true;
+  }
+  if(!failure)for(int row=0;row<rows;++row) {
+    const double weighted_target=d[row]/std::sqrt(v[row]);
+    for(int i=0;i<components;++i) {
+      const double xi=p[row*components+i]/(std::sqrt(v[row])*scales[i]);
+      rhs[i]+=xi*weighted_target;
+      for(int j=0;j<=i;++j)gram[i*components+j]+=xi*
+          (p[row*components+j]/(std::sqrt(v[row])*scales[j]));
+    }
+  }
+  if(!failure)for(int i=0;i<components;++i)for(int j=0;j<i;++j)
+    gram[j*components+i]=gram[i*components+j];
+  if(!failure)symmetric_eigenvalues(gram,components,eigenvalues);
+  if(failure || eigenvalues.empty() || eigenvalues[0]<=0
+      || eigenvalues.back()<=eigenvalues[0]*rcond*rcond) {
+    rank_fallback=true;
+    failure=false;
+  }
+  if(!rank_fallback)for(int i=0;i<components;++i) {
+    for(int j=0;j<=i;++j) {
+      double value=gram[i*components+j];
+      for(int k=0;k<j;++k)value-=lower[i*components+k]*lower[j*components+k];
+      if(i==j) {
+        if(value<=1e-15)failure=true;
+        else lower[i*components+i]=std::sqrt(value);
+      } else lower[i*components+j]=value/lower[j*components+j];
+    }
+  }
+  if(!rank_fallback && !failure) {
+    for(int i=0;i<components;++i)for(int j=0;j<components;++j)
+      upper[i*components+j]=lower[j*components+i];
+    solve_lower(lower,rhs,components,modes_y);
+    solve_upper(upper,modes_y,components,coefficients);
+    for(int column=0;column<components;++column) {
+      singular[column]=std::sqrt(std::max(eigenvalues[column],0.));
+      intensities[column]=coefficients[column]/scales[column];
+    }
+    for(int column=0;column<components;++column) {
+      std::vector<double> unit(components,0.),forward(components),solved(components);
+      unit[column]=1.;
+      solve_lower(lower,unit,components,forward);
+      solve_upper(upper,forward,components,solved);
+      for(int row=0;row<components;++row)
+        covariance[row*components+column]=solved[row]/scales[row]/scales[column];
+    }
+  }
+  Py_END_ALLOW_THREADS
+  Py_DECREF(data);Py_DECREF(variance);Py_DECREF(profiles);
+  if(rank_fallback)Py_RETURN_NONE;
+  if(failure)return PyErr_NoMemory();
+  std::vector<double> fitted(rows),data_sum(rows,0.);
+  for(int row=0;row<rows;++row)for(int column=0;column<components;++column)
+    fitted[row]+=p[row*components+column]*intensities[column];
+  double chi2=0;
+  for(int row=0;row<rows;++row)chi2+=(d[row]-fitted[row])*(d[row]-fitted[row])/v[row];
+  double modes_norm=0;for(double value:modes_y)modes_norm+=value*value;
+  const double constant=std::max(target_norm[0]-modes_norm,0.);
+  PyObject* result=PyTuple_New(9);
+  if(!result)return nullptr;
+  PyTuple_SET_ITEM(result,0,array_from_vector(intensities,components,0));
+  PyTuple_SET_ITEM(result,1,array_from_vector(covariance,components,components));
+  PyTuple_SET_ITEM(result,2,array_from_vector(fitted,rows,0));
+  PyTuple_SET_ITEM(result,3,PyFloat_FromDouble(chi2));
+  PyTuple_SET_ITEM(result,4,array_from_vector(singular,components,0));
+  PyTuple_SET_ITEM(result,5,array_from_vector(upper,components,components));
+  PyTuple_SET_ITEM(result,6,array_from_vector(modes_y,components,0));
+  PyTuple_SET_ITEM(result,7,array_from_vector(scales,components,0));
+  PyTuple_SET_ITEM(result,8,PyFloat_FromDouble(constant));
+  return result;
+}
+
 PyMethodDef methods[]={{"spot_proposals",spot_proposals,METH_VARARGS,"Count-excess proposals using fused summed-area statistics."},
+                       {"known_background_wls",known_background_wls,METH_VARARGS,
+                        "Fixed known-background signed WLS with Cholesky covariance."},
                        {nullptr,nullptr,0,nullptr}};
 PyModuleDef module={PyModuleDef_HEAD_INIT,"_native",nullptr,-1,methods};
 }
