@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="32 页单晶衍射课堂课件：结构基元、点阵、晶胞、晶系、Miller 指数、Bragg 定律、Ewald 球及 Ariadne 计算与 agent 设计。黑白教材式配图，本地 LaTeX 风格公式，支持离线。">
+<title>Ariadne · 单晶衍射晶体学课程</title>
+<link rel="stylesheet" href="slides.css">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<script src="vendor/katex/katex.min.js" defer></script>
+<script src="figures.js" defer></script>
+<script src="lecture.js" defer></script>
+<script src="player.js" defer></script>
+</head>
+<body>
+<a href="#deck" class="skip">跳转到演示内容</a>
+<header class="topbar">
+<a class="brand" href="#/1" aria-label="Ariadne 首页"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 29 9.5v13L16 30 3 22.5v-13Z M3 9.5 16 17l13-7.5 M16 17v13 M16 2v15"/></svg><span>Ariadne<span class="brand-sub">衍射与结构推断</span></span></a>
+<div class="chapter-label" id="chapter-label">从观测出发</div>
+<div class="tools"><button id="motion" aria-pressed="false" title="切换动画">暂停动画</button><button id="notes-toggle" aria-pressed="false" title="讲解备注（N）">备注</button><button id="fullscreen" title="全屏（F）">全屏</button><button id="menu-toggle" aria-expanded="false" aria-controls="contents" title="章节导航（M）">目录 <span class="menu-icon" aria-hidden="true">☰</span></button></div>
+</header>
+<main id="deck" tabindex="-1" aria-label="Ariadne 演示文稿"></main>
+<footer class="bottom-bar"><div class="slide-meta"><span id="section-name">原理</span><span class="keyhint">← → 翻页 · N 备注 · F 全屏</span></div><div class="page-controls"><button id="prev" aria-label="上一页">←</button><span id="page" aria-live="polite">1 / 32</span><button id="next" aria-label="下一页">→</button></div></footer>
+<div class="progress" aria-hidden="true"><div id="progress-fill"></div></div>
+<div id="contents" class="contents" hidden><div class="contents-head"><h2>课程目录</h2><button id="menu-close" aria-label="关闭目录">×</button></div><p>晶体结构基础、衍射几何、结构推断与计算方法。</p><nav id="contents-links" aria-label="选择幻灯片"></nav><div class="contents-links"><a href="Ariadne_Introduction_Offline.zip" download>下载离线完整包</a><a href="Ariadne_Crystallography_Lecture.pdf">32 页课件 PDF</a><a href="../technical-report/Ariadne_Mathematical_Technical_Report.pdf">56 页技术报告</a><a href="../technical-report/Ariadne_Mathematical_Technical_Report_LaTeX.zip" download>LaTeX 源码</a><button id="print">打印全部页面</button></div></div>
+<aside id="notes" class="notes" hidden aria-label="本页讲解备注"><strong>讲解备注</strong><p id="notes-text"></p></aside>
+<div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+<noscript><p class="no-script">此交互式演示需要 JavaScript。你也可以直接阅读<a href="../technical-report/Ariadne_Mathematical_Technical_Report.pdf">完整技术报告 PDF</a>。</p></noscript>
+</body>
+</html>

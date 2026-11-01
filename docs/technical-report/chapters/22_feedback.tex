@@ -1,0 +1,66 @@
+\chapter{结构反馈、信息上限与低秩推断}
+\section{结构预测如何进入重叠分解}
+结构模型能在多个反射间建立联系，但同一观测先建立模型、再由该模型改写自身，会造成循环确认。反馈应使用训练数据以外的预测，并保留原始实验估计和模型辅助结果的区别。
+
+Ariadne-Xtal 的局部 Gaussian 部件考虑 $y=A I+\epsilon$，$\Cov(\epsilon)=\Sigma_y$，以及结构预测均值 $m$ 和协方差 $C_m$。一般目标为
+\begin{equation}
+\Phi(I)=(y-AI)^{\mathsf T}\Sigma_y^{-1}(y-AI)
++\lambda(I-m)^{\mathsf T}C_m^{-1}(I-m),\qquad I\ge0.
+\end{equation}
+实际 \code{deblend_profiles} API 使用逐点 sigma，即对角观测协方差；这里的一般矩阵式用于解释理论。忽略非负边界时
+\begin{equation}
+\widehat I=(H_D+\lambda C_m^{-1})^{-1}
+[A^{\mathsf T}\Sigma_y^{-1}y+\lambda C_m^{-1}m],\qquad
+H_D=A^{\mathsf T}\Sigma_y^{-1}A.
+\end{equation}
+实现白化并堆叠数据和先验两部分，求解有界最小二乘。返回的无界局部曲率逆在边界处不能直接当成置信区间。
+\section{方向性信息上限的推导}
+仅比较信息矩阵的迹可能允许先验在数据最弱方向上占主导。若 $H_D\succ0$，令
+\begin{equation}
+M=H_D^{-1/2}C_m^{-1}H_D^{-1/2},\qquad
+\lambda_{\rm eff}=\min\left(\lambda_{\rm req},\frac{\eta}{\lambda_{\max}(M)}\right).
+\end{equation}
+由 $M\preceq\lambda_{\max}(M)I$，左右同余变换得到
+\begin{equation}
+\lambda_{\rm eff}C_m^{-1}\preceq\eta H_D.
+\end{equation}
+即任意方向 $v$ 的先验曲率不超过 $\eta$ 倍数据曲率。默认 $\eta=0.25$ 是显式工程设置，应在最终评价前固定；它不是晶体学常数。
+
+若 $H_D$ 秩亏，存在 $v\ne0$ 使 $Av=0$，数据完全无法区分对应分量组合。局部工具在存在先验时拒绝这种分解，以免把先验补足的方向称为独立测量；无先验时可返回最小二乘可行解，但标记完整协方差不可估计并报告零空间。
+\section{全局潜在强度与共享低秩相关}
+Ariadne 主包另有有符号强度空间的条件化模块。每个唯一强度只对应一个潜变量，重复曝光不能重复施加先验。设
+\begin{equation}
+I=m+Uz+\delta,\quad z\sim N(0,I_r),\quad\delta\sim N(0,D),\quad
+D=\diag(d_1,\ldots,d_n)\succ0.
+\end{equation}
+则 $C_0=D+UU^{\mathsf T}$。观测块 $g$ 为 $y_g=H_gI_g+\epsilon_g$，噪声协方差 $R_g\succ0$。共享潜变量的观测先合成连接组，重复 raw pixel ID 直接拒绝。
+
+积分消去独立部分 $\delta_g$ 后，有
+\begin{align}
+Q_g&=R_g+H_gD_gH_g^{\mathsf T},\\
+K_z&=I_r+\sum_gU_g^{\mathsf T}H_g^{\mathsf T}Q_g^{-1}H_gU_g,\\
+\widehat z&=K_z^{-1}\sum_gU_g^{\mathsf T}H_g^{\mathsf T}Q_g^{-1}(y_g-H_gm_g).
+\end{align}
+因此全局相关计算只需 $r\times r$ 系统。固定 $z$ 时，局部后验为
+\begin{align}
+C_g&=(D_g^{-1}+H_g^{\mathsf T}R_g^{-1}H_g)^{-1},\\
+a_g&=m_g+C_gH_g^{\mathsf T}R_g^{-1}(y_g-H_gm_g),\\
+L_g&=C_gD_g^{-1}U_g.
+\end{align}
+于是 $\E[I_g\mid y]=a_g+L_g\widehat z$，完整协方差表示为局部 $C_g$ 加共享 $L_gK_z^{-1}L_{g'}^{\mathsf T}$。实际实现以 Cholesky、三角求解及增广 QR 保存因子，不显式建立全局稠密 $n\times n$ 协方差。连接组矩阵仍受明确预算限制。
+
+这一模块是 Gaussian 条件化，允许有符号结果；它与上一节非负像素分解的参数空间和先验控制不同，不能称作同一个求解器。后验精度不等于实验测量秩：先验能使后验有限，但数据本身仍可能无法辨识某个分量。
+\section{先验构造、尺度与预测误差}
+结构模型集合可以形成均值、对角误差下限和低秩模型差异。由结构参数协方差传播得到
+\begin{equation}
+C_m\simeq J_\mu C_pJ_\mu^{\mathsf T}+C_{\rm discrepancy}
+\end{equation}
+只是局部近似；遗漏模型不完备项会高估预测可靠性。尺度或畴校准应只使用训练块，其误差需与结构预测误差分别记录。当前校准不自动推断结构与尺度参数的交叉协方差，不能称作完整误差传播。
+\section{分组闭包与留出证据}
+在观测连接图中，共享潜在强度、等价反射轨道、Friedel 关系、孪晶关联及共同重叠都可能形成信息通路。分组必须在这些关联上闭包，不能随机拆分单条表行。对组 $D_k$ 的预测应来自排除该组后训练的 $p^{(-k)}$：
+\begin{equation}
+m_k=\mu_k(p^{(-k)}).
+\end{equation}
+训练、参数选择与最终评价集合还需分别留存。反射组划分应与共享像素唯一性结合：同一个原始像素被复制为两个独立观测，不能仅靠把它们放同组来纠正重复计数。
+
+局部 \code{StructuralPrior} 的源运行及排除组由调用者声明，低层 API 只检查字段，不能验证上游是否真实重训。主包 \code{closed_split} 使用已声明潜变量和等价 ID 做连接分组，同样依赖调用方提供完整关联。已实现的数值部件、来源协议和完整自动交叉拟合调度需要分别验收；目前尚无全扫描原始图像到原子精修再返回像素的完整科学验收。

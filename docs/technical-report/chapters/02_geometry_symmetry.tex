@@ -1,0 +1,99 @@
+\chapter{晶胞度量与空间群}
+\section{任意晶胞的坐标变换}
+取 $\vct a$ 沿笛卡尔 $x$ 轴，$\vct b$ 位于 $xy$ 平面。晶胞矩阵可写为
+\begin{equation}
+\mat A=\begin{pmatrix}
+a&b\cos\gamma&c\cos\beta\\
+0&b\sin\gamma&c\dfrac{\cos\alpha-\cos\beta\cos\gamma}{\sin\gamma}\\
+0&0&\dfrac{V}{ab\sin\gamma}
+\end{pmatrix},
+\end{equation}
+其中
+\begin{equation}
+V=abc\sqrt{1+2\cos\alpha\cos\beta\cos\gamma
+-\cos^2\alpha-\cos^2\beta-\cos^2\gamma}.
+\end{equation}
+根号中的量必须为正。若该量过小，坐标变换将病态；软件在建立晶胞对象时即检验这一条件。
+
+直接度量和倒易度量分别为
+\begin{equation}
+\mat G=\mat A^{\mathsf T}\mat A,\qquad
+\mat G^*=\mat G^{-1}=\mat B^{\mathsf T}\mat B.
+\end{equation}
+于是分数位移 $\Delta\vct x$ 的平方距离，以及晶面间距，满足
+\begin{equation}
+d^2=\Delta\vct x^{\mathsf T}\mat G\Delta\vct x,\qquad
+d_{\vct h}^{-2}=\vct h^{\mathsf T}\mat G^*\vct h.
+\end{equation}
+逐坐标将分数位移折入 $[-1/2,1/2]$，对一般斜晶胞不保证得到最近镜像。正确问题是整数最优化
+\begin{equation}
+\vct n_* =\argmin_{\vct n\in\mathbb Z^3}
+\lVert\mat A(\Delta\vct x-\vct n)\rVert^2.
+\label{eq:cvp}
+\end{equation}
+利用上三角矩阵 $\mat A$，可自第三坐标向第一坐标作球形分支定界。先取一个可行整数向量得到当前最小半径，每一层只枚举使剩余平方距离不超过该半径的整数区间。该过程具有明确的界，而不依赖任意设定的相邻 27 个晶胞。
+
+\section{空间群操作与倒易空间关系}
+空间群操作写成 Seitz 形式 $g=(\mat R,\vct t)$：
+\begin{equation}
+\vct x'=\mat R\vct x+\vct t\pmod{\mathbb Z^3}.
+\end{equation}
+对有效晶体操作，$\mat R$ 必须保持晶胞度量，
+\begin{equation}
+\mat R^{\mathsf T}\mat G\mat R=\mat G.
+\end{equation}
+在笛卡尔坐标中，相应的正交矩阵为 $\mat Q=\mat A\mat R\mat A^{-1}$。对称等价位置的位移张量随位置共同旋转：
+\begin{equation}
+\mat U'=\mat Q\mat U\mat Q^{\mathsf T}.
+\end{equation}
+
+由密度不变性 $\rho(\mat R\vct x+\vct t)=\rho(\vct x)$，在结构因子积分中换元可得
+\begin{align}
+F_{\vct h}
+&=e^{2\pi\iu\vct h^{\mathsf T}\vct t}F_{\mat R^{\mathsf T}\vct h},\\
+F_{\mat R^{\mathsf T}\vct h}
+&=e^{-2\pi\iu\vct h^{\mathsf T}\vct t}F_{\vct h}.
+\label{eq:symF}
+\end{align}
+振幅和强度的变换规律并不相同。强度满足 $I_{\mat R^{\mathsf T}\vct h}=I_{\vct h}$，没有平移相位因子。因此，电子密度图与 Patterson 图必须采用不同的对称展开规则。
+
+\section{系统消光的推导}
+若某操作满足 $\mat R^{\mathsf T}\vct h=\vct h$，式~\eqref{eq:symF} 给出
+\begin{equation}
+\left[1-e^{-2\pi\iu\vct h^{\mathsf T}\vct t}\right]F_{\vct h}=0.
+\end{equation}
+当括号不为零时，反射必须消失。例如，沿 $b$ 轴的 $2_1$ 螺旋操作 $(-x,y+1/2,-z)$ 对 $0k0$ 的作用为
+\begin{equation}
+F_{0k0}=e^{-\pi\iu k}F_{0k0},
+\end{equation}
+故 $k$ 为奇数时 $F_{0k0}=0$。对于体心平移 $(1/2,1/2,1/2)$，同样得到 $h+k+l=2n$。
+
+消光条件是对空间群的必要约束，通常不是充分约束。不同空间群可以有相同的消光，弱反射、伪对称和重原子主导也可影响基于强度的判断。SHELXT 将相位求解与空间群判定结合，这是其公开方法的重要组成~\cite{shelxt2015}。本实现的候选空间群排序输出消光违背情况，并保留同等合理候选，不把排序第一项当作已证明的空间群。
+
+\section{特殊位置、稳定子与占有率}
+固定原子位置的操作组成稳定子群
+\begin{equation}
+H_j=\{g\in G:\;\mat R_g\vct x_j+\vct t_g-\vct x_j\in\mathbb Z^3\}.
+\end{equation}
+轨道--稳定子关系给出不同等价位置的数目
+\begin{equation}
+m_j=\frac{|G|}{|H_j|}.
+\end{equation}
+若完整占据的特殊位置用物理占有率 $o_j=1$ 表示，只应把其 $m_j$ 个不同位置相加。将全部 $|G|$ 个操作机械相加，会多计 $|H_j|$ 次。
+
+传统 SHELX 原子行中的占有因子还包含特殊位置的多重性比。设解码后的数值为 $s_j$，则与内部物理占有率的关系为
+\begin{equation}
+o_j=s_j\frac{m_{\mathrm{general}}}{m_j}.
+\label{eq:shelxsof}
+\end{equation}
+例如，一般位置多重性为 4、特殊位置多重性为 1 时，固定的传统数值 $10.25$ 对应内部物理占有率 1。数值中的 ``10'' 是固定参数编码，不参与散射计算~\cite{shelxl_instructions}。
+
+特殊位置上的张量必须满足所有稳定子操作的条件。任意对称矩阵可通过群平均投影到不变子空间：
+\begin{equation}
+\Pi_{H_j}(\mat U)=\frac{1}{|H_j|}\sum_{g\in H_j}\mat Q_g\mat U\mat Q_g^{\mathsf T}.
+\label{eq:stabilizerU}
+\end{equation}
+但群平均本身不减少参数数目。精修时应只优化这个不变子空间中的独立参数，避免在法方程中保留完全冗余方向。
+
+\section{显式对称操作的优先级}
+Hermann--Mauguin 名称只是群的一种标识。文件中的显式操作还携带设定、原点和轴的具体约定。程序读取 CIF 时检验单位操作、闭合性、整数晶格保持以及度量相容性，并以显式操作为运算依据。若群名与操作表不一致，导出文件按实际操作重写一致的标识；原文件及不一致信息保存在运行记录中。这样可以防止用群名重新生成另一套操作后，出现成键断裂或分子重叠。

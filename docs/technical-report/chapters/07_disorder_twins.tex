@@ -1,0 +1,102 @@
+\chapter{无序、孪晶与扩展散射模型}
+\section{静态无序与平均结构}
+Bragg 衍射主要描述晶胞之间相干平均的周期结构。若同一位置以概率 $o$ 被某原子占据，平均密度中该原子的振幅乘以 $o$。相互排斥的构象 $A$、$B$ 可表示为
+\begin{equation}
+\rho=o\rho_A+(1-o)\rho_B.
+\end{equation}
+由此产生的 Bragg 振幅是 $F=oF_A+(1-o)F_B$，而不是两个独立晶畴的强度和。占有率涨落还可产生漫散射；将平均模型精修得很好，不代表漫散射或局域相关已被解释。
+
+多组分占有率的总和可通过 softmax 满足：
+\begin{equation}
+o_j=o_{\mathrm{tot}}\frac{e^{z_j}}{\sum_{m=1}^{M}e^{z_m}},\quad j=1,\ldots,M.
+\end{equation}
+同时给全部 $z_j$ 加一个常数不会改变占有率，因此必须固定一个 logit 或移除公共方向，只保留 $M-1$ 个独立参数。其导数为
+\begin{equation}
+\frac{\partial o_j}{\partial z_k}
+=o_j\left(\delta_{jk}-\frac{o_k}{o_{\mathrm{tot}}}\right).
+\end{equation}
+零占有率是 softmax 的边界极限。若需要检验某组分是否不存在，应比较包含与不包含该组分的模型，而不能把逼近零的小值自动解释为已精确测得。
+
+\section{占有率、尺度和位移的相关性}
+单一原子的幅度含 $o f(s)e^{-8\pi^2Us^2}$。对数微分为
+\begin{equation}
+\dif\log|F|\simeq\dif\log o-8\pi^2s^2\dif U.
+\end{equation}
+若所有反射的 $s^2$ 几乎相同，占有率改变可以被 $U$ 改变抵消。若全部原子占有率同时乘以 $c$，强度会乘以 $c^2$，又能被尺度除以 $c^2$ 抵消。自由精修这些变量必须有独立组成信息、足够分辨率范围或固定参考。Jacobian 的小奇异值能直接揭示这些相关方向。
+
+\section{孪晶畴的非相干叠加}
+不同孪晶畴通常大于相干尺度，畴间相位不固定，交叉项在观测中平均消失。若第 $d$ 个畴通过倒易变换 $\mat T_d$ 贡献于同一观测位置，
+\begin{equation}
+\mu_h=k\sum_{d=0}^{D-1}\alpha_d|F_{\mat T_dh}|^2,
+\qquad \alpha_d\ge0,\quad\sum_d\alpha_d=1.
+\label{eq:twin}
+\end{equation}
+其中 $\mat T_0=\mat I$。原生接口只接收其余非单位变换，而分数数组包括单位畴，避免一个常见的接口歧义。
+
+完全重叠的整数变换必须保持倒易度量：
+\begin{equation}
+\mat T_d^{\mathsf T}\mat G^*\mat T_d=\mat G^*.
+\end{equation}
+孪晶分数对强度的线性影响可以在固定结构时直接看出。对两畴模型令 $\alpha_1=x$，则
+\begin{equation}
+\frac{\partial\mu_h}{\partial x}=k\left(|F_{\mat T h}|^2-|F_h|^2\right).
+\end{equation}
+若两项对所有观测都相等，该参数完全不可辨识。程序此时应报告秩缺失，而不是返回一个看似精确的分数。
+
+\section{一般重叠组与 HKLF5 的数学形式}
+非共格孪晶可能同时存在单独反射、部分重叠和完全重叠。设观测组为 $n$，组内列出各畴反射 $h_{nd}$，重叠系数为 $M_{nd}$，则
+\begin{equation}
+\mu_n=k\sum_dM_{nd}\alpha_d|F_{h_{nd}}|^2.
+\end{equation}
+$M_{nd}$ 来自积分和重叠组定义，不能仅凭一个整数矩阵从单条 HKL 恢复。输入次序、批次符号与组终止约定是 HKLF5 语义的一部分。原生完全重叠模型没有实现这些一般观测组；原始文件可交给官方 SHELXL 路径处理。
+
+\section{反演孪晶与绝对结构}
+取 $\mat T=-\mat I$，得到 Flack 型两畴模型~\cite{parsons2013}
+\begin{equation}
+\mu_h=k[(1-x)|F_h|^2+x|F_{-h}|^2].
+\end{equation}
+定义单畴计算强度 $J_+=|F_h|^2$、$J_-=|F_{-h}|^2$，则
+\begin{align}
+\mu_++\mu_-&=k(J_++J_-),\\
+\mu_+-\mu_-&=k(1-2x)(J_+-J_-).
+\end{align}
+商量消去共同尺度：
+\begin{equation}
+Q_{\mathrm{obs}}=\frac{I_+-I_-}{I_++I_-},\qquad
+Q_{\mathrm{calc}}=\frac{J_+-J_-}{J_++J_-},\qquad
+Q_{\mathrm{obs}}\simeq(1-2x)Q_{\mathrm{calc}}.
+\end{equation}
+若两个观测的误差独立，一阶传播给出
+\begin{equation}
+\sigma_Q^2=\frac{4(I_-^2\sigma_+^2+I_+^2\sigma_-^2)}{(I_++I_-)^4}.
+\end{equation}
+固定结构后，令 $\beta=1-2x$，加权直线斜率和其方差为
+\begin{equation}
+\widehat\beta=\frac{\sum Q_{\mathrm{calc}}Q_{\mathrm{obs}}/\sigma_Q^2}
+{\sum Q_{\mathrm{calc}}^2/\sigma_Q^2},\qquad
+\widehat x=\frac{1-\widehat\beta}{2},\quad
+\sigma_x=\frac{1}{2\sqrt{\sum Q_{\mathrm{calc}}^2/\sigma_Q^2}}.
+\end{equation}
+原生商量工具实现这一固定模型估计，不把 $x$ 截断到 $[0,1]$，以保留误差诊断。它要求足够显著的反射对强度和，并报告该筛选阈值。该不确定度没有包含结构协方差、共同吸收误差或近吸收边色散模型误差；因此不能替代完整的绝对结构证据评估。
+
+\section{吸收、消光和部分结构因子}
+当晶体形状和吸收系数已知时，几何吸收因子可表达为
+\begin{equation}
+A_h=\frac{1}{V_{\mathrm{cryst}}}\int_{V_{\mathrm{cryst}}}\exp\{-\mu_{\mathrm{abs}}[l_{\mathrm{in}}(\vct r)+l_{\mathrm{out},h}(\vct r)]\}\dif^3\vct r.
+\end{equation}
+这里 $V_{\mathrm{cryst}}$ 是整块晶体的体积，不是单胞体积。该因子乘在观测强度的正向模型中。不同取向测量的冗余反射也能约束经验吸收模型，但吸收拟合应保留独立几何与观测依据。
+
+消光使强反射偏离简单运动学强度。某类经验模型可写为
+\begin{equation}
+\mu_h=kJ_h(1+c_hxJ_h)^{-1/2},\qquad J_h=|F_h|^2,
+\end{equation}
+其中 $c_h$ 包含波长和角度依赖，$x$ 是经验消光参数。不同程序对该参数的归一化有专门约定，不能只复用名称而忽略公式。原生版本没有实施 EXTI 校正。
+
+未解析溶剂或其他连续密度可以作为复部分结构因子加入：
+\begin{equation}
+F_h^{\mathrm{total}}=F_h^{\mathrm{atoms}}+k_s e^{-B_s s_h^2}F_h^{\mathrm{mask}}.
+\end{equation}
+因为存在干涉交叉项，应先加振幅再取模平方，不能直接相加强度。ABIN、溶剂掩膜及相关参数计算保留在官方路径；其完整原始附属文件随输入一同复制。
+
+\section{中子与其他散射探针}
+中子的相干核散射可将 X 射线形状因子换为核散射长度 $b_j$。$b_j$ 随元素和同位素变化，某些值为负；氢与氘也有不同的散射和背景性质。因此，元素名称、同位素和散射类型必须成为模型的一部分。热位移的特征函数形式仍适用，但电子密度图的物理单位不再适用。SHELXL 的公开功能包含中子精修~\cite{shelxl2015}；配套原生实现限定为运动学 X 射线模型，输入明确声明中子或电子衍射时不会按 X 射线参数默算。

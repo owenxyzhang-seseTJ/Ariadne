@@ -1,0 +1,40 @@
+\chapter{源码映射与复现说明}
+\section{编译本报告}
+本报告为 UTF-8 中文 LaTeX 工程，使用 TeX Live 的 \code{ctexbook} 与 Fandol 字体，不依赖下载字体。\code{chapters/} 保存正文，\code{figures/} 保存从参考报告沿用的三幅已有矢量图，\code{references.tex} 为可读参考文献。所有章节和配图保持相对路径，可离线编译。
+\begin{lstlisting}
+xelatex -no-shell-escape -interaction=nonstopmode -halt-on-error Ariadne_Mathematical_Technical_Report.tex
+\end{lstlisting}
+同一命令运行两次以完成目录、文献与交叉引用。首次生成的辅助文件不属于最终科学数据；交付压缩包包含源文件、已有图版、说明与 PDF，不包含实测反射表、原始帧、数据库和本地结构候选。
+\section{检测与积分证据文件}
+下列路径相对于仓库根目录 \code{reports/current_validation/}。
+\begin{longtable}{p{65mm}p{72mm}}
+\toprule 文件 & 可核对内容\\\midrule\endfirsthead
+\toprule 文件 & 可核对内容\\\midrule\endhead
+\code{matched_validation.json} & 验证种子、参数与全部方法输出\\
+\code{matched_test.json} & 最终合成种子、组件下限与一对一匹配统计\\
+\code{matched_real_absolute.json} & 绝对 underflow 语义下真实帧检测\\
+\code{matched_real_dxtbx.json} & 原 dxtbx 解释下独立对照\\
+\code{matched_timing_final.json} & 每轮时间、单线程/四工作单元与阶段时间\\
+\code{matched_parity.json} & 各例 mask 差与噪声模型浮点差\\
+\code{gaussian_profile_compression.json} & QR 完整拟合、区间、KKT 与原始计时\\
+\code{reduction_path_run2/reduction_path.json} & 32 帧实际命令、输出、旧积分导出和限制\\
+\code{xtal_shelxl.json} & 真实 SHELXL 对照、模型与平台限制\\
+\code{matched_regression_output.txt} & 实际针对性回归输出\\
+\bottomrule
+\end{longtable}
+\section{针对性复现入口}
+以下命令用于解释已有记录的入口，\textbf{本次文档编写没有执行它们}。需要匹配 DIALS 科学环境、源码路径与原始输入；含真实数据的运行应写入新的本地目录。
+\begin{lstlisting}
+python benchmarks/matched_spots.py --split test --output /path/to/new_matched_test.json
+python benchmarks/matched_spots_timing.py --experiments /path/to/integrated.expt --compare-threads --repeat 20 --output /path/to/new_timing.json
+python benchmarks/gaussian_profile_compression.py
+\end{lstlisting}
+\code{matched_spots_parity.py} 对照 NumPy/native 分数模型与选择输出。\code{validate_reduction_path.py} 使用真实生产 backend 验证限定帧路线，需要明确 source EXPT、source refl、composition CIF 和新输出目录。它不能仅凭存在输入文件就替代全扫描科学验收。应在明确需要复验时运行对应检查，避免与任务无关的重复构建或测试。
+\section{实现中需要准确解释的细节}
+原生 occupancy-sum 约束目前只接受 $0<t\le1$，要求成员均可精修、初始占有率严格正并满足总和，且不与其他占有率约束重叠；一般线性约束的理论不代表任意目标和均已实现。角度限制的数值单位为度。ADP 相似残差的非对角分量乘 $\sqrt2$，使平方和对应 Frobenius 范数。距离相似组以第一对为参照。
+
+各向异性位移采用正定参数化或特殊位置不变子空间，但 \code{u_min/u_max} 不等于最终每个特征值都具有相同上下界。活动边界在内部用于警告与相关 s.u. 置空，当前结果并不逐变量序列化完整 \code{active_mask}。
+
+agent 遇完全重叠孪晶模型时跳过常规差值图；直接底层 \code{difference_map()} API 没有孪晶参数来自动检查这一条件。因此调用者必须确保输入属于可解释的单一幅度模型。地图显示采用的截断开方不会改变精修中保留的负强度。
+
+波长不自动为每个元素加载异常散射修正。原生模型的 $f',f''$ 默认为零；使用显式色散或指定适配器时应记录来源。特殊位置只累加不同位置，并按稳定子平均变换的位移张量；对一般位置的全部操作求和不能直接复制到特殊位置。

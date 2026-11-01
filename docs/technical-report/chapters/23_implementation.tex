@@ -1,0 +1,55 @@
+\chapter{实现契约、执行组织与复杂度}
+\section{从数学对象到文件接口}
+还原阶段以 EXPT 表示仪器与晶体，以反射表保存观测位置、强度、标记和实验映射；共享像素分析以 JSON/JSONL 保留 contributor、协方差与来源。结构阶段的 \code{Cell}、\code{Atom}、\code{Structure}、\code{Reflections} 分别表示度量、物理原子参数、对称模型和带误差的观测。物理占有率与 SHELX 特殊位置的文件编码在边界转换，不应混成一个数值定义。
+
+所有处理阶段应携带同一个 reader 与单位契约。当前 agent 与旧 MCP 的 DIALS 调用共同使用 \code{dials_command} 和 \code{spotfinding_options}；默认选择 ariadne/matched。读取原始像素的轮廓与 overlap 分析也经过相同 runtime。非 Python dispatcher 在加载科学模块之前给出明确部署错误，避免以错误解释器执行脚本。
+\section{核心文件与数学职责}
+\begin{longtable}{p{57mm}p{80mm}}
+\toprule 源码相对路径或模块 & 职责\\\midrule\endfirsthead
+\toprule 源码相对路径或模块 & 职责\\\midrule\endhead
+\code{python/src/ariadne/spots.py} & NumPy 检测参考、参数契约与 native dispatch\\
+\code{python/src/ariadne/_native.cpp} & float64 检测、缓存、原生积分与并行工作预算\\
+\code{threshold_adapter.py} & corrected 像素到 ADU 的临时逆变换\\
+\code{lattice_math.py}, \code{ranking.py} & 周期密度、整数基约化、最近点与条件留出评分\\
+\code{skills/ariadne-reduction/scripts/} & 以下列出的独立科学脚本所在目录\\
+\code{dials_runtime.py} & signed underflow、overflow 和 baseline 解码\\
+\code{local_profiles.py} & 局部经验轮廓与 pooled 收缩\\
+\code{overlap_integrator.py} & 背景剖面化、有符号 WLS、SVD 与可估计对比\\
+\code{constrained_pixels.py} & NNLS、Poisson/PG、QR 与条件剖面区间\\
+\code{python/src/ariadne/feedback.py} & 唯一潜变量、低秩 Gaussian 条件化与分组\\
+\code{ariadne_xtal/src/ariadne_xtal/} & 结构计算模块所在目录\\
+\code{scattering.py}, \code{symmetry.py} & 散射求和、唯一轨道、消光与显式对称操作\\
+\code{phasing.py}, \code{refinement.py} & 已知组成求相位、约束参数化与冻结权重精修\\
+\code{restraints.py}, \code{feedback.py} & 化学限制与有信息上限的局部 Gaussian 反馈\\
+\code{maps.py}, \code{visualization.py} & 物理标度地图、椭球与诊断图\\
+\code{compat.py}, \code{shelx.py} & 官方后端调用与严格格式转换边界\\
+\bottomrule
+\end{longtable}
+\section{计算工作与科学接受分别记录}
+一个结构状态包括观测、对称假设、原子集合、连续参数、约束、限制和分组。空间群、元素种类、无序数目或孪晶律改变时，应建立新的假设分支。工具调用返回数值和文件，不能由自然语言直接填写“科学成功”。
+\begin{table}[htbp]\centering\small
+\begin{tabularx}{\textwidth}{p{27mm}X}
+\toprule 状态 & 所需证据\\\midrule
+执行完成 & 请求成功读取，进程或函数完成并保存预期产物\\
+数值收敛 & 目标、步长、梯度或 KKT 满足给定停止条件\\
+可辨识 & 去除规范自由度后，数据支持所报告参数或强度对比\\
+科学接受 & 化学、对称性、残差、独立检验和替代模型共同支持\\
+\bottomrule
+\end{tabularx}
+\caption{四类判断不能用一个退出码替代。不同模块的初始科学状态字段可能不同，应按实际结果读取。}
+\end{table}
+原始输入保留，输出写入独立运行目录；输入清单、字节数、程序版本、参数、日志和产物映射用于追溯。本次文档任务不执行任何 SHA-256 计算或验证，也不调用可能隐式执行该操作的旧验证脚本。旧运行记录中的既有字段不作为本报告验收条件。
+
+确定性计划器可以按依赖运行任务，不要求 LLM。可选宿主智能体的职责是选择有类型动作与保留假设证据，实际衍射、优化和误差由数值部件计算。本报告没有用远程模型调用替代任何科学计算。
+\section{原生结构算法与官方指令的边界}
+原生求相位为已知单胞组成的 $P1$ 多起点电荷翻转或稀疏原子投影。它不包含完整 SHELXT 空间群、原点及元素联立搜索。原生精修支持明确 JSON 模型中的坐标、尺度、ADP、指定占有率和部分约束；一般 HKLF5、全部 AFIX/HFIX、消光、溶剂掩膜和其他完整指令行为由显式官方后端处理。
+
+特别要区分 JSON 功能与 INS 语法：JSON 可表达某个权重或孪晶模型，不意味着 INS 中 WGHT 或 TWIN 已能无损翻译。结构转换白名单之外的科学指令会明确拒绝；原始文件可保留交由官方程序。官方执行成功表示该外部程序完成，不能据此宣称原生功能等价。
+\section{主要计算复杂度}
+对 $N$ 像素、固定核宽和固定轮数，背景、滑窗及分数主要为 $O(N)$，候选排序和 watershed 的排序阶段约为 $O(M\log M)$，其中 $M$ 为候选像素数。常数成本包括两轮标定、多个背景遍历、相关估计和内存读写。多线程在内存带宽、同步、负载和候选分布约束下不保证线性加速。
+
+对 $m$ 像素、$K$ 个轮廓，稠密 WLS/QR 主要为 $O(mK^2+K^3)$。多次区间求解时增广 QR 将后续固定 Gaussian 目标评估从 $m$ 行降至最多 $K+1$ 行，收益随反复求值次数增加。Gaussian 权重若随参数改变，不能直接重复使用旧压缩因子。
+
+结构因子直接求和约为 $O(HN_a)$，其中 $H$ 为反射数、$N_a$ 为对称展开原子数。通用三点差分 Jacobian 约需 $2P$ 次参数扰动计算，一轮导数约为 $O(PHN_a)$；密集参数系统求解约为 $O(P^3)$。当前通用原生精修使用 SciPy 信赖域与三点差分，理论解析导数没有被表述为已经全量实现。
+
+三维相位恢复网格 $M=N_1N_2N_3$ 的每次 FFT 约为 $O(M\log M)$。独立起点适于并行，同一起点内的迭代具有顺序依赖。低秩反馈全局部分依赖相关秩 $r$，但大的重叠连接组仍需局部稠密处理；因此实现保留矩阵预算而不承诺任意规模。

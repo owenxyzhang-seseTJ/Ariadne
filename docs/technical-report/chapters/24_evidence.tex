@@ -1,0 +1,104 @@
+\chapter{已有验证证据与性能结果}
+\section{证据分层与时间范围}
+本章汇总仓库已保存的记录，主要为 2026 年 10 月 30--31 日的实验与回归。本次写报告只核对文件、源码与公式，没有再次运行这些科学计算。不同记录的环境、样本和阶段不能合并为一次总实验；旧报告的历史测试数也不与最新针对性回归相加。
+
+合成数据提供已知真值，但正向生成器与被测模型相同的恢复实验，不能独立证明正向模型正确。真实积分参考提供位置与信噪比支持，但不是完整真实性标签。外部程序比较需要模型、权重和时间范围相近；有限指标接近不等于全部指令一致。
+\section{合成检测留出集}
+验证种子为 200--219，最终测试种子为 300--319；每套各含 20 张 $512\times512$ 图像。规则场景含增益、偏置、读出噪声与掩膜；复杂场景另含环、间隙和尖峰。位置匹配为一对一分配，门限 3 像素，双方均剔除小于 6 像素组件。
+\begin{table}[htbp]\centering\small
+\begin{tabular}{llrrr}
+\toprule 场景 & 方法 & Precision & Recall & F1\\\midrule
+规则 & Ariadne matched & 0.9985 & 0.6929 & 0.8181\\
+规则 & DIALS Extended，oracle noise & 1.0000 & 0.3633 & 0.5329\\
+复杂 & Ariadne matched & 0.9893 & 0.6388 & 0.7763\\
+复杂 & DIALS Extended，oracle noise & 0.9969 & 0.4401 & 0.6106\\
+\bottomrule
+\end{tabular}
+\caption{最终测试集，来源为 \code{matched_test.json}。oracle 对照使用真实背景和读出方差构造 $1+r/b$ 方差增益图。}
+\end{table}
+这些结果支持指定合成条件下召回与 F1 提高，同时精确率略低于强基线。oracle 方差图使对照优于忽略读出噪声的设置，但它不是完整 Poisson--Gaussian 似然。组件下限为 1 的完整结果也保存在 JSON，不能省略该评价条件后推广表中精确率。
+\section{真实帧与读取语义}
+五个扫描各取 8 帧，共 40 张 $1024\times1536$ 图。参考来自既有双域积分反射，以计算位置、帧范围与 $I/\sigma\ge3$ 定义召回代理。
+\begin{table}[htbp]\centering\small
+\begin{tabularx}{\textwidth}{Xrrr}
+\toprule 方法，同一绝对 underflow 解释 & 召回代理 & 组件数 & 参考支持比例\\\midrule
+Ariadne matched & 0.9666 & 2834 & 0.8345\\
+DIALS Extended，原 panel gain & 0.6520 & 1314 & 0.9079\\
+DIALS Extended，仅有效 gain & 0.8046 & 1799 & 0.8994\\
+DIALS Extended，有效 gain 与 offset & 0.8475 & 1978 & 0.8888\\
+\bottomrule
+\end{tabularx}
+\caption{\code{matched_real_absolute.json}，均采用 6 像素下限。参考不完整，最后一列不能称作 precision。}
+\end{table}
+DIALS 校准对照借用同帧背景估计的 gain/offset，不用参考反射调参；其检测时间不包括 Ariadne 标定成本。位置附近存在旧反射不构成独立真实性证明，缺少旧反射也不等于误检。
+
+在第一扫描第 20 帧，旧 dxtbx 解释使 82,397 个像素多加 64 ADU，占 5.24\%，涉及原值 47--64 ADU。绝对 underflow 解码与 FabIO 语义一致。保留旧解释的另一组检测记录中，Ariadne 召回代理为 0.9714，校准 DIALS 为 0.8618，但 Ariadne 参考支持比例降至 0.7692。读取语义会实质改变候选分布，不能跨解释直接归因于算法质量。
+\section{检测速度及逐阶段开销}
+最终内核对四张真实帧运行 14 轮，剔除各方法前两次样本；单线程与四工作单元顺序逐轮交换。排除磁盘读取和径向 bins 构造，保留 Python 调用与动态掩膜成本。
+\begin{table}[htbp]\centering\small
+\begin{tabular}{lr}
+\toprule 同轮方法 & 中位时间 / ms\\\midrule
+Ariadne matched，单线程 & 163.513\\
+Ariadne matched，四工作单元 & 87.195\\
+DIALS Extended，复用 C++/flex 输入 & 27.950\\
+DIALS Extended，含 NumPy/flex 转换 & 32.631\\
+\bottomrule
+\end{tabular}
+\caption{\code{matched_timing_final.json}。四工作单元相对单线程约快 1.88 倍，仍比 DIALS C++ 慢约 3.12 倍。}
+\end{table}
+四工作单元阶段中位数依次为 load 4.25、background 18.38、calibration 24.28、noise 16.18、scores 13.37、basins 4.45 ms。阶段中位数之和不必等于总时间中位数，背景和校准仍为主要热点。Ariadne 执行额外背景、标定、相关修正和区域分割，这说明工作量不同，但不改变速度目标未达到的事实。
+
+记录时机器存在持续外部 CPU 负载，因此不可用早期更空闲记录的绝对时间计算本轮收益。现有优化没有证明进一步保持精度的加速已不可能；这里只陈述当前测得性能。
+\section{Gaussian 增广 QR 的完整求解收益}
+基准使用固定种子 6817、三个重叠 Gaussian 轮廓、异方差固定噪声、背景像素与掩膜。每组五次交替计时覆盖完整拟合、所有分量及总量剖面区间；对照仅将压缩函数换为原像素路径。
+\begin{table}[htbp]\centering\small
+\begin{tabular}{rrrr}
+\toprule 请求信号行数 & 原像素 / ms & QR / ms & 加速比\\\midrule
+64 & 12.630 & 12.743 & 0.99\\
+700 & 19.191 & 15.979 & 1.20\\
+1600 & 20.063 & 14.227 & 1.41\\
+12000 & 50.894 & 14.041 & 3.62\\
+60000 & 212.244 & 18.597 & 11.41\\
+\bottomrule
+\end{tabular}
+\caption{\code{gaussian_profile_compression.json}，固定方差 Gaussian NNLS 合成数据，单进程及单线程。}
+\end{table}
+25 对结果的最大区间端点差为 $1.09\times10^{-11}$、强度差 $3.46\times10^{-11}$、目标差 $1.46\times10^{-11}$，原像素空间投影梯度不超过 $7.203\times10^{-13}$。这些是有限案例中的浮点证据，与式~\eqref{eq:augmentedqr} 的代数恒等式共同支持该优化；它们不表示 Poisson/PG 或整条真实流程加速相同倍数。
+\section{32 帧真实链路与结构入口}
+真实 Store、Context 与生产 backend 已执行以下有限路线。
+\begin{table}[htbp]\centering\small
+\begin{tabularx}{\textwidth}{l r X}
+\toprule 阶段 & 时间 / s & 输出\\\midrule
+import & 4.586 & 同一原始 ADU 读取契约的 EXPT\\
+matched find\_spots & 8.875 & 389 个斑点\\
+index & 10.476 & 254/389 归属一个晶格\\
+refine & 8.088 & 原生 DIALS 几何精修输出\\
+integrate & 8.431 & 1048 行，保留 144 个负 sum 强度\\
+\bottomrule
+\end{tabularx}
+\caption{\code{reduction_path_run2/reduction_path.json}。时间含进程、I/O 与计算，无同范围整链 DIALS 基线。}
+\end{table}
+首帧 raw 与 FabIO 逐像素相等，corrected 逆变换后检测 mask 与 raw 一致。该单位检查显式使用 offset/readout，且关闭检测自校准，因此不是探测器实验标定。原数据为双域，此有限单晶路径验证软件衔接；它尚未覆盖完整多扫描约化、缩放和多域吸收/重叠验收。
+
+另取既有完整积分的原 crystal 0，共 8823 行、1188 个负 sum 强度，使用现有 CIF 的组成 C20 H16 Co N2 O5 导出，保留 1092 个负 HKL 行。真实 SHELXT 生成三组 RES/HKL，候选 R1 为 0.270、0.240、0.249；组成和空间群尚需判断。这条证据来自旧积分，不能接到上述 32 帧后宣称新 raw 到完整结构已经成功。
+\section{结构精修与真实 SHELXL 对照}
+\code{xtal_shelxl.json} 保存三种受控模型的真实进程比较。均使用固定晶胞、固定占有率、各向同性 ADP 和显式异常散射。没有自由反射集，限制残差数为零。
+\begin{table}[htbp]\centering\small
+\begin{tabularx}{\textwidth}{Xrrrr}
+\toprule 案例 & 反射数 & 原生 $wR_2$ & SHELXL $wR_2$ & 最大坐标差 / $\angstrom$\\\midrule
+FeN$_4$ 公开实测 & 71 & 0.081480 & 0.0815 & 0.001957\\
+$P\bar1$ 三原子合成 & 665 & 0.024887 & 0.0248 & 0.0000827\\
+$P\bar1$ 八原子合成 & 665 & 0.020725 & 0.0207 & 0.0000772\\
+\bottomrule
+\end{tabularx}
+\caption{有限相同模型中的数值接近；不包含各向异性、无序、占有率或孪晶分数的完整官方等价性验证。}
+\end{table}
+FeN$_4$ 观测来自 Bykov 等的公开数据\cite{fen4_2018}，原生强反射 $R_1=0.04031575$、SHELXL 为 0.0404。当前记录的原生热内核中位时间为 84.90 ms，新 Python 进程为 337.36 ms，SHELXL 新进程为 78.42 ms。该主机为 arm64，SHELXL 为 x86\_64/Rosetta。三个案例的热内核/SHELXL 进程时间比分别约 1.08、1.41、7.16，新 Python 进程比约 4.30、4.36、9.91；范围不同，应分别报告，不支持原生更快的结论。
+
+同一记录还有无噪声四碳 $P1$、4540 条反射的求相位案例：原生峰恢复 RMS 为 0.0107474 $\angstrom$，精修后为 $1.42\times10^{-8}$ $\angstrom$。SHELXT 最佳结果约为 $4.63\times10^{-16}$ $\angstrom$，两者搜索空间不等价。该实例的极小误差源于无噪声和匹配正向模型，不是实验坐标精度或一般成功率。
+\section{针对性回归与证据边界}
+最终检测与接口回归日志记录 90 项通过、45 个子测试通过、2 项 MCP 测试在主环境跳过；后两项在带既有 MCP 运行库的环境单独通过。三条既有 SWIG 类型弃用警告保留。六组合成与四张真实帧在单线程/四工作单元共 20 组对照中布尔像素差为零；噪声统计最大绝对差约 $2.28\times10^{-11}$。
+
+这些结果验证实际用例的一致性，不证明任意阈值附近输入的浮点位级恒等。DIALS 3.30.1 补丁已保存精确行号应用检查和语法检查证据；零上下文 hunk 使用 \code{git apply --unidiff-zero}。历史汇总 \code{summary.json} 属于另一批运行，不把其 369/143 等数量叠加到本章针对性回归。
+
+当前证据支持数学部件、有限案例数值一致性、部分检测质量提升和具体 Gaussian 加速；尚未建立全数据多域结构的最终科学接受，也没有多化学体系解析成功率、跨平台性能排名或全面优于 DIALS/SHELX 的结论。

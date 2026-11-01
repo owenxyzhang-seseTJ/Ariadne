@@ -1,0 +1,114 @@
+\chapter{从电子散射到晶胞结构因子}
+\label{ch:scattering}
+\section{单电子的弹性散射}
+设入射 X 射线为频率 $\omega$、偏振矢量 $\vct e$ 的平面波。在远离吸收边、忽略电子束缚对弹性散射的主要修正时，电子受电场作用作受迫振动。非相对论运动方程为
+\begin{equation}
+m_e\ddot{\vct r}=-e\vct E_0 e^{-\iu\omega t},\qquad
+\ddot{\vct r}=-\frac{e}{m_e}\vct E_0 e^{-\iu\omega t}.
+\end{equation}
+加速电荷产生辐射。远场振幅与入射场振幅之比包含经典电子半径
+\begin{equation}
+r_e=\frac{e^2}{4\pi\varepsilon_0m_ec^2}.
+\end{equation}
+对入射与散射偏振方向取投影后，单电子的微分散射截面为
+\begin{equation}
+\frac{\dif\sigma}{\dif\Omega}=r_e^2
+\left|\vct e_{\mathrm{out}}^{*}\cdot\vct e_{\mathrm{in}}\right|^2.
+\end{equation}
+对两个相互垂直的入射偏振等权平均，并对未分析的两种出射偏振求和，即得到通常的非偏振因子 $(1+\cos^22\theta)/2$。该因子描述探测方向的几何响应，不属于晶体内部的电子密度。
+
+令入射和出射波矢分别为 $\vct k_{\mathrm{in}}$、$\vct k_{\mathrm{out}}$，其长度均为 $2\pi/\lambda$。取散射矢量
+\begin{equation}
+\vct q=\vct k_{\mathrm{in}}-\vct k_{\mathrm{out}},\qquad
+\lVert\vct q\rVert=\frac{4\pi\sin\theta}{\lambda}.
+\end{equation}
+位置 $\vct r$ 上的电子相对于原点多出相位 $\vct q\cdot\vct r$。在运动学近似下，各电子的散射振幅线性相加。
+
+\section{电子密度的傅里叶表示}
+若连续电子数密度为 $\rho(\vct r)$，以单电子振幅为单位的散射振幅为
+\begin{equation}
+F(\vct q)=\int\rho(\vct r)e^{\iu\vct q\cdot\vct r}\dif^3\vct r.
+\label{eq:continuousF}
+\end{equation}
+这一关系来自相位叠加，不需要预先假定原子位置。原子模型只是对密度的一种参数化：
+\begin{equation}
+\rho(\vct r)=\sum_j o_j\rho_j(\vct r-\vct r_j).
+\end{equation}
+把该式代入式~\eqref{eq:continuousF}，并令 $\vct u=\vct r-\vct r_j$，得到
+\begin{equation}
+F(\vct q)=\sum_j o_j f_j(\vct q)e^{\iu\vct q\cdot\vct r_j},\qquad
+f_j(\vct q)=\int\rho_j(\vct u)e^{\iu\vct q\cdot\vct u}\dif^3\vct u.
+\end{equation}
+当电子云近似球对称时，$f_j$ 只依赖 $s=\sin\theta/\lambda$。程序采用公开的 IT92 参数，由 Gemmi 提供系数~\cite{gemmi_scattering}：
+\begin{equation}
+f_j^0(s)=\sum_{m=1}^{4}a_{jm}e^{-b_{jm}s^2}+c_j.
+\label{eq:it92}
+\end{equation}
+这些系数是散射曲线的数值近似，$\sum_ma_{jm}+c_j$ 可以略偏离原子序数。实现保持表值，不把这种偏差隐藏在额外的归一化中。
+
+靠近吸收边时，散射包含色散修正：
+\begin{equation}
+f_j(s,\lambda)=f_j^0(s)+f'_j(\lambda)+\iu f''_j(\lambda).
+\label{eq:anomalous}
+\end{equation}
+其中 $f'$ 改变与入射波同相的部分，$f''$ 描述相位相差 $\pi/2$ 的部分。在不同元素组成的非中心对称结构中，它们可使 $|F_{\vct h}|\ne|F_{-\vct h}|$。因此，保留 Friedel 对的独立观测是绝对结构分析的前提之一。
+
+\section{晶格求和与衍射条件}
+设直接晶格为 $\vct R_{\vct n}=\mat A\vct n$，$\vct n\in\mathbb Z^3$。有限晶体的振幅可分解为
+\begin{equation}
+F_{\mathrm{crystal}}(\vct q)
+=F_{\mathrm{cell}}(\vct q)\sum_{\vct n}e^{\iu\vct q\cdot\mat A\vct n}.
+\end{equation}
+对由 $N_a,N_b,N_c$ 个晶胞组成的长方体，晶格和在每一方向上都是有限几何级数，例如
+\begin{equation}
+\sum_{n=0}^{N_a-1}e^{\iu n\varphi_a}
+=e^{\iu(N_a-1)\varphi_a/2}
+\frac{\sin(N_a\varphi_a/2)}{\sin(\varphi_a/2)}.
+\end{equation}
+当 $\varphi_a,\varphi_b,\varphi_c$ 分别接近 $2\pi$ 的整数倍时，强度集中成窄峰。理想无限晶格的条件为
+\begin{equation}
+\mat A^{\mathsf T}\vct q=2\pi\vct h,
+\qquad \vct q=2\pi\mat A^{-\mathsf T}\vct h.
+\end{equation}
+定义 $\mat B=\mat A^{-\mathsf T}$ 和 $\vct g_{\vct h}=\mat B\vct h$，可得
+\begin{equation}
+d_{\vct h}^{-1}=\lVert\vct g_{\vct h}\rVert,
+\qquad 2d_{\vct h}\sin\theta=\lambda.
+\end{equation}
+原子位置写作 $\vct r_j=\mat A\vct x_j$ 后，结构因子的相位简化为
+\begin{equation}
+\vct q\cdot\vct r_j=2\pi\vct h^{\mathsf T}\vct x_j.
+\end{equation}
+这说明散射振幅中的原子位置相位用分数坐标计算，而热运动与距离可以用笛卡尔坐标计算；二者通过晶胞矩阵连接。
+
+\section{热运动的特征函数}
+令原子的瞬时位置为 $\vct r_j+\vct u_j$，其中 $\E[\vct u_j]=0$。时间平均的原子振幅包含
+\begin{equation}
+\E\left[e^{\iu\vct q\cdot\vct u_j}\right].
+\end{equation}
+若位移服从三维正态分布，协方差为 $\mat U_j=\E[\vct u_j\vct u_j^{\mathsf T}]$，完成平方后得到高斯分布的特征函数
+\begin{equation}
+\E\left[e^{\iu\vct q\cdot\vct u_j}\right]
+=\exp\left(-\frac12\vct q^{\mathsf T}\mat U_j\vct q\right)
+=\exp\left(-2\pi^2\vct g^{\mathsf T}\mat U_j\vct g\right).
+\label{eq:dw}
+\end{equation}
+各向同性情况下 $\mat U_j=U_{\mathrm{iso},j}\mat I$，因而
+\begin{equation}
+T_j(s)=e^{-8\pi^2U_{\mathrm{iso},j}s^2},\qquad
+B_j=8\pi^2U_{\mathrm{iso},j}.
+\end{equation}
+热运动降低高角散射振幅，且不同方向衰减不同。若数据只有很窄的分辨率范围，位移参数、占有率和尺度就容易相关，因为它们均能改变幅度。
+
+\section{正向模型的最终形式}
+把占有率、散射因子、热运动和对称位置合并，得到原生内核使用的振幅
+\begin{equation}
+F_{\vct h}=\sum_{j\in\mathrm{ASU}}o_j f_j(s)
+\sum_{m\in\mathcal O_j}
+\exp\left[-2\pi^2\vct g^{\mathsf T}\mat U_{jm}\vct g
++2\pi\iu\vct h^{\mathsf T}\vct x_{jm}\right].
+\label{eq:fullF}
+\end{equation}
+$\mathcal O_j$ 是原子 $j$ 的不同对称位置集合，重复位置只计一次。运动学强度模型为 $\mu_{\vct h}=k|F_{\vct h}|^2$，其中 $k$ 吸收了实验尺度及已经约定的强度归一化。
+
+吸收、消光、多重散射、探测器响应和积分轮廓不是同一类效应。它们在原始观测到 $y_{\vct h}$ 的链条中有各自的位置。只有数据预处理与精修模型的定义一致，$k|F|^2$ 才能与输入强度直接比较。

@@ -1,7 +1,7 @@
 {
   "schema": "ariadne-release-manifest/2",
-  "build": "0.7.0-dials-deep-accuracy-20261031",
-  "generated_utc": "2026-10-31T11:22:03.063227+00:00",
+  "build": "0.7.0-lecture-report-20261101",
+  "generated_utc": "2026-11-01T11:42:47.168198+00:00",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -65,11 +65,11 @@
     },
     {
       "path": "README.md",
-      "bytes": 7084
+      "bytes": 7565
     },
     {
       "path": "README.zh-CN.md",
-      "bytes": 4092
+      "bytes": 4753
     },
     {
       "path": "ROUND2_OPTIMIZATION.md",
@@ -592,12 +592,400 @@
       "bytes": 89020
     },
     {
+      "path": "docs/.nojekyll",
+      "bytes": 0
+    },
+    {
       "path": "docs/R2_README.md",
       "bytes": 26931
     },
     {
       "path": "docs/R2_README.zh-CN.md",
       "bytes": 22939
+    },
+    {
+      "path": "docs/index.html",
+      "bytes": 434
+    },
+    {
+      "path": "docs/slides/Ariadne_Crystallography_Lecture.pdf",
+      "bytes": 1036428
+    },
+    {
+      "path": "docs/slides/Ariadne_Introduction_Offline.zip",
+      "bytes": 4316354
+    },
+    {
+      "path": "docs/slides/README.zh-CN.md",
+      "bytes": 2406
+    },
+    {
+      "path": "docs/slides/figures.js",
+      "bytes": 14690
+    },
+    {
+      "path": "docs/slides/index.html",
+      "bytes": 3282
+    },
+    {
+      "path": "docs/slides/lecture.js",
+      "bytes": 26897
+    },
+    {
+      "path": "docs/slides/player.js",
+      "bytes": 7307
+    },
+    {
+      "path": "docs/slides/slides.css",
+      "bytes": 10535
+    },
+    {
+      "path": "docs/slides/vendor/katex/LICENSE",
+      "bytes": 1107
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_AMS-Regular.ttf",
+      "bytes": 63632
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_AMS-Regular.woff",
+      "bytes": 33516
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "bytes": 28076
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Caligraphic-Bold.ttf",
+      "bytes": 12368
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Caligraphic-Bold.woff",
+      "bytes": 7716
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Caligraphic-Bold.woff2",
+      "bytes": 6912
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Caligraphic-Regular.ttf",
+      "bytes": 12344
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff",
+      "bytes": 7656
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "bytes": 6908
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Fraktur-Bold.ttf",
+      "bytes": 19584
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Fraktur-Bold.woff",
+      "bytes": 13296
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Fraktur-Bold.woff2",
+      "bytes": 11348
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Fraktur-Regular.ttf",
+      "bytes": 19572
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Fraktur-Regular.woff",
+      "bytes": 13208
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Fraktur-Regular.woff2",
+      "bytes": 11316
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-Bold.ttf",
+      "bytes": 51336
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-Bold.woff",
+      "bytes": 29912
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "bytes": 25324
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-BoldItalic.ttf",
+      "bytes": 32968
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-BoldItalic.woff",
+      "bytes": 19412
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-BoldItalic.woff2",
+      "bytes": 16780
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-Italic.ttf",
+      "bytes": 33580
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-Italic.woff",
+      "bytes": 19676
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-Italic.woff2",
+      "bytes": 16988
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-Regular.ttf",
+      "bytes": 53580
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-Regular.woff",
+      "bytes": 30772
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "bytes": 26272
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Math-BoldItalic.ttf",
+      "bytes": 31196
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Math-BoldItalic.woff",
+      "bytes": 18668
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Math-BoldItalic.woff2",
+      "bytes": 16400
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Math-Italic.ttf",
+      "bytes": 31308
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Math-Italic.woff",
+      "bytes": 18748
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "bytes": 16440
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_SansSerif-Bold.ttf",
+      "bytes": 24504
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_SansSerif-Bold.woff",
+      "bytes": 14408
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_SansSerif-Bold.woff2",
+      "bytes": 12216
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_SansSerif-Italic.ttf",
+      "bytes": 22364
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_SansSerif-Italic.woff",
+      "bytes": 14112
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_SansSerif-Italic.woff2",
+      "bytes": 12028
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_SansSerif-Regular.ttf",
+      "bytes": 19436
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_SansSerif-Regular.woff",
+      "bytes": 12316
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_SansSerif-Regular.woff2",
+      "bytes": 10344
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Script-Regular.ttf",
+      "bytes": 16648
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Script-Regular.woff",
+      "bytes": 10588
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Script-Regular.woff2",
+      "bytes": 9644
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size1-Regular.ttf",
+      "bytes": 12228
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size1-Regular.woff",
+      "bytes": 6496
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "bytes": 5468
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size2-Regular.ttf",
+      "bytes": 11508
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size2-Regular.woff",
+      "bytes": 6188
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "bytes": 5208
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size3-Regular.ttf",
+      "bytes": 7588
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size3-Regular.woff",
+      "bytes": 4420
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "bytes": 3624
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size4-Regular.ttf",
+      "bytes": 10364
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size4-Regular.woff",
+      "bytes": 5980
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "bytes": 4928
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Typewriter-Regular.ttf",
+      "bytes": 27556
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Typewriter-Regular.woff",
+      "bytes": 16028
+    },
+    {
+      "path": "docs/slides/vendor/katex/fonts/KaTeX_Typewriter-Regular.woff2",
+      "bytes": 13568
+    },
+    {
+      "path": "docs/slides/vendor/katex/katex.min.css",
+      "bytes": 24793
+    },
+    {
+      "path": "docs/slides/vendor/katex/katex.min.js",
+      "bytes": 273081
+    },
+    {
+      "path": "docs/technical-report/Ariadne_Mathematical_Technical_Report.pdf",
+      "bytes": 977715
+    },
+    {
+      "path": "docs/technical-report/Ariadne_Mathematical_Technical_Report.tex",
+      "bytes": 7939
+    },
+    {
+      "path": "docs/technical-report/Ariadne_Mathematical_Technical_Report_LaTeX.zip",
+      "bytes": 1234450
+    },
+    {
+      "path": "docs/technical-report/README.zh-CN.md",
+      "bytes": 1898
+    },
+    {
+      "path": "docs/technical-report/chapters/00_scope.tex",
+      "bytes": 2987
+    },
+    {
+      "path": "docs/technical-report/chapters/01_scattering.tex",
+      "bytes": 6114
+    },
+    {
+      "path": "docs/technical-report/chapters/02_geometry_symmetry.tex",
+      "bytes": 5429
+    },
+    {
+      "path": "docs/technical-report/chapters/03_statistics.tex",
+      "bytes": 5298
+    },
+    {
+      "path": "docs/technical-report/chapters/04_phasing.tex",
+      "bytes": 8270
+    },
+    {
+      "path": "docs/technical-report/chapters/05_refinement.tex",
+      "bytes": 6271
+    },
+    {
+      "path": "docs/technical-report/chapters/06_constraints.tex",
+      "bytes": 6685
+    },
+    {
+      "path": "docs/technical-report/chapters/07_disorder_twins.tex",
+      "bytes": 6559
+    },
+    {
+      "path": "docs/technical-report/chapters/08_uncertainty.tex",
+      "bytes": 6236
+    },
+    {
+      "path": "docs/technical-report/chapters/11_visualization.tex",
+      "bytes": 5536
+    },
+    {
+      "path": "docs/technical-report/chapters/20_raw_detection.tex",
+      "bytes": 10038
+    },
+    {
+      "path": "docs/technical-report/chapters/21_geometry_integration.tex",
+      "bytes": 9855
+    },
+    {
+      "path": "docs/technical-report/chapters/22_feedback.tex",
+      "bytes": 5121
+    },
+    {
+      "path": "docs/technical-report/chapters/23_implementation.tex",
+      "bytes": 6241
+    },
+    {
+      "path": "docs/technical-report/chapters/24_evidence.tex",
+      "bytes": 9836
+    },
+    {
+      "path": "docs/technical-report/chapters/25_reproduction.tex",
+      "bytes": 4191
+    },
+    {
+      "path": "docs/technical-report/figures/density_sections.pdf",
+      "bytes": 22822
+    },
+    {
+      "path": "docs/technical-report/figures/refinement_diagnostics.pdf",
+      "bytes": 146611
+    },
+    {
+      "path": "docs/technical-report/figures/structure_ellipsoids.pdf",
+      "bytes": 41071
+    },
+    {
+      "path": "docs/technical-report/references.tex",
+      "bytes": 5500
     },
     {
       "path": "environment.yml",

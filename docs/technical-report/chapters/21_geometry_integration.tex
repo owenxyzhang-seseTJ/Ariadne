@@ -1,0 +1,128 @@
+\chapter{晶格几何、共享像素与精确降维}
+\section{Ewald 条件与扫描导数}
+设 $A_q$ 为取向后的倒易基，$F,S$ 为固定和设置旋转，扫描轴为 $e$。实验室散射向量与出射波矢为
+\begin{equation}
+q=SR_e(\varphi)FA_qh,\qquad s_1=s_0+q,\qquad |s_1|^2=|s_0|^2.
+\end{equation}
+令 $v_\theta=SR_eF(\partial A_q/\partial\theta)h$、$t=(Se)\times q$。隐式求导给出
+\begin{equation}
+\frac{\partial\varphi}{\partial\theta}=-\frac{s_1^{\mathsf T}v_\theta}{s_0^{\mathsf T}t},\qquad
+\frac{\partial s_1}{\partial\theta}=v_\theta+t\frac{\partial\varphi}{\partial\theta}.
+\end{equation}
+分母等价于 $s_1^{\mathsf T}t$，因为 $q^{\mathsf T}t=0$。接近 Ewald 相切时的高灵敏度属于几何性质。实际扫描分支、角度圈数和面板选择由原生 DIALS 预测器提供，局部导数只在选定分支上使用\cite{geometry}。本章 $q=s_1-s_0$ 是不含 $2\pi$ 的实验几何向量；电子散射章节使用 $q_{\rm phys}=k_{\rm in}-k_{\rm out}$，两者满足 $q_{\rm phys}=-2\pi q$。若直接连接二者的 Miller 标记，需要同时作 $h\mapsto-h$ 的约定转换；异常散射存在时不能忽略该符号后交换 Friedel 标签。
+\section{周期晶格密度及归一化}
+仅以离最近格点的距离评分可能偏爱过密倒易晶格。对等方坐标噪声 $\sigma_q$，定义相对基本胞均匀密度的无量纲比
+\begin{equation}
+R_A(q)=|\det A|\sum_{h\in\mathbb Z^3}
+\frac{\exp[-|q-Ah|^2/(2\sigma_q^2)]}{(2\pi\sigma_q^2)^{3/2}}.
+\end{equation}
+在一个基本胞上积分周期密度得到 1，因此 $R_A$ 的胞平均值为 1；乘 $|\det A|$ 可以抵消仅靠缩小倒易胞提高点密度的平凡收益。它仍不包含消光、强度或不同相的化学信息。
+
+Poisson 求和公式给出另一种表示：
+\begin{equation}
+R_A(q)=\sum_{k\in\mathbb Z^3}
+ e^{-2\pi^2\sigma_q^2|A^{-\mathsf T}k|^2}
+ e^{2\pi\iu k^{\mathsf T}A^{-1}q}.
+\end{equation}
+窄实空间核适用局部格点和，宽核适用快速衰减的 Fourier 和；正交度量还可分解为三个一维和。整数幺模基变换 $A\mapsto AU$ 保持物理晶格、胞体积和密度不变，LLL 约化可以减少剪切导致的搜索量。当前有限邻域按噪声和度量自适应选择，保留显式半径及内存预算。最近格点搜索具有距离逃逸界检查，但周期密度截断\textbf{没有}经认证的统一误差界，二者不能混为一谈。
+
+候选分数为
+\begin{equation}
+\mathcal S(A)=\frac1{N_v}\sum_{i\in v}
+\log[(1-\eta)+\eta R_A(q_i)].
+\end{equation}
+$\eta$ 是配置混合权重，不是孪晶畴分数。候选短精修按原 imageset 与扫描帧块留出数据、固定仪器几何，再评价 refined crystal。候选生成可能已使用这些数据，因此这是条件精修留出，不是独立整链交叉验证。仿射整数 HKL 秩和支持量用于排除退化支持。
+\section{多晶格几何相容性}
+对观测 $y_i$ 和晶格 $k$ 的预测 $\mu_{kh}$，在统一 mm/mm/radian 单位下计算
+\begin{equation}
+D_{ikh}^2=(y_i-\mu_{kh})^{\mathsf T}
+(\Sigma_i+\Sigma_{kh}^{\rm model})^{-1}(y_i-\mu_{kh}),\quad
+r_{ikh}=e^{-D_{ikh}^2/2}.
+\end{equation}
+多个预测可以同时相容，$r_{ikh}$ 不要求归一化。当前观测协方差采用对角近似；共同仪器系统误差没有自动进入各观测间协方差。几何相容分数、像素贡献强度和物理畴分数分别定义。
+
+几何联合精修使用唯一解释的 anchors 与软权重，保持仪器固定。多来源质心不会被复制为多个独立测量；其分量信息交给像素层。扫描角保留展开后的圈数，避免仅因角度周期相同而混合不同曝光。
+\section{轮廓积分与局部经验模型}
+对连续归一化轮廓 $\varphi(x;\mu,\Sigma)$，体素 $V$ 的系数为
+\begin{equation}
+P_V=\int_V\varphi(x;\mu,\Sigma)\dif x.
+\end{equation}
+像素中心函数值不是体素质量。对平移导数，$\partial\varphi/\partial\mu_j=-\partial\varphi/\partial x_j$，散度定理得到两侧表面通量之差；相邻体素内部表面可复用。裁剪支持后，若 $I$ 定义为完整轮廓幅度，就不能把保留下来的质量重新归一化为 1。
+
+经验轮廓来自孤立参考 shoebox，扣背景、取非负值、质心对齐并在共同参考支持上归一化。局部网格节点使用收缩
+\begin{equation}
+P_c=\frac{n_c}{n_c+\kappa}\bar P_c+
+\frac{\kappa}{n_c+\kappa}P_{\rm pool}.
+\end{equation}
+非负三线性插值保留质量归一化；缺节点或超出覆盖范围时使用 pooled profile。共同有限参考支持是该经验模型的定义域，其盒外真实性仍需独立校准。当前强度误差条件于已给轮廓，不包含轮廓学习误差。
+\section{共享像素模型与背景消元}
+同一 panel 与原始扫描中的候选支持及背景 halo 构成保守连接区域，每个区域对其 contributor 集合只提取一次。组模型为
+\begin{equation}
+y=PI+B_0\beta+\epsilon,\qquad\Cov(\epsilon)=W^{-1}.
+\end{equation}
+对背景白化矩阵做薄 QR：$W^{1/2}B_0=QR$。则
+\begin{equation}
+D=(I_m-QQ^{\mathsf T})W^{1/2}P,\qquad
+\widetilde y=(I_m-QQ^{\mathsf T})W^{1/2}y.
+\end{equation}
+这是对背景 nuisance 参数精确剖面化后的有符号 WLS。实现通过矩阵乘积作用投影，不建立 $m\times m$ 稠密投影阵。列尺度归一化后使用 SVD，避免单位和强度尺度决定数值秩。
+
+令 $D_s=DS^{-1}$、$z=SI$，$V_0$ 为 $D_s$ 的右零空间基。对比 $c^{\mathsf T}I$ 可估计，当且仅当
+\begin{equation}
+V_0^{\mathsf T}S^{-1}c=0.
+\end{equation}
+例如 $P_1=P_2$ 时，仅 $I_1+I_2$ 可由数据确定。非负约束允许某种分配，不会自动增加一个独立测量方向。伪逆提供的分量不应被当成可独立测得的反射强度。
+\section{非负 Gaussian、Poisson 与混合计数似然}
+冻结由背景像素估计的 $b$ 后，Gaussian NNLS 为
+\begin{equation}
+\min_{I\ge0}\frac12\|W^{1/2}(y-b-PI)\|^2.
+\end{equation}
+其 KKT 条件为 $I\ge0$、$\nabla L\ge0$、$I_a\nabla_aL=0$。有符号 WLS 估计允许负强度，NNLS 是不同估计器；对零真实信号截零的正偏差为 $\sigma/\sqrt{2\pi}$，两类结果不可混用。
+
+真实计数满足独立 Poisson 时，$\lambda_j=b_j+\sum_aP_{ja}I_a$，负对数似然为
+\begin{equation}
+L=\sum_j(\lambda_j-N_j\log\lambda_j),\qquad I\ge0.
+\end{equation}
+该分支要求明确的真实计数证据、已去偏置及零读出方差。存在 Gaussian 读出噪声时应使用
+\begin{equation}
+p(Y_j\mid\lambda_j)=\sum_{n=0}^{\infty}
+\frac{e^{-\lambda_j}\lambda_j^n}{n!}
+\frac{\exp[-(Y_j-gn)^2/(2v_r)]}{\sqrt{2\pi v_r}}.
+\end{equation}
+有限求和预算与尾部处理属于独立数值控制；不能用 Gaussian QR 压缩直接替代此混合似然。
+\section{增广 Householder QR 的精确压缩}
+设 Gaussian 目标为 $\|Az-b\|^2$，$A\in\mathbb R^{m\times K}$，构造增广矩阵
+\begin{equation}
+M=[A\ b]=Q\begin{bmatrix}R\\0\end{bmatrix},\qquad Q^{\mathsf T}Q=I_m.
+\end{equation}
+任意 $z$ 都满足
+\begin{equation}
+\|Az-b\|^2=\left\|M\begin{bmatrix}z\\-1\end{bmatrix}\right\|^2
+=\left\|R\begin{bmatrix}z\\-1\end{bmatrix}\right\|^2.
+\label{eq:augmentedqr}
+\end{equation}
+$R$ 至多有 $K+1$ 个非零行。增广目标列保留参数无关残差，所以绝对目标、固定分量与总强度的剖面目标同时保留。非负可行域不变，弱方向和零方向不做秩截断。Householder 正交变换避免正规方程将条件数平方；浮点下仍存在舍入差，数学等价不等于逐位相等。
+
+一次 QR 约需 $O(mK^2)$，随后每次目标或梯度由 $O(mK)$ 降为 $O(K^2)$。当多个区间端点需要反复重优化时，预处理成本容易摊销。实现对 $m\le\max(128,4(K+1))$ 保留原路径；小组不保证收益。该恒等式适用于固定权重、固定设计，权重若随均值或参数变化则需要另行处理。
+\section{剖面区间和精确 Poisson 充分统计}
+对所需对比 $c^{\mathsf T}I=t$，定义
+\begin{equation}
+L_p(t)=\min_{I\ge0,\;c^{\mathsf T}I=t}L(I),\qquad
+2[L_p(t)-L(\widehat I)]\le\chi^2_1(1-\alpha).
+\end{equation}
+每个端点都重新优化其他分量，使用原目标和投影梯度检查可行性。Gaussian 若以平方残差为目标，LR 差直接等于平方残差差；不能再多乘一次 2。卡方阈值属于渐近标定，非负边界、低计数和弱可辨识时没有精确覆盖率保证。当前区间条件于冻结背景、轮廓、几何和噪声标定。
+
+Poisson 也存在特定精确压缩：若一个 contributor 集合内每像素所有正物理系数严格相同，背景恰为零，则 $N_j\sim\mathrm{Poisson}(e_jT)$，$T$ 为对应分量和。联合对数似然中依赖 $T$ 的项只有
+\begin{equation}
+\left(\sum_je_j\right)T-\left(\sum_jN_j\right)\log T.
+\end{equation}
+因此计数和与曝光和是充分统计。实现只合并严格满足条件的行，不按容差合并近似轮廓；其不变量是参数相关似然及似然比，常数项应在需要绝对报告时另行保留。
+\section{校正、总量与导出语义}
+若 $I$ 为完整幅度，观测有效支持质量 $p_a$ 对应期望 $p_aI_a$，后续不能重复除以 $p_a$。对 $z=f\odot I$，一阶传播为
+\begin{equation}
+C_z=FC_IF+JC_fJ+FC_{If}J+JC_{If}^{\mathsf T}F,
+\quad F=\diag(f),\ J=\diag(I).
+\end{equation}
+组总量方差为 $\mathbf1^{\mathsf T}C_z\mathbf1$。若只能测得未校正总量而分量校正不同，仅由这个总量不能确定校正后总量，需要全局观测模型。当前适配不估计完整的孪晶感知全局吸收与缩放。
+
+HKLF4 适于结构求解输入，HKLF5 表示真正同相的复合观测与贡献映射；它们不能完整承载分量和跨观测协方差。内部 JSON 保留相关性与来源，导出应说明丢失的信息。不同相不能仅为使用一个孪晶格式而合并为一个结构。

@@ -1,0 +1,110 @@
+% !TeX program = xelatex
+% 在本目录使用 XeLaTeX 编译两次。
+\documentclass[UTF8,11pt,a4paper,oneside,openany,fontset=fandol]{ctexbook}
+\usepackage[left=24mm,right=24mm,top=23mm,bottom=24mm,headheight=16pt]{geometry}
+\usepackage{amsmath,amssymb,mathtools,bm,graphicx,booktabs,longtable,array,tabularx}
+\usepackage{xcolor,enumitem,fancyhdr,listings,tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usepackage[unicode,colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue!40!black]{hyperref}
+\definecolor{ink}{HTML}{253346}
+\definecolor{accent}{HTML}{345B74}
+\definecolor{papergray}{HTML}{F3F4F5}
+\hypersetup{pdftitle={Ariadne 与 Ariadne-Xtal：从原始衍射像素到结构推断的数学与算法},pdfauthor={Ariadne 技术文档},pdfsubject={数学推导、实现边界与已有验证证据}}
+\ctexset{chapter={format=\huge\bfseries\color{ink},beforeskip=0pt,afterskip=20pt},section={format=\Large\bfseries\color{ink}}}
+\setlength{\parindent}{2em}\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{3em}\renewcommand{\arraystretch}{1.18}
+\linespread{1.10}\allowdisplaybreaks
+\setcounter{tocdepth}{1}\setcounter{secnumdepth}{2}
+\setlist{itemsep=3pt,topsep=5pt,leftmargin=2em}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small Ariadne / Ariadne-Xtal}
+\fancyhead[R]{\small 数学、算法与证据}
+\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0.3pt}
+\newcommand{\vct}[1]{\bm{#1}}\newcommand{\mat}[1]{\mathbf{#1}}
+\newcommand{\iu}{\mathrm{i}}\newcommand{\dif}{\mathrm{d}}\newcommand{\E}{\mathbb E}
+\newcommand{\Var}{\operatorname{Var}}\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\tr}{\operatorname{tr}}\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\diag}{\operatorname{diag}}\newcommand{\Real}{\operatorname{Re}}
+\newcommand{\Imag}{\operatorname{Im}}\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\angstrom}{\text{\AA}}\newcommand{\code}[1]{{\small\nolinkurl{#1}}}
+\newcommand{\latinfont}{\rmfamily}
+\newenvironment{principle}{\begin{quote}\small\color{ink}}{\end{quote}}
+\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true,columns=fullflexible,keepspaces=true,showstringspaces=false,frame=single,rulecolor=\color{black!15},backgroundcolor=\color{papergray}}
+\renewcommand{\topfraction}{0.88}\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.1}\renewcommand{\floatpagefraction}{0.8}
+\begin{document}
+\frontmatter
+\begin{titlepage}
+\vspace*{15mm}
+{\large\color{accent} 数学与算法技术报告\par}
+\vspace{15mm}
+{\Huge\bfseries Ariadne 与 Ariadne-Xtal\par}
+\vspace{8mm}
+{\LARGE\bfseries 从原始衍射像素到结构推断\par}
+\vspace{10mm}
+{\large 探测器还原、自校准检测、重叠积分、相位恢复与约束精修\par}
+\vspace{12mm}\noindent\rule{\textwidth}{0.6pt}
+\vspace{5mm}
+本报告以用户提供的\textit{单晶结构求解与精修的数学基础}为参考，保留散射物理与结构推断主线，补充 Ariadne 数据还原算法、精确加速及现有实测证据。
+\vfill
+\noindent\begin{tabularx}{\textwidth}{@{}lX@{}}
+报告日期 & 2026 年 11 月 01 日\\
+源码基线 & Ariadne 0.7.0；提交 \code{cec63ba186a1843389b1ae161944388304ff1cdd}\\
+还原接口 & DIALS 3.30.1 源码扩展及进程内 Bruker100 适配\\
+结构模块 & 独立 Ariadne-Xtal 原生算法与显式 SHELXT/SHELXL 后端\\
+证据口径 & 已保存的数值记录与源码核对；本次未重跑科学基准\\
+\end{tabularx}
+\end{titlepage}
+\chapter*{内容提要}\addcontentsline{toc}{chapter}{内容提要}
+单晶衍射分析的核心是从有限、带噪声的强度观测推断周期结构。原始像素的单位、背景与相关噪声决定弱信号是否可见；晶格几何和轮廓决定重叠反射能否区分；相位缺失、对称性和参数相关性决定原子模型是否可辨识。Ariadne 与 Ariadne-Xtal 分别实现这些问题中的数据还原与结构计算部件，并通过有类型的产物与来源记录衔接。
+
+本报告先由电子散射、晶胞度量和概率模型建立统一正向关系，再推导原始 ADU 还原、自校准 matched-filter、周期晶格密度评分、共享像素积分、Gaussian 增广 QR 压缩及条件剖面区间。随后讨论相位恢复、非线性精修、严格约束、化学限制、无序、孪晶与不确定度，并给出结构反馈的信息上限、低秩条件化及防止数据重复使用的分组规则。
+
+现有记录表明，自校准检测在指定合成留出场景中提高召回率与 F1，精确率略低于获得真实噪声方差图的 DIALS 强基线；四工作单元检测仍比 DIALS C++ 内核慢约 3.12 倍。固定方差 Gaussian 约束积分在 12,000 与 60,000 行合成像素组中分别加速约 3.62 与 11.41 倍。32 帧真实数据已完成 import 至 integrate 的软件衔接，但完整多扫描、多域结构解析尚未建立科学验收。结构模块与真实 SHELXL 的有限受控比较给出接近的精修指标，其范围不覆盖全部 SHELX 指令。
+
+报告将数学恒等式、近似模型、源码行为和既有验证分开叙述。这里给出的精度和时间均对应明确案例；公式成立的前提与计算成功的含义同时给出，以便读者判断哪些量来自测量，哪些量依赖模型。
+\chapter*{阅读约定}\addcontentsline{toc}{chapter}{阅读约定}
+倒易基矢不含 $2\pi$；长度为 $\angstrom$，笛卡尔位移张量为 $\angstrom^2$。结构因子使用正指数，电子密度反变换使用负指数。原始 ADU、DIALS corrected 像素、光子等效值和校正后的积分强度分别定义，不能仅凭数值相近互换。
+
+参考 PDF 的理论章节在本报告中整理、复用，并据当前实现补注。已有图版沿用原报告明确标注的合成示例；本次没有生成新的科学实验结果。证据文件是本地保存的历史记录，报告制作只执行文档编译和排版检查。
+
+源码中 $A$ 的历史命名有时指晶胞、有时指取向后的倒易基。为避免歧义，本报告新写的数据还原章节以 $C$ 表示直接晶胞矩阵，以 $A_q=UC^{-\mathsf T}$ 表示取向后的倒易基；沿用的结构章节仍用 $\mat A$ 表示直接晶胞，其局部定义优先。
+\tableofcontents
+\chapter*{主要符号}\addcontentsline{toc}{chapter}{主要符号}
+\begin{longtable}{p{32mm}p{106mm}}
+\toprule 符号 & 定义与单位\\\midrule\endfirsthead
+\toprule 符号 & 定义与单位\\\midrule\endhead
+$C,\mat A$ & 直接晶胞矩阵，列为基矢，$\angstrom$\\
+$B=C^{-\mathsf T},A_q=UB$ & 倒易基及取向后的倒易基，$\angstrom^{-1}$\\
+$\vct h,\vct x,\vct r$ & Miller 指数、分数坐标与笛卡尔坐标\\
+$Y,g,o,v_r$ & 原始 ADU、ADU/count 增益、ADU 偏置、ADU$^2$ 读出方差\\
+$x,b,r$ & 光子等效像素、背景、该单位下的读出方差\\
+$h,H$ & 一维检测核与二维可分离检测核；$H$ 在反馈章节也表示观测设计矩阵\\
+$\rho_d,\kappa_H,\phi$ & 残差相关、核方差修正与局部超额方差因子\\
+$P,I,B_0\beta$ & 轮廓设计、完整轮廓强度与像素背景\\
+$F_h,\mu_h,y_h$ & 复结构因子、预测强度与有符号观测强度\\
+$o_j,U_j,\alpha_d$ & 物理占有率、位移协方差与孪晶畴分数\\
+$J,C_p$ & 残差 Jacobian 与条件参数协方差\\
+$m,C_m,D+UU^{\mathsf T}$ & 结构强度预测、其协方差及低秩表示\\
+\bottomrule
+\end{longtable}
+\mainmatter
+\input{chapters/00_scope}
+\input{chapters/01_scattering}
+\input{chapters/02_geometry_symmetry}
+\input{chapters/03_statistics}
+\input{chapters/20_raw_detection}
+\input{chapters/21_geometry_integration}
+\input{chapters/04_phasing}
+\input{chapters/05_refinement}
+\input{chapters/06_constraints}
+\input{chapters/07_disorder_twins}
+\input{chapters/08_uncertainty}
+\input{chapters/22_feedback}
+\input{chapters/11_visualization}
+\input{chapters/23_implementation}
+\input{chapters/24_evidence}
+\appendix
+\input{chapters/25_reproduction}
+\input{references}
+\end{document}

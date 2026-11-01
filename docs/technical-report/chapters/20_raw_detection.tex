@@ -1,0 +1,116 @@
+\chapter{原始像素还原与自校准检测}
+\section{文件解码属于测量模型}
+Bruker FORMAT100 的主像素阵列包含 underflow 与 overflow 标记，附属表分别保存替代值。当前适配器接受 1 或 2 字节主阵列、signed i1 underflow 与 unsigned 16/32 bit overflow；附属表按 16 字节对齐。解码顺序为保存原始零标记位置、依次恢复 overflow、按模式加 baseline、最后将 underflow 位置恢复为绝对 ADU。
+
+若 $U$ 为原始 underflow 位置，$M_j$ 为已经恢复 overflow 的主值，$u_j$ 为 signed underflow 表值，$b_0$ 为 baseline，则正常模式为
+\begin{equation}
+Y_j=\begin{cases}u_j,&j\in U,\\M_j+b_0,&j\notin U.\end{cases}
+\end{equation}
+因此不能在写入 $u_j$ 后向全图再加 $b_0$。当头部明确表示无 baseline 模式时，则不加 baseline。数组最终使用 float64；其精确整数范围覆盖 signed i1 和 unsigned 32 bit 加当前头部基线的实际数值，避免有符号回绕。截断、表计数与标记数量不一致均报错。
+
+进程内 \code{dials_runtime.py} 对同一 DIALS Python dispatcher 安装读取适配，import、find\_spots、integrate 以及轮廓和重叠提取共享该行为。修改只存在于当前进程；已有 EXPT 保留既有探测器范围，新导入范围允许 signed i1 样本。负读出值不是负光子计数，不能因其小于零就自动删除。
+\section{corrected 像素与 ADU 的单位契约}
+DIALS 阈值扩展收到的像素为
+\begin{equation}
+Y_j^{\rm corr}=\frac{Y_j-p_j}{c_j},\qquad
+Y_j=c_jY_j^{\rm corr}+p_j.
+\end{equation}
+$c_j,p_j$ 是实际启用的 correction gain 与 pedestal；外部 lookup map 优先于面板常量，ROI 必须截取同一范围。这里的 correction gain 与检测模型的物理 $g$ 应分别取得，不能因为输入已经叫 corrected 就再次机械地除去面板增益。
+
+适配器构造临时 ADU 数组供检测使用，不修改调用方数组。光子等效起始值和读出方差为
+\begin{equation}
+x_j=\frac{Y_j-o}{g},\qquad r=\frac{v_r}{g^2},\quad g>0.
+\end{equation}
+自校准检测的有效 $g,o,v_r$ 用于候选选择，不回写 detector gain；后续 PixelList、质心和积分仍使用原 DIALS corrected 像素。因而检测校准成功不等于已完成积分噪声实验标定。
+\section{matched-filter 的最优性条件}
+对已知背景、Gaussian 噪声及一个已知形状 $p$，考虑 $x-b=ap+\epsilon$，$\epsilon\sim N(0,\Sigma)$。对任意线性统计量 $w^{\mathsf T}(x-b)$，其单位振幅信噪比为
+\begin{equation}
+\frac{w^{\mathsf T}p}{\sqrt{w^{\mathsf T}\Sigma w}}.
+\end{equation}
+对白化后的向量使用 Cauchy--Schwarz 不等式，最优方向为 $w\propto\Sigma^{-1}p$，标准化统计量为
+\begin{equation}
+Z_*=\frac{p^{\mathsf T}\Sigma^{-1}(x-b)}{\sqrt{p^{\mathsf T}\Sigma^{-1}p}}.
+\end{equation}
+这解释了轮廓加权比单像素阈值更能积累分布式弱信号。当前检测器使用两个固定可分离核、局部标量方差和有限位移相关修正，并未逐窗口求解完整 $\Sigma^{-1}$，故是有物理动机的近似 matched-filter，不能宣称对任意探测器噪声全局最优。
+\section{径向背景与空间调制}
+背景模型为 $b_j=P_{\ell(j)}S_j$。$\ell(j)$ 是径向或散射角分箱，无径向输入时只有一箱；$S$ 在较粗 tile 节点上估计并双线性插值。以 $2\times2$ cell 的有效像素和记为 $X_c$，数量为 $n_c$，其近似期望为 $n_cP_{\ell(c)}S_c$。固定 $S$，Poisson 型比值更新为
+\begin{equation}
+P_\ell=\frac{\sum_{c:\ell(c)=\ell,\;c\in K}X_c}{\sum_{c:\ell(c)=\ell,\;c\in K}n_cS_c}.
+\end{equation}
+固定径向剖面后，tile 内 $S$ 同样由观测和与期望和之比更新。实现用 cell 左上采样位置确定 cell 分箱；最终每像素背景使用各自径向 bins。因此该分块拟合是明确的离散近似，而不是对每像素联合 Poisson 似然的精确解。
+
+初始空间调制由 cell 比值的 tile 中位数取得，背景更新剔除超过 $e_c+3\sqrt{e_c+n_cr}+1$ 的正异常。默认完成两轮径向/空间更新；第二次噪声校准前使用 warm start。径向与空间因子存在乘法尺度自由度，实际有意义的是其乘积。背景逆有效样本数使用径向支持量与插值 tile 支持量的倒数和估计，后续再加入局部估计项；它不是完整背景协方差矩阵。
+\section{有效增益、偏置与读出方差}
+在保留的背景样本上拟合
+\begin{equation}
+\Var(x-b)\simeq\alpha b+\beta.
+\end{equation}
+每 8 行、每 2 列固定取样，按正背景分为 24 个几何强度箱，每箱至少 200 个样本。各箱完整执行四轮 $4\sigma$ 残差裁剪，使用二阶矩 $v_k$ 和背景均值 $\bar b_k$，以 $n_k/v_k^2$ 为权重拟合斜率、截距；有效箱不足或设计退化时不进行该次更新。
+
+令 $x'=(x-a)/\alpha$，则 $b'=(b-a)/\alpha$，有
+\begin{equation}
+\Var(x'-b')\simeq b'+\frac{\alpha a+\beta}{\alpha^2}.
+\end{equation}
+实现选择
+\begin{equation}
+a=\max(-\beta/\alpha,0),\qquad
+r'=\max(\beta,0)/\alpha^2,
+\end{equation}
+并将总单位变换累积为 $O\leftarrow O+Ga$、$G\leftarrow G\alpha$。物理 ADU 中对应 $g_{\rm eff}=gG$、$o_{\rm eff}=o+gO$、$v_{r,\rm eff}=r'g_{\rm eff}^2$。
+
+该变换是依据背景方差关系选取的一种有效参数分解。有限背景动态范围、相关噪声、裁剪和真实空间变化都会影响估计；它不能独立识别任意增益、偏置与读出噪声场，也不是完整 Poisson--Gaussian 极大似然标定。
+\section{相关噪声与局部背景修正}
+标准化残差 $u_j=(x_j-b_j)/\sqrt{\max(\max(b_j,0)+r,10^{-6})}$ 在背景样本上估计 12 种位移相关：
+\begin{equation}
+(0,1),(1,0),(1,1),(1,-1),(0,2),(2,0),
+(1,2),(2,1),(1,-2),(2,-1),(2,2),(2,-2).
+\end{equation}
+相关估计固定每 16 行取样，剔除 $|u|\ge4$；某个位移不足 1000 对时设为零。令一维核自相关为 $a(d)=\sum_i h_i h_{i+d}$，二维核为 $H_{ij}=h_i h_j$，在局部平稳近似下
+\begin{equation}
+\kappa_H=1+2\sum_d\rho_d\frac{a(d_y)a(d_x)}{a(0)^2},\qquad
+\kappa_\infty=1+2\sum_d\rho_d.
+\end{equation}
+两者实现均设下限 0.1；有限相关系数与下限不是对任意协方差正定性的证明。
+
+局部修正使用 $2\times2$ cell、默认半宽 4 cell，即 $9\times9$ cell 窗口。保留 cell 的观测和与背景和之比估计背景乘数 $c$，完整三轮裁剪估计不小于 1 的超额方差因子 $\phi$。实现没有单独把比值 $c$ 截到非负；若极低背景下有符号读出使比值为负，分数方差及高阶矩仍使用 $\max(b,0)$，这与强制非负背景拟合并不相同。cell 背景和必须逐像素累加 $\max(b_j,0)$，不能用粗背景乘像素数替代。窗口样本不足时沿用默认值；\code{local_cells=0} 可显式关闭该修正。
+\section{两尺度分数与阈值近似}
+两个一维核为
+\begin{equation}
+h_f=\frac{(1,4,6,4,1)}{16},\qquad
+h_c=\frac{(4,16,32,48,56,48,32,16,4)}{256}.
+\end{equation}
+令 $m_j$ 为有效掩膜，检测中心附近定义
+\begin{align}
+N&=\sum_j H_jm_j(x_j-b_j),& A&=\sum_jH_jm_j,&Q&=\sum_jH_j^2m_j,\\
+V&=\max(\max(b,0)+r,10^{-6})\phi
+\left(\kappa_HQ+\kappa_\infty A^2n_{\rm eff}^{-1}\right).
+\end{align}
+第一项近似滤波后的噪声，第二项近似背景估计误差。$b,r,\phi$ 取局部中心尺度，因此在强梯度、复杂掩膜和非平稳噪声下不是精确方差。有效核质量 $A\le0.5$ 或中心无效时，分数设为负无穷。
+
+局部 Poisson 偏度和峰度近似为
+\begin{equation}
+\gamma_1=\frac{\max(b,0)(\sum_i h_i^3)^2}{V^{3/2}},\qquad
+\gamma_2=\frac{\max(b,0)(\sum_i h_i^4)^2}{V^2}.
+\end{equation}
+代码在阈值 $t$ 处减去 Cornish--Fisher 分位修正
+\begin{equation}
+Z=\frac{N}{\sqrt V}-\left[
+\frac{\gamma_1(t^2-1)}6+\frac{\gamma_2(t^3-3t)}{24}
+-\frac{\gamma_1^2(2t^3-5t)}{36}\right].
+\end{equation}
+上述高阶矩未完整建模相关与缺失核的高阶累积量，是低计数尾部的近似处理。
+
+二维 Gaussian 随机场局部极大数的高阈值近似为
+\begin{equation}
+\E N_{\max}(t)\simeq\frac{\mathcal A\sqrt{\lambda_y\lambda_x}}{(2\pi)^{3/2}}
+t e^{-t^2/2},\qquad \lambda_j=2[1-C(e_j)/C(0)].
+\end{equation}
+每尺度分配一半目标，二分搜索 $t\in[1,12]$。默认 \code{false_alarms=0.02} 是这一模型的每帧噪声峰设计目标。空间非平稳性、边界、背景估计和高阶相关均使该值不能直接解释为已验证误检率、族错误概率或 FDR；显式 peak threshold 可覆盖它。
+\section{区域生长与尖峰排除}
+细尺度 $Z\ge3$ 的像素构成候选，按分数下降执行 watershed。相遇盆地在峰谷差小于配置 contrast 时合并，否则边界被排除。每个盆地只需在任一尺度包含达到该尺度峰阈值的局部极大，即可进入后续选择。
+
+尖峰检验比较残差最大值附近两个相邻像素 core 与其余 $3\times3$ halo：若 $f\,\mathrm{core}-\mathrm{halo}$ 超过相应近似噪声的配置倍数，则排除。最后可按连接组件像素数过滤。这些步骤利用斑点空间形态，不能把所有真实窄峰和探测器异常严格分类；组件下限是评价时必须一致的条件。
+\section{保持模型与精度的实现优化}
+背景、校准与分数保持 float64，不启用 fast-math，不减少采样或迭代。优化集中在内存与重复计算：中间背景仅插值校准所需位置；最终才生成完整背景；融合插值和裁剪、双通道滑窗；线程内复用工作区；细尺度使用五行缓存，粗尺度响应按候选惰性求值。
+
+核系数是二进制精确分数，稀疏掩膜变化可局部更新 $A,Q$。这一事实不意味着所有滤波加法均位级相同，浮点累加顺序仍可改变末位。Apple 实现使用 double NEON 与 \code{dispatch_apply_f}；每次调用最多请求四工作单元，并发调用共享三个附加 worker 配额。每个 caller 仍独立存在，因此整个进程不限于四线程。小图和其他平台使用单线程。
