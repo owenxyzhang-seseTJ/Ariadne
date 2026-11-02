@@ -4,11 +4,15 @@
 
 所有处理阶段应携带同一个 reader 与单位契约。当前 agent 与旧 MCP 的 DIALS 调用共同使用 \code{dials_command} 和 \code{spotfinding_options}；默认选择 ariadne/matched。读取原始像素的轮廓与 overlap 分析也经过相同 runtime。非 Python dispatcher 在加载科学模块之前给出明确部署错误，避免以错误解释器执行脚本。
 \section{核心文件与数学职责}
-\begin{longtable}{p{57mm}p{80mm}}
+\begin{longtable}{p{64mm}p{88mm}}
 \toprule 源码相对路径或模块 & 职责\\\midrule\endfirsthead
 \toprule 源码相对路径或模块 & 职责\\\midrule\endhead
 \code{python/src/ariadne/spots.py} & NumPy 检测参考、参数契约与 native dispatch\\
 \code{python/src/ariadne/_native.cpp} & float64 检测、缓存、原生积分与并行工作预算\\
+\code{_likelihood_kernel.h} & Poisson--Gaussian 精确卷积\\
+\code{_centroid_kernel.h} & 质心 EM 完整候选责任度\\
+\code{_scaling_kernel.h} & 缩放设计有序装配\\
+\code{_grouping_kernel.h} & 精确整数分组与排序窗口\\
 \code{threshold_adapter.py} & corrected 像素到 ADU 的临时逆变换\\
 \code{lattice_math.py}, \code{ranking.py} & 周期密度、整数基约化、最近点与条件留出评分\\
 \code{skills/ariadne-reduction/scripts/} & 以下列出的独立科学脚本所在目录\\
@@ -45,8 +49,21 @@
 原生求相位为已知单胞组成的 $P1$ 多起点电荷翻转或稀疏原子投影。它不包含完整 SHELXT 空间群、原点及元素联立搜索。原生精修支持明确 JSON 模型中的坐标、尺度、ADP、指定占有率和部分约束；一般 HKLF5、全部 AFIX/HFIX、消光、溶剂掩膜和其他完整指令行为由显式官方后端处理。
 
 特别要区分 JSON 功能与 INS 语法：JSON 可表达某个权重或孪晶模型，不意味着 INS 中 WGHT 或 TWIN 已能无损翻译。结构转换白名单之外的科学指令会明确拒绝；原始文件可保留交由官方程序。官方执行成功表示该外部程序完成，不能据此宣称原生功能等价。
+\section{融合原生内核的接口与舍入契约}
+除检测内核外，四个数值热点也由 \code{_native} 提供原生入口。Python 侧全部使用可选导入：扩展缺失时回退到同一参数的 NumPy/SciPy 参考路径，两条路径共享输入校验、异常类型与输出结构；小输入保留参考路径，因为转换和调用开销会抵消收益。
+
+Poisson--Gaussian 卷积内核仍求精确离散模型 $\sum_n p_N(n;\mu)f_G(y-gn)$。逐像素用前向比值的二分搜索定位众数，窗口宽度从 8 起逐倍扩大；每次扩张都检查两侧几何尾界是否达到相对容差，并累计每像素与整次评估的项预算。预算耗尽返回空值，由 Python 转为 \code{LikelihoodBudgetError}，不返回近似结果。众数附近使用稳定 Poisson 偏差多项式，$n\ge16$ 使用 Stirling 余项，零均值项退化为解析 Gaussian。没有高计数 Gaussian 替代。
+
+质心 EM 内核计算完整候选集合的归一化责任度：对每个观测使用完整 $3\times3$ 白化矩阵，保留全部合法候选与均匀离群分量，按块做 log-sum-exp 后归一化，公开的 $N\times M$ 责任度矩阵保持不变。没有近邻裁剪、概率阈值或弱候选删除；块大小只是内存预算，不改变集合。
+
+缩放装配内核按贡献列在原顺序上累加，重复的 equivalence ID 按贡献出现次序相加；分组内核按 z 起点稳定排序、维护活动表并按原方向合并，全部使用 int64 精确比较，不经过 double；窗口内核只替代已排序数组上的双指针扫描，排序、取模与中位数仍由 NumPy 完成，圆周展开限制为左端点小于原始点数且成员数不超过原始点数，并保留首个最大窗口。
+
+舍入方面，光子残差 $y-gn$ 显式保持先乘后减。编译器默认会把该表达式融合为 FMA，使极端 ADU 单位下的结果与 NumPy 相差约 $2\times10^{-5}$（均值 $10^{12}$、增益 $10^{-12}$ 或 $10^{8}$ 时）；阻止融合后差异回到 $10^{-15}$ 量级。这是算术顺序的选择，不是模型或容差改变。
+
 \section{主要计算复杂度}
 对 $N$ 像素、固定核宽和固定轮数，背景、滑窗及分数主要为 $O(N)$，候选排序和 watershed 的排序阶段约为 $O(M\log M)$，其中 $M$ 为候选像素数。常数成本包括两轮标定、多个背景遍历、相关估计和内存读写。多线程在内存带宽、同步、负载和候选分布约束下不保证线性加速。
+
+融合内核保持相同阶数：Poisson--Gaussian 卷积在窗口宽度 $W$ 下每像素 $O(W)$，$W$ 随容差而非固定；质心责任度为 $O(NM)$，块大小只改变常数与峰值内存；缩放装配为 $O(M_rK)$；分组为 $O(n\log n+\sum_i a_i)$，$a_i$ 为活动表长度，最坏情形仍是 $O(n^2)$；排序窗口为 $O(n)$。
 
 对 $m$ 像素、$K$ 个轮廓，稠密 WLS/QR 主要为 $O(mK^2+K^3)$。多次区间求解时增广 QR 将后续固定 Gaussian 目标评估从 $m$ 行降至最多 $K+1$ 行，收益随反复求值次数增加。Gaussian 权重若随参数改变，不能直接重复使用旧压缩因子。
 

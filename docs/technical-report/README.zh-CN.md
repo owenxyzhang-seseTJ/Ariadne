@@ -1,6 +1,6 @@
 # Ariadne 数学与算法技术报告
 
-报告日期：2026年11月01日。
+报告日期：2026年11月02日。
 
 主文件为 `Ariadne_Mathematical_Technical_Report.tex`，PDF 为同名文件。正文含 15 章、复现附录、主要符号、目录与参考文献。报告参考用户提供的 47 页 `Ariadne_Xtal_Mathematical_Technical_Report.pdf`，复用仓库保存的相应理论章节与三个已有合成图版，并新增原始像素还原、matched-filter、晶格评分、共享像素积分、QR 压缩、低秩反馈、实现契约与最新证据章节。
 
@@ -18,7 +18,7 @@ xelatex -no-shell-escape -interaction=nonstopmode -halt-on-error Ariadne_Mathema
 
 ## 材料与结果范围
 
-源码基线为 `cec63ba186a1843389b1ae161944388304ff1cdd`。数值来自仓库 `reports/current_validation/` 的既有记录；本次报告编写没有重跑科学基准或新增结构验收。历史记录的环境和计时口径分别解释，原报告中“尚未运行官方程序”的旧叙述已按现有真实 SHELXL 对照更新。
+源码基线为 `25d228b2f587cf2ba464bd64c89ee1739855fe68`。检测留出集、Gaussian QR、真实链路与结构对照来自仓库 `reports/current_validation/` 的既有记录，本轮未重跑；融合原生内核与缩放侧表的基准于 2026-11-02 实际执行，原始样本与误差保存在同一目录。历史记录的环境和计时口径分别解释，原报告中“尚未运行官方程序”的旧叙述已按现有真实 SHELXL 对照更新。
 
 报告明确保留未完成事项：当前 matched 检测速度仍低于 DIALS C++，全扫描多域约化与新 raw 路线完整结构解析尚未建立科学接受；Gaussian QR 的加速结论限于所列固定方差合成组。
 

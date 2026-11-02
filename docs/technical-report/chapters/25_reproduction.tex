@@ -7,7 +7,7 @@ xelatex -no-shell-escape -interaction=nonstopmode -halt-on-error Ariadne_Mathema
 同一命令运行两次以完成目录、文献与交叉引用。首次生成的辅助文件不属于最终科学数据；交付压缩包包含源文件、已有图版、说明与 PDF，不包含实测反射表、原始帧、数据库和本地结构候选。
 \section{检测与积分证据文件}
 下列路径相对于仓库根目录 \code{reports/current_validation/}。
-\begin{longtable}{p{65mm}p{72mm}}
+\begin{longtable}{p{66mm}p{86mm}}
 \toprule 文件 & 可核对内容\\\midrule\endfirsthead
 \toprule 文件 & 可核对内容\\\midrule\endhead
 \code{matched_validation.json} & 验证种子、参数与全部方法输出\\
@@ -15,7 +15,12 @@ xelatex -no-shell-escape -interaction=nonstopmode -halt-on-error Ariadne_Mathema
 \code{matched_real_absolute.json} & 绝对 underflow 语义下真实帧检测\\
 \code{matched_real_dxtbx.json} & 原 dxtbx 解释下独立对照\\
 \code{matched_timing_final.json} & 每轮时间、单线程/四工作单元与阶段时间\\
+\code{matched_rewrite_timing_final.json} & 改写前后内核同进程交替计时与 DIALS 对照\\
 \code{matched_parity.json} & 各例 mask 差与噪声模型浮点差\\
+\code{numerical\_kernels.json} & PG 密度、完整拟合区间与质心责任度的原始样本和误差\\
+\code{scaling\_kernel.json} & 缩放装配与完整拟合的逐元素一致性与计时\\
+\code{grouping\_kernels.json} & 分组、窗口的精确顺序比较与分派门槛\\
+\code{global\_prepare\_kernel.json} & 缩放侧表完整输出对照与计时\\
 \code{gaussian_profile_compression.json} & QR 完整拟合、区间、KKT 与原始计时\\
 \code{reduction_path_run2/reduction_path.json} & 32 帧实际命令、输出、旧积分导出和限制\\
 \code{xtal_shelxl.json} & 真实 SHELXL 对照、模型与平台限制\\
@@ -23,11 +28,15 @@ xelatex -no-shell-escape -interaction=nonstopmode -halt-on-error Ariadne_Mathema
 \bottomrule
 \end{longtable}
 \section{针对性复现入口}
-以下命令用于解释已有记录的入口，\textbf{本次文档编写没有执行它们}。需要匹配 DIALS 科学环境、源码路径与原始输入；含真实数据的运行应写入新的本地目录。
+以下命令用于解释已有记录的入口。检测留出集、Gaussian QR 与真实链路记录未在本轮重跑；融合内核与缩放侧表的基准在 2026 年 11 月 2 日按下列入口实际执行。需要匹配 DIALS 科学环境、源码路径与原始输入；含真实数据的运行应写入新的本地目录。
 \begin{lstlisting}
 python benchmarks/matched_spots.py --split test --output /path/to/new_matched_test.json
 python benchmarks/matched_spots_timing.py --experiments /path/to/integrated.expt --compare-threads --repeat 20 --output /path/to/new_timing.json
 python benchmarks/gaussian_profile_compression.py
+python benchmarks/numerical_kernels.py --repeats 7 --output reports/current_validation/numerical_kernels.json
+python benchmarks/scaling_kernel.py --output reports/current_validation/scaling_kernel.json
+python benchmarks/grouping_kernels.py --repeats 7
+python benchmarks/global_prepare_kernel.py
 \end{lstlisting}
 \code{matched_spots_parity.py} 对照 NumPy/native 分数模型与选择输出。\code{validate_reduction_path.py} 使用真实生产 backend 验证限定帧路线，需要明确 source EXPT、source refl、composition CIF 和新输出目录。它不能仅凭存在输入文件就替代全扫描科学验收。应在明确需要复验时运行对应检查，避免与任务无关的重复构建或测试。
 \section{实现中需要准确解释的细节}
