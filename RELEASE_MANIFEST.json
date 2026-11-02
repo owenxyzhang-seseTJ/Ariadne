@@ -65,11 +65,11 @@
     },
     {
       "path": "README.md",
-      "bytes": 7565
+      "bytes": 7555
     },
     {
       "path": "README.zh-CN.md",
-      "bytes": 4753
+      "bytes": 4747
     },
     {
       "path": "ROUND2_OPTIMIZATION.md",
@@ -609,15 +609,15 @@
     },
     {
       "path": "docs/slides/Ariadne_Crystallography_Lecture.pdf",
-      "bytes": 1036428
+      "bytes": 1396373
     },
     {
       "path": "docs/slides/Ariadne_Introduction_Offline.zip",
-      "bytes": 4316354
+      "bytes": 4597651
     },
     {
       "path": "docs/slides/README.zh-CN.md",
-      "bytes": 2406
+      "bytes": 2400
     },
     {
       "path": "docs/slides/figures.js",
@@ -625,19 +625,23 @@
     },
     {
       "path": "docs/slides/index.html",
-      "bytes": 3282
+      "bytes": 3320
+    },
+    {
+      "path": "docs/slides/lecture-details.js",
+      "bytes": 30447
     },
     {
       "path": "docs/slides/lecture.js",
-      "bytes": 26897
+      "bytes": 26951
     },
     {
       "path": "docs/slides/player.js",
-      "bytes": 7307
+      "bytes": 7320
     },
     {
       "path": "docs/slides/slides.css",
-      "bytes": 10535
+      "bytes": 11325
     },
     {
       "path": "docs/slides/vendor/katex/LICENSE",

@@ -1,6 +1,6 @@
 # 单晶衍射：晶体学基础与计算方法
 
-32 页中文课堂课件，采用黑白教材式线图、宋体正文及本地 KaTeX 公式。内容参照用户提供的《Ariadne Monograph》，补充从结构基元与点阵开始的入门章节。
+中文课堂课件，采用黑白教材式线图、宋体正文及本地 KaTeX 公式。内容参照用户提供的《Ariadne Monograph》，补充从结构基元与点阵开始的入门章节。
 
 在线入口：https://owenxyzhang-sesetj.github.io/Ariadne/slides/
 

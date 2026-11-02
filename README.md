@@ -8,7 +8,7 @@ This release builds on the recovered R2 source and reconstructs the 0.7.0 agent 
 
 ## Start here
 
-- [Crystallography lecture slides (32 pages, Chinese)](https://owenxyzhang-sesetj.github.io/Ariadne/slides/) · [PDF handout](docs/slides/Ariadne_Crystallography_Lecture.pdf) · [offline bundle](docs/slides/Ariadne_Introduction_Offline.zip) · [source](docs/slides/)
+- [Crystallography lecture slides (Chinese)](https://owenxyzhang-sesetj.github.io/Ariadne/slides/) · [PDF handout](docs/slides/Ariadne_Crystallography_Lecture.pdf) · [offline bundle](docs/slides/Ariadne_Introduction_Offline.zip) · [source](docs/slides/)
 - [Detailed mathematical and technical report (56 pages)](docs/technical-report/Ariadne_Mathematical_Technical_Report.pdf) · [LaTeX project](docs/technical-report/Ariadne_Mathematical_Technical_Report_LaTeX.zip)
 - [Chinese quick start and operation guide](AGENT_GUIDE.zh-CN.md)
 - [Technical report](reports/Ariadne_0_7_0_Technical_Report.pdf) and [LaTeX source](reports/Ariadne_0_7_0_Technical_Report.tex)

@@ -8,7 +8,7 @@
 
 ## 直接使用
 
-先看 [32 页晶体学课程](https://owenxyzhang-sesetj.github.io/Ariadne/slides/)，从结构基元、晶胞与晶系讲到 Bragg、Ewald、结构推断和 agent 设计。课件采用黑白教材式配图与 LaTeX 风格公式，含几何动画；可下载 [PDF 讲义](docs/slides/Ariadne_Crystallography_Lecture.pdf)与[离线完整包](docs/slides/Ariadne_Introduction_Offline.zip)；[网页源码](docs/slides/)保留。详细推导见新编的 [56 页数学与算法技术报告](docs/technical-report/Ariadne_Mathematical_Technical_Report.pdf)，可下载 [LaTeX 工程](docs/technical-report/Ariadne_Mathematical_Technical_Report_LaTeX.zip)。完整操作说明见 [使用指南](AGENT_GUIDE.zh-CN.md)；[早期版本报告](reports/Ariadne_0_7_0_Technical_Report.pdf)继续保留。
+先看 [晶体学课程](https://owenxyzhang-sesetj.github.io/Ariadne/slides/)，从结构基元、晶胞与晶系讲到 Bragg、Ewald、结构推断和 agent 设计。课件采用黑白教材式配图与 LaTeX 风格公式，含几何动画；可下载 [PDF 讲义](docs/slides/Ariadne_Crystallography_Lecture.pdf)与[离线完整包](docs/slides/Ariadne_Introduction_Offline.zip)；[网页源码](docs/slides/)保留。详细推导见新编的 [56 页数学与算法技术报告](docs/technical-report/Ariadne_Mathematical_Technical_Report.pdf)，可下载 [LaTeX 工程](docs/technical-report/Ariadne_Mathematical_Technical_Report_LaTeX.zip)。完整操作说明见 [使用指南](AGENT_GUIDE.zh-CN.md)；[早期版本报告](reports/Ariadne_0_7_0_Technical_Report.pdf)继续保留。
 
 ```bash
 export PYTHONPATH="$PWD/python/src${PYTHONPATH:+:$PYTHONPATH}"

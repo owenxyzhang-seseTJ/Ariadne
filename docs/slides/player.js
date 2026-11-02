@@ -1,7 +1,7 @@
 'use strict';
 (() => {
   const $=s=>document.querySelector(s),slides=window.LECTURE,F=window.LectureFigures;
-  $('#deck').innerHTML=slides.map((s,i)=>`<section class="slide" id="slide-${i+1}" aria-label="第 ${i+1} 页：${s.title}"><div class="slide-topline">${s.part}</div>${i?`<h2>${s.title}</h2>`:''}${s.body}</section>`).join('');
+  $('#deck').innerHTML=slides.map((s,i)=>`<section class="slide ${s.cls||''}" id="slide-${i+1}" aria-label="第 ${i+1} 页：${s.title}"><div class="slide-topline">${s.part}</div>${i?`<h2>${s.title}</h2>`:''}${s.body}</section>`).join('');
   let figureNumber=0;
   document.querySelectorAll('figcaption').forEach(el=>{figureNumber++;el.textContent=el.textContent.replace(/^图\s*\d+/,`图 ${figureNumber}`);});
   const mathErrors=[];
