@@ -609,15 +609,15 @@
     },
     {
       "path": "docs/slides/Ariadne_Crystallography_Lecture.pdf",
-      "bytes": 1527106
+      "bytes": 1605950
     },
     {
       "path": "docs/slides/Ariadne_Introduction_Offline.zip",
-      "bytes": 4698310
+      "bytes": 4741287
     },
     {
       "path": "docs/slides/README.zh-CN.md",
-      "bytes": 2518
+      "bytes": 2617
     },
     {
       "path": "docs/slides/figures.js",
@@ -625,7 +625,11 @@
     },
     {
       "path": "docs/slides/index.html",
-      "bytes": 3372
+      "bytes": 3424
+    },
+    {
+      "path": "docs/slides/lecture-comparison.js",
+      "bytes": 5237
     },
     {
       "path": "docs/slides/lecture-details.js",
