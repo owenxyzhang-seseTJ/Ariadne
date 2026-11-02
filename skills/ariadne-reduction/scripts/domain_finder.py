@@ -17,6 +17,30 @@ import sys
 import numpy as np
 from scipy.spatial import cKDTree
 
+try:
+    from ariadne._native import densest_window as _native_densest_window
+except ImportError:
+    _native_densest_window = None
+
+
+def _densest_window(sorted_values, width, period_size=0):
+    # 小窗口及特殊宽度/形状保留原始 NumPy 标量语义。
+    if (_native_densest_window is not None and (period_size or len(sorted_values)) >= 16
+            and sorted_values.ndim == 1
+            and sorted_values.dtype == np.dtype('float64')
+            and isinstance(width, (float, np.float64))
+            and np.isfinite(width) and width >= 0
+            and np.all(np.isfinite(sorted_values))):
+        return _native_densest_window(sorted_values, width, period_size)
+    left = best_left = best_right = 0
+    for right in range(len(sorted_values)):
+        while (sorted_values[right] - sorted_values[left] > width
+               or (period_size > 0 and right - left + 1 > period_size)):
+            left += 1
+        if (period_size == 0 or left < period_size) and right - left > best_right - best_left:
+            best_left, best_right = left, right
+    return best_left, best_right
+
 
 def load_points(path):
     with path.open(encoding='utf-8', newline='') as handle:
@@ -171,12 +195,7 @@ def common_gap(gaps, tolerance):
     gaps = np.sort(np.asarray(gaps, dtype=float))
     if not len(gaps):
         return None
-    left = best_left = best_right = 0
-    for right in range(len(gaps)):
-        while gaps[right] - gaps[left] > 2 * tolerance:
-            left += 1
-        if right - left > best_right - best_left:
-            best_left, best_right = left, right
+    best_left, best_right = _densest_window(gaps, 2 * tolerance)
     return float(np.median(gaps[best_left:best_right + 1]))
 
 
@@ -188,13 +207,8 @@ def periodic_subset(values, spacing, tolerance, minimum):
     remainders = np.mod(values, spacing)
     order = np.argsort(remainders)
     expanded = np.r_[remainders[order], remainders[order] + spacing]
-    left = best_left = best_right = 0
     n = len(values)
-    for right in range(2 * n):
-        while expanded[right] - expanded[left] > 2 * tolerance or right - left + 1 > n:
-            left += 1
-        if left < n and right - left > best_right - best_left:
-            best_left, best_right = left, right
+    best_left, best_right = _densest_window(expanded, 2 * tolerance, n)
     chosen = order[np.arange(best_left, best_right + 1) % n]
     if len(chosen) < minimum:
         return np.empty(0, dtype=int)

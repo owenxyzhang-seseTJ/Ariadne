@@ -1,0 +1,142 @@
+..............................................FF                         [100%]
+=================================== FAILURES ===================================
+_______ test_native_worker_is_stopped_before_computation_returns[False] ________
+
+tmp_path = PosixPath('/private/var/folders/4v/7ncylwg93550p9qc0kkj3nr80000gn/T/pytest-of-xiaoyuzhang/pytest-51/test_native_worker_is_stopped_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cd77680>
+cancel = False
+
+    @pytest.mark.parametrize('cancel', [False, True])
+    def test_native_worker_is_stopped_before_computation_returns(tmp_path, monkeypatch, cancel):
+        model = tmp_path/'model.cif'
+        write_model(model)
+        root = tmp_path/'session'
+        engine.initialize(dict(mode='audit', inputs={'cif':str(model)},
+                               budget={'action_seconds':10 if cancel else .2}), root)
+        marker = tmp_path/'should_not_finish'
+    
+        def slow_worker(ctx, argv, label):
+            # Exercise the production process supervisor, not a synchronous sleep
+            # in the runner. A successful late computation would leave the marker.
+            code = f'import time;from pathlib import Path;time.sleep(20);Path({str(marker)!r}).touch()'
+            return invoke(ctx, [sys.executable, '-c', code], label)
+    
+        monkeypatch.setattr(action_worker, 'invoke', slow_worker)
+        timer = threading.Timer(.2, engine.cancel, args=(root,)) if cancel else None
+        started = time.monotonic()
+        if timer:
+            timer.start()
+        try:
+            state = engine.run(root, max_steps=1)
+        finally:
+            if timer:
+                timer.join()
+        assert time.monotonic()-started < 4
+        assert state['nodes'][0]['status'] == ('cancelled' if cancel else 'failed')
+        assert not marker.exists()
+        store = Store(root)
+        try:
+            pid = store.db.execute('SELECT pid FROM attempts').fetchone()[0]
+            assert pid
+>           from ariadne.server import pid_alive
+
+../tests_rebuild/test_native_boundaries.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """Local MCP tools for bounded asynchronous reduction and evidence decisions.
+    
+    Only fixed operations and typed PHIL options are accepted. Shell commands are
+    never accepted. A process result and a scientific acceptance are separate states.
+    """
+    from __future__ import annotations
+    
+    from contextlib import contextmanager
+    import fcntl
+    import json
+    from datetime import datetime, timezone
+    import math
+    import os
+    import re
+    from pathlib import Path
+    import signal
+    import subprocess
+    import sys
+    from typing import Literal
+    import uuid
+    
+>   from mcp.server.fastmcp import FastMCP
+E   ModuleNotFoundError: No module named 'mcp'
+
+src/ariadne/server.py:22: ModuleNotFoundError
+________ test_native_worker_is_stopped_before_computation_returns[True] ________
+
+tmp_path = PosixPath('/private/var/folders/4v/7ncylwg93550p9qc0kkj3nr80000gn/T/pytest-of-xiaoyuzhang/pytest-51/test_native_worker_is_stopped_1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10deb75c0>
+cancel = True
+
+    @pytest.mark.parametrize('cancel', [False, True])
+    def test_native_worker_is_stopped_before_computation_returns(tmp_path, monkeypatch, cancel):
+        model = tmp_path/'model.cif'
+        write_model(model)
+        root = tmp_path/'session'
+        engine.initialize(dict(mode='audit', inputs={'cif':str(model)},
+                               budget={'action_seconds':10 if cancel else .2}), root)
+        marker = tmp_path/'should_not_finish'
+    
+        def slow_worker(ctx, argv, label):
+            # Exercise the production process supervisor, not a synchronous sleep
+            # in the runner. A successful late computation would leave the marker.
+            code = f'import time;from pathlib import Path;time.sleep(20);Path({str(marker)!r}).touch()'
+            return invoke(ctx, [sys.executable, '-c', code], label)
+    
+        monkeypatch.setattr(action_worker, 'invoke', slow_worker)
+        timer = threading.Timer(.2, engine.cancel, args=(root,)) if cancel else None
+        started = time.monotonic()
+        if timer:
+            timer.start()
+        try:
+            state = engine.run(root, max_steps=1)
+        finally:
+            if timer:
+                timer.join()
+        assert time.monotonic()-started < 4
+        assert state['nodes'][0]['status'] == ('cancelled' if cancel else 'failed')
+        assert not marker.exists()
+        store = Store(root)
+        try:
+            pid = store.db.execute('SELECT pid FROM attempts').fetchone()[0]
+            assert pid
+>           from ariadne.server import pid_alive
+
+../tests_rebuild/test_native_boundaries.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """Local MCP tools for bounded asynchronous reduction and evidence decisions.
+    
+    Only fixed operations and typed PHIL options are accepted. Shell commands are
+    never accepted. A process result and a scientific acceptance are separate states.
+    """
+    from __future__ import annotations
+    
+    from contextlib import contextmanager
+    import fcntl
+    import json
+    from datetime import datetime, timezone
+    import math
+    import os
+    import re
+    from pathlib import Path
+    import signal
+    import subprocess
+    import sys
+    from typing import Literal
+    import uuid
+    
+>   from mcp.server.fastmcp import FastMCP
+E   ModuleNotFoundError: No module named 'mcp'
+
+src/ariadne/server.py:22: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED ../tests_rebuild/test_native_boundaries.py::test_native_worker_is_stopped_before_computation_returns[False]
+FAILED ../tests_rebuild/test_native_boundaries.py::test_native_worker_is_stopped_before_computation_returns[True]
+2 failed, 46 passed in 2.43s

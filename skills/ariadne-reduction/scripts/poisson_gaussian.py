@@ -12,6 +12,11 @@ import operator
 import numpy as np
 from scipy.special import gammaln, logsumexp
 
+try:
+    from ariadne._native import poisson_gaussian_sums as _native_pg_sums
+except ImportError:
+    _native_pg_sums = None
+
 
 class LikelihoodBudgetError(ValueError):
     """The requested truncation accuracy could not be met within the budget."""
@@ -95,6 +100,12 @@ class PoissonGaussian:
     def _bounded_sums(self, y, mean, remaining):
         """Batch shifted densities; each series has its own mode and tail test."""
         y, mean = np.asarray(y, float), np.asarray(mean, float)
+        if _native_pg_sums is not None:
+            result = _native_pg_sums(y, mean, self.gain, self.variance, self.tolerance,
+                                     self.pixel_budget, remaining)
+            if result is None:
+                raise LikelihoodBudgetError('Poisson-Gaussian exact-sum term budget exceeded; no approximation used')
+            return result
         count = len(y)
         logs, errors = np.empty(count), np.zeros(count)
         zero = mean == 0
@@ -246,7 +257,7 @@ class PoissonGaussian:
 
     def diagnostics(self):
         return {'evaluation': 'exact logsumexp Poisson*Gaussian bounded sum; no high-count approximation',
-                'arithmetic': 'batched mode-centred sum; stable Poisson deviance and Stirling remainder',
+                'arithmetic': 'mode-centred sum; stable Poisson deviance and Stirling remainder',
                 'relative_truncation_tolerance': self.tolerance,
                 'max_relative_density_truncation_bound': self.max_tail,
                 'max_absolute_score_truncation_bound': self.max_score_error,

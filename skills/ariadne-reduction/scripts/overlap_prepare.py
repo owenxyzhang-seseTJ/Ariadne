@@ -16,8 +16,27 @@ from scipy.ndimage import map_coordinates
 from local_profiles import select_profile
 from profile_geometry import gaussian_voxels
 
+try:
+    from ariadne._native import connected_boxes_int64 as _native_connected_boxes
+except ImportError:
+    _native_connected_boxes = None
+
 
 def connected_boxes(boxes):
+    # 小分组的转换成本高于扫描收益，直接保留 Python 路径。
+    if (_native_connected_boxes is not None and isinstance(boxes, (list, tuple, np.ndarray))
+            and len(boxes) >= 32):
+        try:
+            integer_boxes = np.asarray(boxes)
+        except (ValueError, TypeError, OverflowError):
+            integer_boxes = None
+        if (integer_boxes is not None and integer_boxes.ndim == 2
+                and integer_boxes.shape[1] == 6 and integer_boxes.dtype.kind == 'i'):
+            return _native_connected_boxes(np.asarray(integer_boxes, dtype=np.int64))
+    return _connected_boxes_python(boxes)
+
+
+def _connected_boxes_python(boxes):
     parent = list(range(len(boxes)))
 
     def root(i):

@@ -121,6 +121,7 @@ def prepare(records, config):
     if type(order) is not int or not 0 <= order <= 2 or absorption not in (0, 2):
         raise ValueError('Supported scan_order=0..2 and absorption_degree=0 or 2')
     candidates, exclusions, names = [], [], set()
+    equivalent_cache = {}
     for record in records:
         name = record.get('observation_id')
         if not isinstance(name, str) or not name or name in names:
@@ -156,7 +157,10 @@ def prepare(records, config):
             hkl = component['hkl']
             if not isinstance(hkl, list) or len(hkl) != 3 or any(type(x) is not int for x in hkl) or hkl == [0, 0, 0]:
                 raise ValueError('Invalid HKL')
-            identities.append(json.dumps([component['domain'], *equivalent_hkl(hkl, domain['space_group'], domain['anomalous'])]))
+            key = (tuple(hkl), domain['space_group'], domain['anomalous'])
+            if key not in equivalent_cache:
+                equivalent_cache[key] = equivalent_hkl(hkl, domain['space_group'], domain['anomalous'])
+            identities.append(json.dumps([component['domain'], *equivalent_cache[key]]))
         if modes is not None:
             y, covariance, design = modes
             representation = 'fixed_gaussian_information_modes'
@@ -173,11 +177,17 @@ def prepare(records, config):
         candidates.append((record, meta, identities, y, covariance, design, representation))
     if not candidates:
         raise ValueError('No usable observations')
-    scans = sorted({m['scan_id'] for _, meta, *_ in candidates for m in meta})
     ranges = {}
-    for scan in scans:
-        phi = [m['phi_rad'] for _, meta, *_ in candidates for m in meta if m['scan_id'] == scan]
-        ranges[scan] = [float(min(phi)), float(max(phi))]
+    for _, meta, *_ in candidates:
+        for item in meta:
+            scan, phi = item['scan_id'], float(item['phi_rad'])
+            if scan not in ranges:
+                ranges[scan] = [phi, phi]
+            else:
+                ranges[scan][0] = min(ranges[scan][0], phi)
+                ranges[scan][1] = max(ranges[scan][1], phi)
+    scans = sorted(ranges)
+    ranges = {scan: ranges[scan] for scan in scans}
     labels = ['scan_offset:' + scan for scan in scans[1:]]
     labels += [f'scan:{scan}:power:{power}' for scan in scans for power in range(1, order+1)]
     labels += [f'absorption_l2:{j}' for j in range(5)] if absorption else []

@@ -1,1 +1,5 @@
 include src/ariadne/_native.cpp
+include src/ariadne/_likelihood_kernel.h
+include src/ariadne/_centroid_kernel.h
+include src/ariadne/_scaling_kernel.h
+include src/ariadne/_grouping_kernel.h

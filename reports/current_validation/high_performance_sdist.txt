@@ -1,0 +1,79 @@
+/Users/xiaoyuzhang/CrystallographyPrograms/scxrd-open/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:82: SetuptoolsDeprecationWarning: `project.license` as a TOML table is deprecated
+!!
+
+        ********************************************************************************
+        Please use a simple string containing a SPDX expression for `project.license`. You can also use `project.license-files`. (Both options available on setuptools>=77.0.0).
+
+        By 2027-Feb-18, you need to update your project and remove deprecated calls
+        or your builds will no longer be supported.
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  corresp(dist, value, root_dir)
+running sdist
+running egg_info
+writing src/ariadne.egg-info/PKG-INFO
+writing dependency_links to src/ariadne.egg-info/dependency_links.txt
+writing entry points to src/ariadne.egg-info/entry_points.txt
+writing requirements to src/ariadne.egg-info/requires.txt
+writing top-level names to src/ariadne.egg-info/top_level.txt
+reading manifest file 'src/ariadne.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+writing manifest file 'src/ariadne.egg-info/SOURCES.txt'
+warning: sdist: standard file not found: should have one of README, README.rst, README.txt, README.md
+
+running check
+creating ariadne-0.7.0
+creating ariadne-0.7.0/src/ariadne
+creating ariadne-0.7.0/src/ariadne.egg-info
+creating ariadne-0.7.0/src/ariadne/agent
+copying files to ariadne-0.7.0...
+copying MANIFEST.in -> ariadne-0.7.0
+copying pyproject.toml -> ariadne-0.7.0
+copying setup.py -> ariadne-0.7.0
+copying src/ariadne/__init__.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/_centroid_kernel.h -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/_grouping_kernel.h -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/_likelihood_kernel.h -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/_native.cpp -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/_scaling_kernel.h -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/contracts.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/crystal.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/errors.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/evidence.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/feedback.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/feedback_bridge.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/lattice_math.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/ranking.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/server.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/spots.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/threshold_adapter.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne/worker.py -> ariadne-0.7.0/src/ariadne
+copying src/ariadne.egg-info/PKG-INFO -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne.egg-info/SOURCES.txt -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne.egg-info/dependency_links.txt -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne.egg-info/entry_points.txt -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne.egg-info/requires.txt -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne.egg-info/top_level.txt -> ariadne-0.7.0/src/ariadne.egg-info
+copying src/ariadne/agent/__init__.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/action_worker.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/actions.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/backends.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/bundles.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/cli.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/engine.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/loop.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/mcp_tools.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/native_inspect.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/planner.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/process.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/spec.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/store.py -> ariadne-0.7.0/src/ariadne/agent
+copying src/ariadne/agent/util.py -> ariadne-0.7.0/src/ariadne/agent
+Writing ariadne-0.7.0/setup.cfg
+creating build/kernel-sdist
+Creating tar archive
+removing 'ariadne-0.7.0' (and everything under it)
+Source package contains all five native source files

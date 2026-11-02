@@ -1,0 +1,793 @@
+{
+  "policy": "Same process; alternate execution order; two warmup samples per path; timing includes dispatch, input ownership copy and output construction. Exact group/member order and window endpoint equality required.",
+  "dispatch_policy": {
+    "box_minimum": 32,
+    "window_minimum_original_points": 16,
+    "pilot_small_boxes_speedup": 0.916,
+    "pilot_small_common_gap_speedup": 0.98,
+    "decision": "Retain Python below these sizes after initial alternating measurements found no useful benefit."
+  },
+  "cases": [
+    {
+      "kind": "connected_boxes",
+      "name": "small_sparse",
+      "boxes": 16,
+      "timing": {
+        "reference_ms": [
+          0.0030187499999999997,
+          0.003,
+          0.0029520500000000003,
+          0.0029437499999999998,
+          0.0029583,
+          0.00293335,
+          0.0029021000000000003
+        ],
+        "native_ms": [
+          0.0030542,
+          0.00305415,
+          0.00289795,
+          0.0030020999999999997,
+          0.0029749999999999998,
+          0.0029708,
+          0.00285415
+        ],
+        "reference_median_ms": 0.0029520500000000003,
+        "native_median_ms": 0.0029749999999999998,
+        "speedup": 0.9922857142857144,
+        "calls_per_sample": 20
+      },
+      "dispatch_used": false,
+      "exact_group_and_member_order": true,
+      "groups": [
+        16,
+        16
+      ],
+      "all_input_candidates_retained": true
+    },
+    {
+      "kind": "connected_boxes",
+      "name": "sparse_scan",
+      "boxes": 4096,
+      "timing": {
+        "reference_ms": [
+          15.065083,
+          18.996125,
+          14.860209,
+          14.936666,
+          14.945667,
+          14.804792,
+          14.975708
+        ],
+        "native_ms": [
+          1.971542,
+          1.9135,
+          1.934542,
+          1.88875,
+          1.96025,
+          1.898,
+          1.897
+        ],
+        "reference_median_ms": 14.945667,
+        "native_median_ms": 1.9135,
+        "speedup": 7.810643846354847,
+        "calls_per_sample": 1
+      },
+      "dispatch_used": true,
+      "exact_group_and_member_order": true,
+      "groups": [
+        3442,
+        3442
+      ],
+      "all_input_candidates_retained": true
+    },
+    {
+      "kind": "connected_boxes",
+      "name": "dense_scan",
+      "boxes": 2048,
+      "timing": {
+        "reference_ms": [
+          44.282,
+          65.272208,
+          68.493833,
+          110.585875,
+          45.071167,
+          45.961583,
+          42.600125
+        ],
+        "native_ms": [
+          5.806792,
+          4.153083,
+          5.719709,
+          6.062958,
+          4.156167,
+          4.068167,
+          3.903542
+        ],
+        "reference_median_ms": 45.961583,
+        "native_median_ms": 4.156167,
+        "speedup": 11.05864682530803,
+        "calls_per_sample": 1
+      },
+      "dispatch_used": true,
+      "exact_group_and_member_order": true,
+      "groups": [
+        1,
+        1
+      ],
+      "all_input_candidates_retained": true
+    },
+    {
+      "kind": "connected_boxes",
+      "name": "all_intersect",
+      "boxes": 512,
+      "timing": {
+        "reference_ms": [
+          16.969792,
+          17.360875,
+          16.904958,
+          23.266708,
+          27.885625,
+          69.600167,
+          23.814334
+        ],
+        "native_ms": [
+          0.330333,
+          0.316417,
+          0.355834,
+          0.327291,
+          0.343625,
+          0.324083,
+          0.694542
+        ],
+        "reference_median_ms": 23.266708,
+        "native_median_ms": 0.330333,
+        "speedup": 70.4341013462173,
+        "calls_per_sample": 1
+      },
+      "dispatch_used": true,
+      "exact_group_and_member_order": true,
+      "groups": [
+        1,
+        1
+      ],
+      "all_input_candidates_retained": true
+    },
+    {
+      "kind": "connected_boxes",
+      "name": "chain",
+      "boxes": 4096,
+      "timing": {
+        "reference_ms": [
+          14.313916,
+          23.139167,
+          18.092416,
+          16.479042,
+          14.8675,
+          14.294584,
+          14.3835
+        ],
+        "native_ms": [
+          1.057125,
+          1.051625,
+          2.358666,
+          1.540625,
+          1.076,
+          0.946792,
+          1.237459
+        ],
+        "reference_median_ms": 14.8675,
+        "native_median_ms": 1.076,
+        "speedup": 13.817379182156133,
+        "calls_per_sample": 1
+      },
+      "dispatch_used": true,
+      "exact_group_and_member_order": true,
+      "groups": [
+        1,
+        1
+      ],
+      "all_input_candidates_retained": true
+    },
+    {
+      "kind": "densest_window",
+      "points": 8,
+      "period_size": 0,
+      "timing": {
+        "reference_ms": [
+          0.00179959,
+          0.00120709,
+          0.0011975,
+          0.00123083,
+          0.00119083,
+          0.0012795799999999998,
+          0.0012104099999999999
+        ],
+        "native_ms": [
+          0.0013095799999999999,
+          0.00122584,
+          0.0014337500000000001,
+          0.0012112499999999999,
+          0.00120916,
+          0.00123292,
+          0.00131208
+        ],
+        "reference_median_ms": 0.0012104099999999999,
+        "native_median_ms": 0.00123292,
+        "speedup": 0.9817425299289491,
+        "calls_per_sample": 100
+      },
+      "dispatch_used": false,
+      "endpoints": [
+        [
+          5,
+          6
+        ],
+        [
+          5,
+          6
+        ]
+      ],
+      "exact_endpoints": true,
+      "max_endpoint_error": 0
+    },
+    {
+      "kind": "densest_window",
+      "points": 8,
+      "period_size": 8,
+      "timing": {
+        "reference_ms": [
+          0.00407125,
+          0.00280958,
+          0.0028325,
+          0.00282958,
+          0.0028495900000000004,
+          0.0029862499999999998,
+          0.00273042
+        ],
+        "native_ms": [
+          0.002865,
+          0.0037483300000000002,
+          0.00388084,
+          0.0028299999999999996,
+          0.00282167,
+          0.00276667,
+          0.0029812499999999995
+        ],
+        "reference_median_ms": 0.0028325,
+        "native_median_ms": 0.002865,
+        "speedup": 0.9886561954624782,
+        "calls_per_sample": 100
+      },
+      "dispatch_used": false,
+      "endpoints": [
+        [
+          5,
+          6
+        ],
+        [
+          5,
+          6
+        ]
+      ],
+      "exact_endpoints": true,
+      "max_endpoint_error": 0
+    },
+    {
+      "kind": "common_gap",
+      "points": 8,
+      "timing": {
+        "reference_ms": [
+          0.00548335,
+          0.0057917,
+          0.0078625,
+          0.00556045,
+          0.005575,
+          0.00588955,
+          0.00541455
+        ],
+        "native_ms": [
+          0.00555415,
+          0.0055125,
+          0.0057521000000000004,
+          0.0057354500000000004,
+          0.0055375,
+          0.00562705,
+          0.0100979
+        ],
+        "reference_median_ms": 0.005575,
+        "native_median_ms": 0.00562705,
+        "speedup": 0.9907500377640149,
+        "calls_per_sample": 20
+      },
+      "dispatch_used": false,
+      "exact_result": true,
+      "max_absolute_error": 0.0
+    },
+    {
+      "kind": "periodic_subset",
+      "points": 8,
+      "timing": {
+        "reference_ms": [
+          0.013000000000000001,
+          0.013900000000000001,
+          0.01345,
+          0.01426875,
+          0.01405205,
+          0.021131249999999997,
+          0.0221875
+        ],
+        "native_ms": [
+          0.013333349999999999,
+          0.01761665,
+          0.01401875,
+          0.01502705,
+          0.01369165,
+          0.01299795,
+          0.0325125
+        ],
+        "reference_median_ms": 0.01405205,
+        "native_median_ms": 0.01401875,
+        "speedup": 1.0023753901025412,
+        "calls_per_sample": 20
+      },
+      "dispatch_used": false,
+      "exact_candidate_order": true,
+      "candidates": [
+        7,
+        7
+      ],
+      "max_index_error": 0
+    },
+    {
+      "kind": "densest_window",
+      "points": 64,
+      "period_size": 0,
+      "timing": {
+        "reference_ms": [
+          0.01383583,
+          0.01259166,
+          0.01295583,
+          0.011999169999999998,
+          0.01252417,
+          0.01342792,
+          0.011429169999999999
+        ],
+        "native_ms": [
+          0.00183291,
+          0.0014720900000000001,
+          0.00160375,
+          0.00136084,
+          0.00282292,
+          0.00151208,
+          0.00179042
+        ],
+        "reference_median_ms": 0.01259166,
+        "native_median_ms": 0.00160375,
+        "speedup": 7.851385814497272,
+        "calls_per_sample": 100
+      },
+      "dispatch_used": true,
+      "endpoints": [
+        [
+          9,
+          13
+        ],
+        [
+          9,
+          13
+        ]
+      ],
+      "exact_endpoints": true,
+      "max_endpoint_error": 0
+    },
+    {
+      "kind": "densest_window",
+      "points": 64,
+      "period_size": 64,
+      "timing": {
+        "reference_ms": [
+          0.02697084,
+          0.0254525,
+          0.023097919999999997,
+          0.02330083,
+          0.02295208,
+          0.0248175,
+          0.02267041
+        ],
+        "native_ms": [
+          0.00172,
+          0.00161833,
+          0.00167167,
+          0.0014666599999999998,
+          0.00169291,
+          0.00145375,
+          0.00161708
+        ],
+        "reference_median_ms": 0.02330083,
+        "native_median_ms": 0.00161833,
+        "speedup": 14.398070850815348,
+        "calls_per_sample": 100
+      },
+      "dispatch_used": true,
+      "endpoints": [
+        [
+          9,
+          13
+        ],
+        [
+          9,
+          13
+        ]
+      ],
+      "exact_endpoints": true,
+      "max_endpoint_error": 0
+    },
+    {
+      "kind": "common_gap",
+      "points": 64,
+      "timing": {
+        "reference_ms": [
+          0.016054199999999998,
+          0.0169646,
+          0.0214125,
+          0.01641875,
+          0.015627099999999998,
+          0.015572949999999999,
+          0.02136875
+        ],
+        "native_ms": [
+          0.0068521,
+          0.006725,
+          0.00683125,
+          0.00649165,
+          0.006306249999999999,
+          0.008587500000000001,
+          0.006577049999999999
+        ],
+        "reference_median_ms": 0.01641875,
+        "native_median_ms": 0.006725,
+        "speedup": 2.441449814126394,
+        "calls_per_sample": 20
+      },
+      "dispatch_used": true,
+      "exact_result": true,
+      "max_absolute_error": 0.0
+    },
+    {
+      "kind": "periodic_subset",
+      "points": 64,
+      "timing": {
+        "reference_ms": [
+          0.03280415,
+          0.039808300000000005,
+          0.0359479,
+          0.0369292,
+          0.0364646,
+          0.04488125,
+          0.032875
+        ],
+        "native_ms": [
+          0.01535415,
+          0.025468750000000002,
+          0.017227100000000002,
+          0.018662500000000002,
+          0.01585835,
+          0.0254208,
+          0.014979200000000002
+        ],
+        "reference_median_ms": 0.0364646,
+        "native_median_ms": 0.017227100000000002,
+        "speedup": 2.116699850816446,
+        "calls_per_sample": 20
+      },
+      "dispatch_used": true,
+      "exact_candidate_order": true,
+      "candidates": [
+        58,
+        58
+      ],
+      "max_index_error": 0
+    },
+    {
+      "kind": "densest_window",
+      "points": 4096,
+      "period_size": 0,
+      "timing": {
+        "reference_ms": [
+          0.7662776666666667,
+          0.7120000000000001,
+          0.7918886666666666,
+          0.7452083333333334,
+          0.7609583333333334,
+          0.728597,
+          0.8022223333333334
+        ],
+        "native_ms": [
+          0.028902666666666663,
+          0.010333333333333333,
+          0.018402666666666668,
+          0.009458333333333334,
+          0.013639,
+          0.009444333333333334,
+          0.012930666666666667
+        ],
+        "reference_median_ms": 0.7609583333333334,
+        "native_median_ms": 0.012930666666666667,
+        "speedup": 58.84911837492267,
+        "calls_per_sample": 3
+      },
+      "dispatch_used": true,
+      "endpoints": [
+        [
+          1295,
+          1410
+        ],
+        [
+          1295,
+          1410
+        ]
+      ],
+      "exact_endpoints": true,
+      "max_endpoint_error": 0
+    },
+    {
+      "kind": "densest_window",
+      "points": 4096,
+      "period_size": 4096,
+      "timing": {
+        "reference_ms": [
+          1.570486,
+          1.5845,
+          1.574403,
+          1.5216666666666667,
+          1.5603473333333333,
+          1.6338056666666667,
+          1.5454723333333333
+        ],
+        "native_ms": [
+          0.042111333333333334,
+          0.021902666666666668,
+          0.04509733333333333,
+          0.01951366666666667,
+          0.026125,
+          0.018166666666666668,
+          0.049625
+        ],
+        "reference_median_ms": 1.570486,
+        "native_median_ms": 0.026125,
+        "speedup": 60.114296650717705,
+        "calls_per_sample": 3
+      },
+      "dispatch_used": true,
+      "endpoints": [
+        [
+          1295,
+          1410
+        ],
+        [
+          1295,
+          1410
+        ]
+      ],
+      "exact_endpoints": true,
+      "max_endpoint_error": 0
+    },
+    {
+      "kind": "common_gap",
+      "points": 4096,
+      "timing": {
+        "reference_ms": [
+          0.764708,
+          0.910167,
+          0.79575,
+          0.783125,
+          0.84725,
+          0.776042,
+          0.849375
+        ],
+        "native_ms": [
+          0.092375,
+          0.087708,
+          0.144042,
+          0.100875,
+          0.22175,
+          0.12125,
+          0.102416
+        ],
+        "reference_median_ms": 0.79575,
+        "native_median_ms": 0.102416,
+        "speedup": 7.769782065302296,
+        "calls_per_sample": 1
+      },
+      "dispatch_used": true,
+      "exact_result": true,
+      "max_absolute_error": 0.0
+    },
+    {
+      "kind": "periodic_subset",
+      "points": 4096,
+      "timing": {
+        "reference_ms": [
+          2.139666,
+          2.373875,
+          1.957958,
+          1.993083,
+          2.072583,
+          1.67975,
+          2.055042
+        ],
+        "native_ms": [
+          0.535958,
+          0.542,
+          0.555875,
+          0.421917,
+          0.3715,
+          0.350833,
+          0.466375
+        ],
+        "reference_median_ms": 2.055042,
+        "native_median_ms": 0.466375,
+        "speedup": 4.406415438220316,
+        "calls_per_sample": 1
+      },
+      "dispatch_used": true,
+      "exact_candidate_order": true,
+      "candidates": [
+        3720,
+        3720
+      ],
+      "max_index_error": 0
+    },
+    {
+      "kind": "densest_window",
+      "points": 65536,
+      "period_size": 0,
+      "timing": {
+        "reference_ms": [
+          13.963000000000001,
+          16.816583333333334,
+          14.680791666666666,
+          13.987291666666666,
+          12.136305666666667,
+          11.759944666666668,
+          11.905680333333335
+        ],
+        "native_ms": [
+          0.551361,
+          0.5169860000000001,
+          0.519778,
+          0.48456933333333335,
+          0.5169443333333333,
+          0.4547776666666667,
+          0.5174443333333333
+        ],
+        "reference_median_ms": 13.963000000000001,
+        "native_median_ms": 0.5169860000000001,
+        "speedup": 27.00846831442244,
+        "calls_per_sample": 3
+      },
+      "dispatch_used": true,
+      "endpoints": [
+        [
+          48420,
+          49843
+        ],
+        [
+          48420,
+          49843
+        ]
+      ],
+      "exact_endpoints": true,
+      "max_endpoint_error": 0
+    },
+    {
+      "kind": "densest_window",
+      "points": 65536,
+      "period_size": 65536,
+      "timing": {
+        "reference_ms": [
+          25.16647233333333,
+          25.609666666666666,
+          25.447722,
+          25.05601366666667,
+          24.884125,
+          25.008152999999997,
+          25.004319666666664
+        ],
+        "native_ms": [
+          1.1475696666666666,
+          0.9440693333333333,
+          1.060125,
+          1.0375416666666666,
+          1.0838750000000001,
+          1.0090973333333333,
+          1.0412916666666667
+        ],
+        "reference_median_ms": 25.05601366666667,
+        "native_median_ms": 1.0412916666666667,
+        "speedup": 24.062435596814854,
+        "calls_per_sample": 3
+      },
+      "dispatch_used": true,
+      "endpoints": [
+        [
+          48420,
+          49843
+        ],
+        [
+          48420,
+          49843
+        ]
+      ],
+      "exact_endpoints": true,
+      "max_endpoint_error": 0
+    },
+    {
+      "kind": "common_gap",
+      "points": 65536,
+      "timing": {
+        "reference_ms": [
+          12.906416,
+          12.726833,
+          12.747,
+          12.79875,
+          12.884333,
+          14.876291,
+          19.324375
+        ],
+        "native_ms": [
+          1.938333,
+          1.9165,
+          1.932792,
+          1.900459,
+          2.021916,
+          2.417333,
+          2.288667
+        ],
+        "reference_median_ms": 12.884333,
+        "native_median_ms": 1.938333,
+        "speedup": 6.647120489616593,
+        "calls_per_sample": 1
+      },
+      "dispatch_used": true,
+      "exact_result": true,
+      "max_absolute_error": 0.0
+    },
+    {
+      "kind": "periodic_subset",
+      "points": 65536,
+      "timing": {
+        "reference_ms": [
+          30.642333,
+          30.034584,
+          30.726042,
+          31.635792,
+          32.991125,
+          30.600208,
+          30.908458
+        ],
+        "native_ms": [
+          9.771542,
+          9.166041,
+          9.1395,
+          9.297334,
+          11.417584,
+          15.495375,
+          9.165916
+        ],
+        "reference_median_ms": 30.726042,
+        "native_median_ms": 9.297334,
+        "speedup": 3.30482286642601,
+        "calls_per_sample": 1
+      },
+      "dispatch_used": true,
+      "exact_candidate_order": true,
+      "candidates": [
+        59524,
+        59524
+      ],
+      "max_index_error": 0
+    }
+  ],
+  "all_exact": true
+}

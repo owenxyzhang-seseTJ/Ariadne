@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """真实帧交替计时，区分首次掩膜、缓存复用与 NumPy/flex 转换。"""
 import argparse
+import importlib.util
 import json
 import os
 import platform
@@ -22,7 +23,14 @@ def main():
     parser.add_argument('--repeat', type=int, default=20)
     parser.add_argument('--compare-threads', action='store_true',
                         help='Compare one/four matched workers in the same alternating run')
+    parser.add_argument('--baseline-native', type=Path,
+                        help='Alternate with a saved native extension in the same process')
     args = parser.parse_args()
+    baseline = None
+    if args.baseline_native:
+        spec = importlib.util.spec_from_file_location('_native', args.baseline_native)
+        baseline = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(baseline)
     if args.repeat < 3:
         parser.error('repeat must be >= 3')
     el = ExperimentListFactory.from_json_file(args.experiments, check_format=False)
@@ -65,6 +73,17 @@ def main():
                   matched_threads_4=lambda i: threaded(i, 4)) if args.compare_threads else
              dict(matched_mask_vary=lambda i: matched(i, False),
                   matched_same_mask=lambda i: matched(i, True)))
+    if baseline is not None:
+        current = spots._native_matched
+        def previous(i, threads):
+            try:
+                spots._native_matched = baseline.matched_spot_proposals
+                return threaded(i, threads)
+            finally:
+                spots._native_matched = current
+        calls.update(baseline_threads_1=lambda i: previous(i, 1),
+                     baseline_threads_4=lambda i: previous(i, 4))
+        result['baseline_native'] = str(args.baseline_native)
     calls.update(dials_cpp_only=lambda i: dials(i, False),
                  dials_flex_conversion=lambda i: dials(i, True))
     result['compare_threads'] = args.compare_threads

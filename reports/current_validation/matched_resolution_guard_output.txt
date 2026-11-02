@@ -1,0 +1,6 @@
+real scan 0: done
+real scan 1: done
+real scan 2: done
+real scan 3: done
+real scan 4: done
+Saved /Users/xiaoyuzhang/Documents/单晶/ariadne/github-release/reports/current_validation/matched_resolution_guard.json

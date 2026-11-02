@@ -2,6 +2,8 @@
 
 日期：2026-10-31。基线：`main` 的 `dedc4fa`；PR #3–#6 已合并，本轮深度优化与对照在该基线上执行。
 
+后续的高性能内核重写与实测见 [高性能路径重写清单](HIGH_PERFORMANCE_KERNELS.zh-CN.md)；matched 检测内核见 [MATCHED_KERNEL_REWRITE](MATCHED_KERNEL_REWRITE.zh-CN.md)。本文保留当轮结果，不随后续改动更新。
+
 ## 验证结果
 
 - Ariadne：369 项通过，另有 136 个子测试通过；0 失败、0 错误、0 跳过。包括真实 DIALS 适配器、本机 HTTP 协议、取消与硬期限、C++/Python 逐像素一致性。

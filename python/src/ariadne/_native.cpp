@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <exception>
+#include <stdexcept>
 #include <limits>
 #include <vector>
 #if defined(__ARM_NEON)
@@ -580,9 +581,9 @@ struct MatchedWorkspace {
   size_t height=0,width=0;
   std::vector<unsigned char> cached_valid,valid,keep,boundary,needed,good;
   std::vector<float> area[kScales],square[kScales];
-  Vec x,b,inv_neff,phi,residual,z0,z1,bg_xs,bg_ns;
+  Vec x,x0,b,inv_neff,phi,residual,z0,z1,bg_xs,bg_ns;
   std::vector<int> bg_bins;
-  Vec local_xs,local_ns,local_es,local_c,local_phi,local_keep,local_sx,local_se,local_u,local_kn,local_nk,local_su,window_scratch;
+  Vec local_xs,local_es,local_c,local_phi,local_keep,local_sx,local_se,local_u,local_kn,local_nk,local_su,window_scratch;
   std::vector<int> label,parent;
 };
 thread_local MatchedWorkspace matched_ws;
@@ -698,21 +699,26 @@ bool matched_background(MatchedWorkspace& w,const int* bins,int nb,size_t H,size
       }
     }
   });
-  Vec P(nb),cnt(nb),num(nb),den(nb),m,c0,partial(12*size_t(nb));
+  Vec P(nb),cnt(nb),num(nb),den(nb),m,c0,partial(12*size_t(nb)),expected(n);
   std::vector<unsigned char> keep(n),good(nb);
   auto profile=[&]() {
     std::fill(num.begin(),num.end(),0.);std::fill(den.begin(),den.end(),0.);std::fill(cnt.begin(),cnt.end(),0.);
     std::fill(partial.begin(),partial.end(),0.);
-    for(size_t i=0;i<n;++i)if(keep[i]) {
-      double* h=partial.data()+3*((i%4)*size_t(nb)+cb[i]);h[0]+=xs[i];h[1]+=ns[i]*state.S[i];h[2]+=ns[i];
-    }
+    // 四条归约链保持各自原有加法顺序，独立调度不会改变分箱结果。
+    matched_parallel(4,[&](size_t first,size_t last){
+      for(size_t lane=first;lane<last;++lane)for(size_t i=lane;i<n;i+=4)if(keep[i]) {
+        double* h=partial.data()+3*(lane*size_t(nb)+cb[i]);h[0]+=xs[i];h[1]+=ns[i]*state.S[i];h[2]+=ns[i];
+      }
+    });
     for(int bin=0;bin<nb;++bin)for(int lane=0;lane<4;++lane) {
       const double* h=partial.data()+3*(size_t(lane)*nb+bin);num[bin]+=h[0];den[bin]+=h[1];cnt[bin]+=h[2];
     }
     const double need=std::min(double(s.min_bin),std::max(1.,*std::max_element(cnt.begin(),cnt.end())));
     bool any=false;
     for(int k=0;k<nb;++k){good[k]=cnt[k]>=need && den[k]>0;P[k]=good[k]?num[k]/den[k]:0.;any|=good[k];}
-    if(!any)return false;fill_bins(P,good);fill_bins(cnt,good);return true;
+    if(!any)return false;fill_bins(P,good);fill_bins(cnt,good);
+    matched_parallel(n,[&](size_t first,size_t last){for(size_t i=first;i<last;++i)expected[i]=ns[i]*P[cb[i]];});
+    return true;
   };
   auto clipped=[&](size_t i,double e) {
     e=std::max(e,0.);const double d=xs[i]-e-1.;
@@ -727,9 +733,25 @@ bool matched_background(MatchedWorkspace& w,const int* bins,int nb,size_t H,size
       for(size_t y=first;y<last;++y) {
         const auto& a=wy[y];double* __restrict dst=state.S.data()+y*cw;
         const double* __restrict u=rows.data()+a.i0*cw;const double* __restrict v=rows.data()+a.i1*cw;
-        for(size_t x=0;x<cw;++x) {
+        size_t x=0;
+#if defined(__ARM_NEON)
+        const float64x2_t fy=vdupq_n_f64(a.f),iy=vdupq_n_f64(1-a.f),zero=vdupq_n_f64(0.),one=vdupq_n_f64(1.);
+        const float64x2_t clip2=vdupq_n_f64(s.clip*s.clip),readout=vdupq_n_f64(r);
+        for(;x+2<=cw;x+=2) {
+          const size_t i=y*cw+x;
+          const float64x2_t sv=vaddq_f64(vmulq_f64(vld1q_f64(u+x),iy),vmulq_f64(vld1q_f64(v+x),fy));
+          vst1q_f64(dst+x,sv);
+          if(clip_after) {
+            const float64x2_t e=vmaxq_f64(vmulq_f64(vld1q_f64(expected.data()+i),sv),zero);
+            const float64x2_t d=vsubq_f64(vsubq_f64(vld1q_f64(xs.data()+i),e),one),nv=vld1q_f64(ns.data()+i);
+            const uint64x2_t ok=vandq_u64(vcgtq_f64(nv,zero),vorrq_u64(vcleq_f64(d,zero),vcleq_f64(vmulq_f64(d,d),vmulq_f64(clip2,vaddq_f64(e,vmulq_f64(nv,readout))))));
+            keep[i]=vgetq_lane_u64(ok,0)!=0;keep[i+1]=vgetq_lane_u64(ok,1)!=0;
+          }
+        }
+#endif
+        for(;x<cw;++x) {
           dst[x]=u[x]*(1-a.f)+v[x]*a.f;
-          if(clip_after){const size_t i=y*cw+x;keep[i]=clipped(i,ns[i]*P[cb[i]]*dst[x]);}
+          if(clip_after){const size_t i=y*cw+x;keep[i]=clipped(i,expected[i]*dst[x]);}
         }
       }
     });
@@ -754,20 +776,35 @@ bool matched_background(MatchedWorkspace& w,const int* bins,int nb,size_t H,size
       }
     });
     if(fill_tiles(med,ones,enough,ny,nx,1.,m,c0))interpolate_S(true);
-    else matched_parallel(n,[&](size_t first,size_t last){for(size_t i=first;i<last;++i)keep[i]=clipped(i,ns[i]*P[cb[i]]*state.S[i]);});
+    else matched_parallel(n,[&](size_t first,size_t last){for(size_t i=first;i<last;++i)keep[i]=clipped(i,expected[i]*state.S[i]);});
   } else {
     matched_parallel(n,[&](size_t first,size_t last){for(size_t i=first;i<last;++i)keep[i]=clipped(i,ns[i]*state.e[i]);});
   }
   Vec sn(nt),sd(nt),sc(nt);
   for(int round=0;round<s.rounds;++round) {
     if(!profile())return false;
-    std::fill(sn.begin(),sn.end(),0.);std::fill(sd.begin(),sd.end(),0.);std::fill(sc.begin(),sc.end(),0.);
     matched_parallel(ny,[&](size_t first,size_t last){
       for(size_t ty=first;ty<last;++ty)for(size_t tx=0;tx<nx;++tx) {
         double sx=0,se=0,count=0;
-        for(size_t y=ty*tc;y<std::min(ch,(ty+1)*tc);++y)for(size_t x=tx*tc;x<std::min(cw,(tx+1)*tc);++x) {
-          const size_t i=y*cw+x;keep[i]=clipped(i,ns[i]*P[cb[i]]*state.S[i]);
-          if(keep[i]){sx+=xs[i];se+=ns[i]*P[cb[i]];count+=ns[i];}
+        for(size_t y=ty*tc;y<std::min(ch,(ty+1)*tc);++y) {
+          size_t x=tx*tc;const size_t end=std::min(cw,(tx+1)*tc);
+#if defined(__ARM_NEON)
+          const float64x2_t zero=vdupq_n_f64(0.),one=vdupq_n_f64(1.),readout=vdupq_n_f64(r),clip2=vdupq_n_f64(s.clip*s.clip);
+          for(;x+2<=end;x+=2) {
+            const size_t i=y*cw+x;
+            const float64x2_t nv=vld1q_f64(ns.data()+i),ev=vld1q_f64(expected.data()+i);
+            const float64x2_t e=vmaxq_f64(vmulq_f64(ev,vld1q_f64(state.S.data()+i)),zero);
+            const float64x2_t d=vsubq_f64(vsubq_f64(vld1q_f64(xs.data()+i),e),one);
+            const uint64x2_t ok=vandq_u64(vcgtq_f64(nv,zero),vorrq_u64(vcleq_f64(d,zero),vcleq_f64(vmulq_f64(d,d),vmulq_f64(clip2,vaddq_f64(e,vmulq_f64(nv,readout))))));
+            keep[i]=vgetq_lane_u64(ok,0)!=0;keep[i+1]=vgetq_lane_u64(ok,1)!=0;
+            if(keep[i]){sx+=xs[i];se+=expected[i];count+=ns[i];}
+            if(keep[i+1]){sx+=xs[i+1];se+=expected[i+1];count+=ns[i+1];}
+          }
+#endif
+          for(;x<end;++x) {
+            const size_t i=y*cw+x;keep[i]=clipped(i,expected[i]*state.S[i]);
+            if(keep[i]){sx+=xs[i];se+=expected[i];count+=ns[i];}
+          }
         }
         const size_t t=ty*nx+tx;sn[t]=sx;sd[t]=se;sc[t]=count;
       }
@@ -784,7 +821,8 @@ void background_pixels(MatchedWorkspace& w,const MatchedBackground& bg,const int
                        int tile,bool samples,double o=0.,double alpha=1.) {
   const size_t ny=bg.ny,nx=bg.nx,cw=(W+1)/2;
   std::vector<AxisWeight> wx(W);for(size_t x=0;x<W;++x)wx[x]=axis_weight(x,tile,nx);
-  Vec rows,icrows,ic(bg.c0.size());
+  Vec rows,icrows,ic(bg.c0.size()),inverse_count(bg.cnt.size());
+  if(!samples)for(size_t bin=0;bin<bg.cnt.size();++bin)inverse_count[bin]=1./std::max(bg.cnt[bin],1.);
   interp_rows(bg.m,ny,nx,wx,rows);
   if(!samples){for(size_t t=0;t<ic.size();++t)ic[t]=1./bg.c0[t];interp_rows(ic,ny,nx,wx,icrows);}
   w.b.resize(H*W);w.keep.resize(H*W);if(!samples)w.inv_neff.resize(H*W);
@@ -792,10 +830,25 @@ void background_pixels(MatchedWorkspace& w,const MatchedBackground& bg,const int
   matched_parallel((H+ystep-1)/ystep,[&](size_t first,size_t last){
   for(size_t row=first;row<last;++row) {
     const size_t y=row*ystep;const auto a=axis_weight(y,tile,ny);
-    for(size_t x=0;x<W;x+=xstep) {
+    size_t x=0;
+#if defined(__ARM_NEON)
+    if(!samples) {
+      const float64x2_t fy=vdupq_n_f64(a.f),iy=vdupq_n_f64(1-a.f),off=vdupq_n_f64(o),scale=vdupq_n_f64(alpha);
+      for(;x+2<=W;x+=2) {
+        const size_t i=y*W+x;const int b0=bins?bins[i]:0,b1=bins?bins[i+1]:0;
+        const double pp[2]={bg.P[b0],bg.P[b1]},cc[2]={inverse_count[b0],inverse_count[b1]};
+        const float64x2_t sv=vaddq_f64(vmulq_f64(vld1q_f64(rows.data()+a.i0*W+x),iy),vmulq_f64(vld1q_f64(rows.data()+a.i1*W+x),fy));
+        vst1q_f64(w.b.data()+i,vdivq_f64(vsubq_f64(vmulq_f64(vld1q_f64(pp),sv),off),scale));
+        // 保留原标量表达式的左结合加法。
+        vst1q_f64(w.inv_neff.data()+i,vaddq_f64(vaddq_f64(vld1q_f64(cc),vmulq_f64(vld1q_f64(icrows.data()+a.i0*W+x),iy)),vmulq_f64(vld1q_f64(icrows.data()+a.i1*W+x),fy)));
+        const bool keep=bg.keep[(y/2)*cw+x/2];w.keep[i]=keep && w.valid[i];w.keep[i+1]=keep && w.valid[i+1];
+      }
+    }
+#endif
+    for(;x<W;x+=xstep) {
       const size_t i=y*W+x;const int bin=bins?bins[i]:0;
       w.b[i]=(bg.P[bin]*(rows[a.i0*W+x]*(1-a.f)+rows[a.i1*W+x]*a.f)-o)/alpha;
-      if(!samples)w.inv_neff[i]=1./std::max(bg.cnt[bin],1.)+icrows[a.i0*W+x]*(1-a.f)+icrows[a.i1*W+x]*a.f;
+      if(!samples)w.inv_neff[i]=inverse_count[bin]+icrows[a.i0*W+x]*(1-a.f)+icrows[a.i1*W+x]*a.f;
       w.keep[i]=bg.keep[(y/2)*cw+x/2] && w.valid[i];
     }
   }});
@@ -852,7 +905,7 @@ Vec noise_correlation(const MatchedWorkspace& w,size_t H,size_t W,double r) {
       u[j]=v;keep[j]=w.keep[i] && std::fabs(v)<4;
     }
   }
-  for(int j=0;j<12;++j) {
+  matched_parallel(12,[&](size_t first,size_t last){for(size_t j=first;j<last;++j) {
     const int dy=noise_lags[j][0],dx=noise_lags[j][1];double aa=0,cc=0,ac=0;size_t count=0;
     if(H<=size_t(dy))continue;
     for(size_t row=0;16*row<H-dy;++row) {
@@ -863,7 +916,7 @@ Vec noise_correlation(const MatchedWorkspace& w,size_t H,size_t W,double r) {
       }
     }
     if(count>=1000 && aa>0 && cc>0)rho[j]=ac/std::sqrt(aa*cc);
-  }
+  }});
   return rho;
 }
 struct KernelNoise {double kappa,ly,lx;};
@@ -887,15 +940,17 @@ double rft_threshold(double area,const KernelNoise& k,double target) {
   return .5*(lo+hi);
 }
 // 双通道窗口共享遍历和边界判断，double SIMD 保留完整精度。
+template<bool Pair=true>
 void window_pair(const Vec& a,const Vec& b,Vec& oa,Vec& ob,size_t H,size_t W,int k,Vec& scratch) {
-  oa.resize(H*W);ob.resize(H*W);scratch.assign(size_t(matched_threads)*2*W,0.);
+  oa.resize(H*W);if constexpr(Pair)ob.resize(H*W);
+  constexpr size_t channels=Pair?2:1;scratch.assign(size_t(matched_threads)*channels*W,0.);
   const int threads=matched_threads;
   matched_parallel(size_t(threads),[&](size_t first,size_t last){
     for(size_t part=first;part<last;++part) {
       const size_t y0=H*part/threads,y1=H*(part+1)/threads;
-      double* vertical=scratch.data()+part*2*W;
+      double* vertical=scratch.data()+part*channels*W;
       for(size_t y=y0>size_t(k)?y0-k:0;y<std::min(H,y0+k+1);++y)for(size_t x=0;x<W;++x) {
-        vertical[2*x]+=a[y*W+x];vertical[2*x+1]+=b[y*W+x];
+        vertical[channels*x]+=a[y*W+x];if constexpr(Pair)vertical[channels*x+1]+=b[y*W+x];
       }
       for(size_t y=y0;y<y1;++y) {
         if(y>y0) {
@@ -904,10 +959,17 @@ void window_pair(const Vec& a,const Vec& b,Vec& oa,Vec& ob,size_t H,size_t W,int
           const double* sub_a=y>size_t(k)?a.data()+(y-k-1)*W:nullptr;
           const double* sub_b=sub_a?b.data()+(y-k-1)*W:nullptr;
           for(size_t x=0;x<W;++x) {
-            if(add_a){vertical[2*x]+=add_a[x];vertical[2*x+1]+=add_b[x];}
-            if(sub_a){vertical[2*x]-=sub_a[x];vertical[2*x+1]-=sub_b[x];}
+            if(add_a){vertical[channels*x]+=add_a[x];if constexpr(Pair)vertical[channels*x+1]+=add_b[x];}
+            if(sub_a){vertical[channels*x]-=sub_a[x];if constexpr(Pair)vertical[channels*x+1]-=sub_b[x];}
           }
         }
+        if constexpr(!Pair) {
+          double sum=0.;for(size_t x=0;x<std::min(W,size_t(k)+1);++x)sum+=vertical[x];
+          for(size_t x=0;x<W;++x) {
+            if(x){if(x+size_t(k)<W)sum+=vertical[x+k];if(x>size_t(k))sum-=vertical[x-k-1];}
+            oa[y*W+x]=sum;
+          }
+        } else {
 #if defined(__ARM_NEON)
         float64x2_t sum=vdupq_n_f64(0.);
         for(size_t x=0;x<std::min(W,size_t(k)+1);++x)sum=vaddq_f64(sum,vld1q_f64(vertical+2*x));
@@ -922,17 +984,18 @@ void window_pair(const Vec& a,const Vec& b,Vec& oa,Vec& ob,size_t H,size_t W,int
           oa[y*W+x]=sa;ob[y*W+x]=sb;
         }
 #endif
+        }
       }
     }
   });
 }
 void local_scale(MatchedWorkspace& w,size_t H,size_t W,const Vec& rho,double r,int k) {
   const size_t B=2,ch=(H+B-1)/B,cw=(W+B-1)/B,n=ch*cw;
-  Vec& xs=w.local_xs;Vec& ns=w.local_ns;Vec& es=w.local_es;xs.assign(n,0.);ns.assign(n,0.);es.assign(n,0.);
+  Vec& xs=w.local_xs;const Vec& ns=w.bg_ns;Vec& es=w.local_es;xs.resize(n);es.resize(n);
   matched_parallel(ch,[&](size_t first,size_t last){
     for(size_t cy=first;cy<last;++cy)for(size_t cx=0;cx<cw;++cx) {
       const size_t y=2*cy,x=2*cx,i=y*W+x,j=cy*cw+cx;
-      xs[j]=w.x[i]+(x+1<W?w.x[i+1]:0.);if(y+1<H)xs[j]+=w.x[i+W]+(x+1<W?w.x[i+W+1]:0.);ns[j]=w.bg_ns[j];
+      xs[j]=w.x[i]+(x+1<W?w.x[i+1]:0.);if(y+1<H)xs[j]+=w.x[i+W]+(x+1<W?w.x[i+W+1]:0.);
       double sum=(w.valid[i]?std::max(w.b[i],0.):0.)+(x+1<W && w.valid[i+1]?std::max(w.b[i+1],0.):0.);
       if(y+1<H)sum+=(w.valid[i+W]?std::max(w.b[i+W],0.):0.)+(x+1<W && w.valid[i+W+1]?std::max(w.b[i+W+1],0.):0.);
       es[j]=sum;
@@ -945,27 +1008,54 @@ void local_scale(MatchedWorkspace& w,size_t H,size_t W,const Vec& rho,double r,i
   const size_t max_count=std::min(ch,window_side)*std::min(cw,window_side);
   Vec phi_bias(max_count+1,0.);for(size_t j=1;j<=max_count;++j)phi_bias[j]=std::sqrt(2./j);
   for(int it=0;it<3;++it) {
-    matched_parallel(n,[&](size_t first,size_t last){for(size_t i=first;i<last;++i) {
-      const double e=c[i]*es[i],d=xs[i]-e;
-      kept[i]=ns[i]>0 && d*d<9*phi[i]*std::max(e+ns[i]*r,1e-6)*kc;
-      sx[i]=kept[i]?xs[i]:0.;se[i]=kept[i]?es[i]:0.;
-    }});
+    matched_parallel(n,[&](size_t first,size_t last){size_t i=first;
+#if defined(__ARM_NEON)
+      const float64x2_t zero=vdupq_n_f64(0.),nine=vdupq_n_f64(9.),readout=vdupq_n_f64(r),corr=vdupq_n_f64(kc),floor=vdupq_n_f64(1e-6);
+      for(;i+2<=last;i+=2) {
+        const float64x2_t xv=vld1q_f64(xs.data()+i),ev=vld1q_f64(es.data()+i),nv=vld1q_f64(ns.data()+i);
+        const float64x2_t e=vmulq_f64(vld1q_f64(c.data()+i),ev),d=vsubq_f64(xv,e);
+        const float64x2_t variance=vmulq_f64(vmulq_f64(vmulq_f64(nine,vld1q_f64(phi.data()+i)),vmaxq_f64(vaddq_f64(e,vmulq_f64(nv,readout)),floor)),corr);
+        const uint64x2_t ok=vandq_u64(vcgtq_f64(nv,zero),vcltq_f64(vmulq_f64(d,d),variance));
+        vst1q_f64(kept.data()+i,vbslq_f64(ok,vdupq_n_f64(1.),zero));
+        vst1q_f64(sx.data()+i,vbslq_f64(ok,xv,zero));vst1q_f64(se.data()+i,vbslq_f64(ok,ev,zero));
+      }
+#endif
+      for(;i<last;++i) {
+        const double e=c[i]*es[i],d=xs[i]-e;
+        kept[i]=ns[i]>0 && d*d<9*phi[i]*std::max(e+ns[i]*r,1e-6)*kc;
+        sx[i]=kept[i]?xs[i]:0.;se[i]=kept[i]?es[i]:0.;
+      }
+    });
     window_pair(sx,se,w.local_nk,w.local_su,ch,cw,k,w.window_scratch);
     sx.swap(w.local_nk);se.swap(w.local_su);
-    matched_parallel(n,[&](size_t first,size_t last){for(size_t i=first;i<last;++i) {
-      if(se[i]>1e-9)c[i]=sx[i]/se[i];const double e=c[i]*es[i],d=xs[i]-e;
-      u[i]=kept[i]?d*d/(std::max(e+ns[i]*r,1e-6)*kc):0.;
-    }});
+    matched_parallel(n,[&](size_t first,size_t last){size_t i=first;
+#if defined(__ARM_NEON)
+      const float64x2_t zero=vdupq_n_f64(0.),readout=vdupq_n_f64(r),corr=vdupq_n_f64(kc),floor=vdupq_n_f64(1e-6);
+      for(;i+2<=last;i+=2) {
+        const float64x2_t denom=vld1q_f64(se.data()+i);
+        const float64x2_t cv=vbslq_f64(vcgtq_f64(denom,vdupq_n_f64(1e-9)),vdivq_f64(vld1q_f64(sx.data()+i),denom),vld1q_f64(c.data()+i));
+        vst1q_f64(c.data()+i,cv);
+        const float64x2_t e=vmulq_f64(cv,vld1q_f64(es.data()+i)),d=vsubq_f64(vld1q_f64(xs.data()+i),e);
+        const float64x2_t variance=vmulq_f64(vmaxq_f64(vaddq_f64(e,vmulq_f64(vld1q_f64(ns.data()+i),readout)),floor),corr);
+        vst1q_f64(u.data()+i,vbslq_f64(vcgtq_f64(vld1q_f64(kept.data()+i),zero),vdivq_f64(vmulq_f64(d,d),variance),zero));
+      }
+#endif
+      for(;i<last;++i) {
+        if(se[i]>1e-9)c[i]=sx[i]/se[i];const double e=c[i]*es[i],d=xs[i]-e;
+        u[i]=kept[i]?d*d/(std::max(e+ns[i]*r,1e-6)*kc):0.;
+      }
+    });
     window_pair(kept,u,w.local_nk,w.local_su,ch,cw,k,w.window_scratch);
     const Vec& nk=w.local_nk;const Vec& su=w.local_su;
     matched_parallel(n,[&](size_t first,size_t last){for(size_t i=first;i<last;++i)if(nk[i]>=8)phi[i]=std::max(1.,(su[i]/nk[i]-phi_bias[size_t(nk[i])])/.9733);});
   }
   for(size_t i=0;i<n;++i)kn[i]=kept[i]?ns[i]:0.;
-  window_pair(kn,kn,w.local_nk,w.local_su,ch,cw,k,w.window_scratch);kn.swap(w.local_nk);
+  window_pair<false>(kn,kn,w.local_nk,w.local_su,ch,cw,k,w.window_scratch);kn.swap(w.local_nk);
+  for(double& v:kn)v=1./std::max(v,1.);
   w.phi.resize(H*W);
   matched_parallel(H,[&](size_t first,size_t last){for(size_t y=first;y<last;++y)for(size_t x=0;x<W;++x) {
     const size_t i=y*W+x,j=(y/B)*cw+x/B;
-    w.b[i]=c[j]*std::max(w.b[i],0.);w.phi[i]=phi[j];w.inv_neff[i]+=1./std::max(kn[j],1.);
+    w.b[i]=c[j]*std::max(w.b[i],0.);w.phi[i]=phi[j];w.inv_neff[i]+=kn[j];
   }});
 }
 struct ScoreConstants {double r,kinf,kappa[2],threshold[2],C3[2],C4[2],c1[2],c2[2],c3[2];};
@@ -978,15 +1068,18 @@ inline double calibrated(double N,double b,double inv_neff,double phi,double A,d
 }
 // fine 核流式处理只需五行缓冲；完整残差保留给少量 coarse 候选。
 void matched_scores(MatchedWorkspace& w,size_t H,size_t W,const ScoreConstants& sc) {
-  const size_t n=H*W;w.residual.resize(n);w.z0.resize(n);Vec ring(5*W),row(W+4,0.),zero(W,0.);
-  for(size_t y=0;y<H+2;++y) {
+  const size_t n=H*W;w.residual.resize(n);w.z0.resize(n);
+  // 各行带有两行 halo，分块各自保留五行缓存；每个分数的运算顺序不变。
+  matched_parallel(H,[&](size_t first,size_t last){
+  Vec ring(5*W),row(W+4,0.),zero(W,0.);
+  for(size_t y=first>2?first-2:0;y<last+2;++y) {
     if(y<H) {
       double* rp=row.data()+2;
-      for(size_t x=0;x<W;++x){const size_t i=y*W+x;rp[x]=w.residual[i]=w.valid[i]?w.x[i]-w.b[i]:0.;}
+      for(size_t x=0;x<W;++x){const size_t i=y*W+x;rp[x]=w.valid[i]?w.x[i]-w.b[i]:0.;if(y>=first && y<last)w.residual[i]=rp[x];}
       double* out=ring.data()+(y%5)*W;
       for(size_t x=0;x<W;++x)out[x]=kH1[0]*(rp[long(x)-2]+rp[x+2])+kH1[1]*(rp[long(x)-1]+rp[x+1])+kH1[2]*rp[x];
     }
-    if(y<2)continue;const size_t yy=y-2;const double* rows[5];
+    if(y<first+2)continue;const size_t yy=y-2;const double* rows[5];
     for(int j=-2;j<=2;++j){const long q=long(yy)+j;rows[j+2]=(q<0 || q>=long(H))?zero.data():ring.data()+(q%5)*W;}
     size_t x=0;const size_t base=yy*W;
 #if defined(__ARM_NEON)
@@ -1013,6 +1106,7 @@ void matched_scores(MatchedWorkspace& w,size_t H,size_t W,const ScoreConstants& 
       w.z0[i]=calibrated(N,w.b[i],w.inv_neff[i],w.phi.empty()?1.:w.phi[i],w.area[0][i],w.square[0][i],sc,0,w.valid[i]);
     }
   }
+  });
 }
 double coarse_response(const Vec& R,long H,long W,long y,long x) {
   double total=0;for(int j=0;j<9;++j) {
@@ -1084,8 +1178,8 @@ void matched_proposals(const double* input,const npy_bool* mask,const int* bins,
   using Clock=std::chrono::steady_clock;auto time=Clock::now();int stage=0;
   auto mark=[&](){auto next=Clock::now();stats[20+stage++]=std::chrono::duration<double,std::milli>(next-time).count();time=next;};
   MatchedThreadBudget budget(H*W);
-  MatchedWorkspace& w=matched_ws;const size_t n=H*W;w.x.resize(n);w.valid.resize(n);w.phi.clear();size_t area=0;
-  for(size_t i=0;i<n;++i){const double v=(input[i]-s.offset)/s.gain;w.valid[i]=mask[i] && std::isfinite(v);w.x[i]=w.valid[i]?v:0.;area+=w.valid[i];}
+  MatchedWorkspace& w=matched_ws;const size_t n=H*W;w.x.resize(n);if(s.calibrate)w.x0.resize(n);w.valid.resize(n);w.phi.clear();size_t area=0;
+  for(size_t i=0;i<n;++i){const double v=(input[i]-s.offset)/s.gain;w.valid[i]=mask[i] && std::isfinite(v);w.x[i]=w.valid[i]?v:0.;if(s.calibrate)w.x0[i]=w.x[i];area+=w.valid[i];}
   mark();MatchedBackground bg;double r=s.readout,G=1.,O=0.;
   stats[0]=1.;stats[1]=0.;stats[2]=r;stats[3]=stats[4]=stats[5]=1.;stats[6]=stats[7]=std::numeric_limits<double>::infinity();
   if(!matched_background(w,bins,nb,H,W,s,r,bg,false)){mark();std::fill(output,output+n,0);return;}
@@ -1100,16 +1194,16 @@ void matched_proposals(const double* input,const npy_bool* mask,const int* bins,
       matched_parallel(n,[&](size_t first,size_t last){
         double* __restrict dst=w.x.data();const unsigned char* __restrict valid=w.valid.data();size_t i=first;
 #if defined(__ARM_NEON)
-        const float64x2_t off=vdupq_n_f64(s.offset),gain=vdupq_n_f64(s.gain),oo=vdupq_n_f64(O),gg=vdupq_n_f64(G);
+        const float64x2_t oo=vdupq_n_f64(O),gg=vdupq_n_f64(G);
         for(;i+2<=last;i+=2) {
-          const float64x2_t x=vdivq_f64(vsubq_f64(vdivq_f64(vsubq_f64(vld1q_f64(input+i),off),gain),oo),gg);
+          const float64x2_t x=vdivq_f64(vsubq_f64(vld1q_f64(w.x0.data()+i),oo),gg);
           const uint64_t bits[2]={valid[i]?~uint64_t(0):0,valid[i+1]?~uint64_t(0):0};
           vst1q_f64(dst+i,vbslq_f64(vld1q_u64(bits),x,vdupq_n_f64(0.)));
         }
 #endif
-        for(;i<last;++i)dst[i]=valid[i]?(((input[i]-s.offset)/s.gain)-O)/G:0.;
+        for(;i<last;++i)dst[i]=valid[i]?(w.x0[i]-O)/G:0.;
       });
-      for(double& e:bg.e)e=(e-o)/alpha;last_o=o;last_alpha=alpha;
+      if(it==0)for(double& e:bg.e)e=(e-o)/alpha;last_o=o;last_alpha=alpha;
     }
   }
   background_pixels(w,bg,bins,H,W,s.tile,false,last_o,last_alpha);
@@ -1167,6 +1261,11 @@ PyObject* matched_spot_proposals(PyObject*,PyObject* args) {
   return Py_BuildValue("NN",reinterpret_cast<PyObject*>(output),reinterpret_cast<PyObject*>(stats));
 }
 
+#include "_likelihood_kernel.h"
+#include "_centroid_kernel.h"
+#include "_scaling_kernel.h"
+#include "_grouping_kernel.h"
+
 PyMethodDef methods[]={{"spot_proposals",spot_proposals,METH_VARARGS,"Standardized or count-excess proposals using fused summed-area statistics."},
                        {"matched_spot_proposals",matched_spot_proposals,METH_VARARGS,
                         "Matched-filter proposals: radial x tile background, watershed, zinger test."},
@@ -1174,6 +1273,16 @@ PyMethodDef methods[]={{"spot_proposals",spot_proposals,METH_VARARGS,"Standardiz
                         "Fixed known-background signed WLS with Cholesky covariance."},
                        {"known_background_irls",known_background_irls,METH_VARARGS,
                         "Fused DIALS-compatible fixed-background IRLS."},
+                       {"centroid_expectation",centroid_expectation,METH_VARARGS,
+                        "Full-covariance complete-candidate centroid responsibilities."},
+                       {"poisson_gaussian_sums",poisson_gaussian_sums,METH_VARARGS,
+                        "Bounded float64 discrete Poisson-Gaussian convolution."},
+                       {"scaling_design",scaling_design,METH_VARARGS,
+                        "Ordered accumulation of repeated intensity contributions."},
+                       {"connected_boxes_int64",connected_boxes_int64,METH_VARARGS,
+                        "Stable exact-integer overlap components."},
+                       {"densest_window",densest_window,METH_VARARGS,
+                        "First maximal linear or circular sorted window."},
                        {nullptr,nullptr,0,nullptr}};
 PyModuleDef module={PyModuleDef_HEAD_INIT,"_native",nullptr,-1,methods};
 }

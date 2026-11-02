@@ -1,0 +1,11 @@
+...................................                                      [100%]
+=============================== warnings summary ===============================
+../../../../../miniforge3/lib/python3.13/site-packages/anyio/pytest_plugin.py:14
+  /Users/xiaoyuzhang/miniforge3/lib/python3.13/site-packages/anyio/pytest_plugin.py:14: PytestRemovedIn10Warning: _pytest.python.CallSpec2 has been renamed to CallSpec.
+  The CallSpec2 alias will be removed in pytest 10.
+  Update imports to use CallSpec instead.
+  See https://docs.pytest.org/en/stable/deprecations.html#callspec2-renamed
+    from _pytest.python import CallSpec2
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+35 passed, 1 warning in 4.99s

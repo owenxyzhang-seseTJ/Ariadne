@@ -17,6 +17,11 @@ from scipy.optimize import least_squares
 from scipy.special import logsumexp
 from scipy.stats import t as student_t
 
+try:
+    from ariadne._native import centroid_expectation as _native_expectation
+except ImportError:
+    _native_expectation = None
+
 
 class BudgetExceeded(RuntimeError):
     pass
@@ -97,6 +102,9 @@ def expectation(y, means, whitening, log_normalizer, allowed, counts,
         raise ValueError('Need nonempty complete prediction sets and positive outlier density')
     if pair_block_size < 1:
         raise ValueError('Pair block size must be positive')
+    if _native_expectation is not None:
+        return _native_expectation(y, means, whitening, log_normalizer, allowed, counts,
+                                   outlier_density, outlier_fraction, min(pair_block_size, 2048))
     # Only the public N*M responsibility output is dense. Differences and
     # whitened residuals are bounded blocks, never a full N*M*3 tensor. The
     # output first stores log components, then is normalized in place.

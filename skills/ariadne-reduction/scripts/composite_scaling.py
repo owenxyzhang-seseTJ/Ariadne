@@ -33,6 +33,20 @@ import numpy as np
 from scipy.linalg import solve_triangular
 from scipy.optimize import least_squares
 
+try:
+    from ariadne._native import scaling_design as _native_scaling_design
+except ImportError:
+    _native_scaling_design = None
+
+
+def _intensity_design(design, gain, indices, count):
+    if _native_scaling_design is not None:
+        return _native_scaling_design(design, gain, indices, count)
+    result = np.zeros((len(design), count))
+    for column, index in enumerate(indices):
+        result[:, index] += design[:, column] * gain[column]
+    return result
+
 
 class _StopFit(Exception):
     pass
@@ -382,9 +396,7 @@ def fit_global(blocks, *, max_iterations=100, tolerance=1e-8, rcond=1e-10,
                     gain = known * np.exp(x @ beta)
                     if np.any(gain <= 0) or not np.all(np.isfinite(gain)):
                         raise _StopFit('nonfinite_model')
-                    a = np.zeros((len(design), n))
-                    for column, index in enumerate(indices):
-                        a[:, index] += design[:, column] * gain[column]
+                    a = _intensity_design(design, gain, indices, n)
                     jb = design @ ((gain * intensity[indices])[:, None] * x)
                     matrices.append(a)
                     derivatives.append(jb)

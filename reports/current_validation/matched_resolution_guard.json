@@ -1,0 +1,4436 @@
+{
+  "policy": "No tuning; fixed seeds and settings. Exact before/after masks; noise diagnostics rtol=1e-7 atol=1e-9.",
+  "synthetic": [
+    {
+      "seed": 801,
+      "separation_px": 2.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 0.6666666666666666,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 1.0658141036401503e-13,
+          "offset": 0.0,
+          "readout_variance": 2.2737367544323206e-12,
+          "kappa": 8.881784197001252e-16,
+          "kappa_inf": 2.220446049250313e-16,
+          "thresholds": 1.7763568394002505e-15
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 2,
+          "fp": 22,
+          "fn": 48,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 0
+            }
+          ]
+        },
+        "after": {
+          "tp": 2,
+          "fp": 22,
+          "fn": 48,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 0
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 0,
+          "fp": 18,
+          "fn": 50,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 801,
+      "separation_px": 2.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 0.6666666666666666,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 1.2789769243681803e-13,
+          "offset": 0.0,
+          "readout_variance": 7.275957614183426e-12,
+          "kappa": 4.440892098500626e-16,
+          "kappa_inf": 2.220446049250313e-16,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 23,
+          "fp": 2,
+          "fn": 27,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 23
+            }
+          ]
+        },
+        "after": {
+          "tp": 23,
+          "fp": 2,
+          "fn": 27,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 23
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 21,
+          "fp": 4,
+          "fn": 29,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 21
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 801,
+      "separation_px": 4.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 1.3333333333333333,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 2.220446049250313e-16,
+          "kappa_inf": 4.440892098500626e-16,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 21,
+          "fp": 11,
+          "fn": 29,
+          "pairs_resolved": 9,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 19
+            }
+          ]
+        },
+        "after": {
+          "tp": 21,
+          "fp": 11,
+          "fn": 29,
+          "pairs_resolved": 9,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 19
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 2,
+          "fp": 14,
+          "fn": 48,
+          "pairs_resolved": 1,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 801,
+      "separation_px": 4.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 1.3333333333333333,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 2.220446049250313e-16,
+          "kappa_inf": 1.1102230246251565e-16,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 14,
+          "fp": 11,
+          "fn": 36,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 14
+            }
+          ]
+        },
+        "after": {
+          "tp": 14,
+          "fp": 11,
+          "fn": 36,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 14
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 15,
+          "fp": 10,
+          "fn": 35,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 15
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 801,
+      "separation_px": 6.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 3.552713678800501e-15,
+          "offset": 0.0,
+          "readout_variance": 5.9685589803848416e-12,
+          "kappa": 8.881784197001252e-16,
+          "kappa_inf": 1.887379141862766e-15,
+          "thresholds": 1.7763568394002505e-15
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 39,
+          "fp": 1,
+          "fn": 11,
+          "pairs_resolved": 19,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 3
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 36
+            }
+          ]
+        },
+        "after": {
+          "tp": 39,
+          "fp": 1,
+          "fn": 11,
+          "pairs_resolved": 19,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 3
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 36
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 29,
+          "fp": 0,
+          "fn": 21,
+          "pairs_resolved": 14,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 29
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 801,
+      "separation_px": 6.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 3.3306690738754696e-16,
+          "kappa_inf": 0.0,
+          "thresholds": 1.7763568394002505e-15
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 44,
+          "fp": 0,
+          "fn": 6,
+          "pairs_resolved": 19,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 1
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 43
+            }
+          ]
+        },
+        "after": {
+          "tp": 44,
+          "fp": 0,
+          "fn": 6,
+          "pairs_resolved": 19,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 1
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 43
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 30,
+          "fp": 5,
+          "fn": 20,
+          "pairs_resolved": 10,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 801,
+      "separation_px": 8.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 4.440892098500626e-16,
+          "kappa_inf": 2.220446049250313e-16,
+          "thresholds": 1.7763568394002505e-15
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 38,
+          "fp": 0,
+          "fn": 12,
+          "pairs_resolved": 18,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 36
+            }
+          ]
+        },
+        "after": {
+          "tp": 38,
+          "fp": 0,
+          "fn": 12,
+          "pairs_resolved": 18,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 36
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 29,
+          "fp": 0,
+          "fn": 21,
+          "pairs_resolved": 14,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 29
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 801,
+      "separation_px": 8.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 2.220446049250313e-16,
+          "kappa_inf": 0.0,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 47,
+          "fp": 0,
+          "fn": 3,
+          "pairs_resolved": 22,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 3
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 44
+            }
+          ]
+        },
+        "after": {
+          "tp": 47,
+          "fp": 0,
+          "fn": 3,
+          "pairs_resolved": 22,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 3
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 44
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 40,
+          "fp": 0,
+          "fn": 10,
+          "pairs_resolved": 15,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 40
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 802,
+      "separation_px": 2.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 0.6666666666666666,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 3.3306690738754696e-16,
+          "kappa_inf": 2.220446049250313e-16,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 1,
+          "fp": 24,
+          "fn": 49,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 1
+            }
+          ]
+        },
+        "after": {
+          "tp": 1,
+          "fp": 24,
+          "fn": 49,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 1
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 3,
+          "fp": 13,
+          "fn": 47,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 802,
+      "separation_px": 2.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 0.6666666666666666,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 6.750155989720952e-14,
+          "offset": 0.0,
+          "readout_variance": 6.0254023992456496e-12,
+          "kappa": 1.1102230246251565e-15,
+          "kappa_inf": 6.661338147750939e-16,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 21,
+          "fp": 4,
+          "fn": 29,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 21
+            }
+          ]
+        },
+        "after": {
+          "tp": 21,
+          "fp": 4,
+          "fn": 29,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 21
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 16,
+          "fp": 9,
+          "fn": 34,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 16
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 802,
+      "separation_px": 4.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 1.3333333333333333,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 0.0,
+          "kappa_inf": 1.1102230246251565e-16,
+          "thresholds": 1.7763568394002505e-15
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 23,
+          "fp": 9,
+          "fn": 27,
+          "pairs_resolved": 9,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 21
+            }
+          ]
+        },
+        "after": {
+          "tp": 23,
+          "fp": 9,
+          "fn": 27,
+          "pairs_resolved": 9,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 21
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 7,
+          "fp": 10,
+          "fn": 43,
+          "pairs_resolved": 3,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 7
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 802,
+      "separation_px": 4.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 1.3333333333333333,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 0.0,
+          "kappa_inf": 0.0,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 15,
+          "fp": 10,
+          "fn": 35,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 15
+            }
+          ]
+        },
+        "after": {
+          "tp": 15,
+          "fp": 10,
+          "fn": 35,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 15
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 12,
+          "fp": 12,
+          "fn": 38,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 12
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 802,
+      "separation_px": 6.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 0.0,
+          "kappa_inf": 2.220446049250313e-16,
+          "thresholds": 1.7763568394002505e-15
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 40,
+          "fp": 0,
+          "fn": 10,
+          "pairs_resolved": 19,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 38
+            }
+          ]
+        },
+        "after": {
+          "tp": 40,
+          "fp": 0,
+          "fn": 10,
+          "pairs_resolved": 19,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 38
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 30,
+          "fp": 0,
+          "fn": 20,
+          "pairs_resolved": 15,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 802,
+      "separation_px": 6.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 0.0,
+          "kappa_inf": 0.0,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 43,
+          "fp": 1,
+          "fn": 7,
+          "pairs_resolved": 19,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 43
+            }
+          ]
+        },
+        "after": {
+          "tp": 43,
+          "fp": 1,
+          "fn": 7,
+          "pairs_resolved": 19,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 43
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 32,
+          "fp": 4,
+          "fn": 18,
+          "pairs_resolved": 11,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 32
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 802,
+      "separation_px": 8.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 3.3306690738754696e-16,
+          "kappa_inf": 0.0,
+          "thresholds": 1.7763568394002505e-15
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 40,
+          "fp": 0,
+          "fn": 10,
+          "pairs_resolved": 20,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 38
+            }
+          ]
+        },
+        "after": {
+          "tp": 40,
+          "fp": 0,
+          "fn": 10,
+          "pairs_resolved": 20,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 38
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 30,
+          "fp": 0,
+          "fn": 20,
+          "pairs_resolved": 15,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 802,
+      "separation_px": 8.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 3.552713678800501e-13,
+          "offset": 0.0,
+          "readout_variance": 1.375610736431554e-11,
+          "kappa": 3.3306690738754696e-16,
+          "kappa_inf": 4.440892098500626e-16,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 46,
+          "fp": 0,
+          "fn": 4,
+          "pairs_resolved": 21,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 44
+            }
+          ]
+        },
+        "after": {
+          "tp": 46,
+          "fp": 0,
+          "fn": 4,
+          "pairs_resolved": 21,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 44
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 40,
+          "fp": 0,
+          "fn": 10,
+          "pairs_resolved": 15,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 40
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 803,
+      "separation_px": 2.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 0.6666666666666666,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 3.3306690738754696e-16,
+          "kappa_inf": 0.0,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 1,
+          "fp": 24,
+          "fn": 49,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 1
+            }
+          ]
+        },
+        "after": {
+          "tp": 1,
+          "fp": 24,
+          "fn": 49,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 1
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 1,
+          "fp": 17,
+          "fn": 49,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 803,
+      "separation_px": 2.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 0.6666666666666666,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 0.0,
+          "kappa_inf": 0.0,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 21,
+          "fp": 4,
+          "fn": 29,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 21
+            }
+          ]
+        },
+        "after": {
+          "tp": 21,
+          "fp": 4,
+          "fn": 29,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 21
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 21,
+          "fp": 4,
+          "fn": 29,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 21
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 803,
+      "separation_px": 4.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 1.3333333333333333,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 1.4566126083082054e-13,
+          "offset": 0.0,
+          "readout_variance": 1.1368683772161603e-11,
+          "kappa": 0.0,
+          "kappa_inf": 1.1102230246251565e-16,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 18,
+          "fp": 14,
+          "fn": 32,
+          "pairs_resolved": 7,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 3
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 15
+            }
+          ]
+        },
+        "after": {
+          "tp": 18,
+          "fp": 14,
+          "fn": 32,
+          "pairs_resolved": 7,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 3
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 15
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 4,
+          "fp": 13,
+          "fn": 46,
+          "pairs_resolved": 2,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 4
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 803,
+      "separation_px": 4.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 1.3333333333333333,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 2.0605739337042905e-13,
+          "offset": 0.0,
+          "readout_variance": 2.2794210963184014e-11,
+          "kappa": 2.220446049250313e-16,
+          "kappa_inf": 1.1102230246251565e-16,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 14,
+          "fp": 11,
+          "fn": 36,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 14
+            }
+          ]
+        },
+        "after": {
+          "tp": 14,
+          "fp": 11,
+          "fn": 36,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 14
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 14,
+          "fp": 11,
+          "fn": 36,
+          "pairs_resolved": 0,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 14
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 803,
+      "separation_px": 6.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 0.0,
+          "kappa_inf": 0.0,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 42,
+          "fp": 0,
+          "fn": 8,
+          "pairs_resolved": 20,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 4
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 38
+            }
+          ]
+        },
+        "after": {
+          "tp": 42,
+          "fp": 0,
+          "fn": 8,
+          "pairs_resolved": 20,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 4
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 38
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 28,
+          "fp": 1,
+          "fn": 22,
+          "pairs_resolved": 14,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 28
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 803,
+      "separation_px": 6.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 2.220446049250313e-16,
+          "kappa_inf": 0.0,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 44,
+          "fp": 2,
+          "fn": 6,
+          "pairs_resolved": 21,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 42
+            }
+          ]
+        },
+        "after": {
+          "tp": 44,
+          "fp": 2,
+          "fn": 6,
+          "pairs_resolved": 21,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 2
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 42
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 26,
+          "fp": 7,
+          "fn": 24,
+          "pairs_resolved": 8,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 26
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 803,
+      "separation_px": 8.0,
+      "flux_ratio": 1.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 0.0,
+          "kappa_inf": 1.1102230246251565e-16,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 42,
+          "fp": 0,
+          "fn": 8,
+          "pairs_resolved": 20,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 4
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 38
+            }
+          ]
+        },
+        "after": {
+          "tp": 42,
+          "fp": 0,
+          "fn": 8,
+          "pairs_resolved": 20,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 4
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 38
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 29,
+          "fp": 0,
+          "fn": 21,
+          "pairs_resolved": 14,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 12,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 38,
+              "found": 29
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seed": 803,
+      "separation_px": 8.0,
+      "flux_ratio": 4.0,
+      "matching_gate_px": 1.5,
+      "parity": {
+        "pixel_differences": 0,
+        "max_absolute_errors": {
+          "gain": 0.0,
+          "offset": 0.0,
+          "readout_variance": 0.0,
+          "kappa": 0.0,
+          "kappa_inf": 1.1102230246251565e-16,
+          "thresholds": 0.0
+        }
+      },
+      "metrics": {
+        "before": {
+          "tp": 48,
+          "fp": 0,
+          "fn": 2,
+          "pairs_resolved": 23,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 4
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 44
+            }
+          ]
+        },
+        "after": {
+          "tp": 48,
+          "fp": 0,
+          "fn": 2,
+          "pairs_resolved": 23,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 4
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 44
+            }
+          ]
+        },
+        "dials_oracle_noise": {
+          "tp": 39,
+          "fp": 0,
+          "fn": 11,
+          "pairs_resolved": 14,
+          "pairs_total": 25,
+          "recall_by_snr": [
+            {
+              "lo": 0.0,
+              "hi": 3.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 3.0,
+              "hi": 5.0,
+              "n": 0,
+              "found": 0
+            },
+            {
+              "lo": 5.0,
+              "hi": 10.0,
+              "n": 6,
+              "found": 0
+            },
+            {
+              "lo": 10.0,
+              "hi": 1000000000.0,
+              "n": 44,
+              "found": 39
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "real": {
+    "frames": [
+      {
+        "scan": 0,
+        "frame": 3,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.7763568394002505e-15,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 0,
+        "frame": 42,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 3.552713678800501e-15,
+            "offset": 0.0,
+            "readout_variance": 1.2656542480726785e-13,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 1.7763568394002505e-15,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 0,
+        "frame": 82,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 3.552713678800501e-15,
+            "offset": 0.0,
+            "readout_variance": 9.636735853746359e-14,
+            "kappa": 1.3322676295501878e-15,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 0,
+        "frame": 121,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 8.881784197001252e-15,
+            "offset": 1.2789769243681803e-13,
+            "readout_variance": 1.3773426843499692e-12,
+            "kappa": 1.1102230246251565e-15,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 0,
+        "frame": 161,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.5987211554602254e-14,
+            "offset": 5.684341886080802e-14,
+            "readout_variance": 2.575717417130363e-13,
+            "kappa": 1.3322676295501878e-15,
+            "kappa_inf": 2.6645352591003757e-15,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 0,
+        "frame": 200,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 3.552713678800501e-15,
+            "offset": 4.263256414560601e-14,
+            "readout_variance": 4.04121180963557e-13,
+            "kappa": 1.7763568394002505e-15,
+            "kappa_inf": 2.6645352591003757e-15,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 0,
+        "frame": 240,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 7.105427357601002e-15,
+            "offset": 1.4210854715202004e-13,
+            "readout_variance": 1.666222715357435e-12,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 0,
+        "frame": 279,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 7.105427357601002e-15,
+            "offset": 7.105427357601002e-14,
+            "readout_variance": 8.469613899109163e-13,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 8.881784197001252e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 1,
+        "frame": 3,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.7763568394002505e-15,
+            "offset": 9.947598300641403e-14,
+            "readout_variance": 1.1834977442504169e-12,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 1,
+        "frame": 14,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.2434497875801753e-14,
+            "offset": 3.552713678800501e-14,
+            "readout_variance": 4.334310688136611e-13,
+            "kappa": 1.1102230246251565e-15,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 1,
+        "frame": 25,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 5.329070518200751e-15,
+            "offset": 9.237055564881302e-14,
+            "readout_variance": 9.388045896230324e-13,
+            "kappa": 1.1102230246251565e-15,
+            "kappa_inf": 1.7763568394002505e-15,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 1,
+        "frame": 36,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 7.105427357601002e-15,
+            "offset": 4.973799150320701e-14,
+            "readout_variance": 6.037392807911601e-13,
+            "kappa": 1.1102230246251565e-15,
+            "kappa_inf": 0.0,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 1,
+        "frame": 48,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 7.105427357601002e-15,
+            "offset": 2.1316282072803006e-14,
+            "readout_variance": 4.241051954068098e-13,
+            "kappa": 1.1102230246251565e-15,
+            "kappa_inf": 2.220446049250313e-15,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 1,
+        "frame": 59,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.7763568394002505e-15,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "kappa": 2.220446049250313e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 1,
+        "frame": 70,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.7763568394002505e-15,
+            "offset": 1.1368683772161603e-13,
+            "readout_variance": 1.1675105326958146e-12,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 1,
+        "frame": 81,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 5.329070518200751e-15,
+            "offset": 9.237055564881302e-14,
+            "readout_variance": 9.412470802772077e-13,
+            "kappa": 2.220446049250313e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 2,
+        "frame": 3,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.5987211554602254e-14,
+            "offset": 7.105427357601002e-15,
+            "readout_variance": 0.0,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 1.3322676295501878e-15,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 2,
+        "frame": 13,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.4210854715202004e-14,
+            "offset": 2.1316282072803006e-14,
+            "readout_variance": 0.0,
+            "kappa": 1.7763568394002505e-15,
+            "kappa_inf": 1.3322676295501878e-15,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 2,
+        "frame": 24,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.4210854715202004e-14,
+            "offset": 1.1368683772161603e-13,
+            "readout_variance": 1.45328193923433e-12,
+            "kappa": 0.0,
+            "kappa_inf": 1.3322676295501878e-15,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 2,
+        "frame": 34,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 0.0,
+            "offset": 0.0,
+            "readout_variance": 1.0891287871572786e-13,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 2,
+        "frame": 45,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.7763568394002505e-15,
+            "offset": 1.1368683772161603e-13,
+            "readout_variance": 1.3007372956508334e-12,
+            "kappa": 1.3322676295501878e-15,
+            "kappa_inf": 2.220446049250313e-15,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 2,
+        "frame": 55,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 7.105427357601002e-15,
+            "offset": 5.684341886080802e-14,
+            "readout_variance": 8.522071937022702e-13,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 0.0,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 2,
+        "frame": 66,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 8.881784197001252e-15,
+            "offset": 5.684341886080802e-14,
+            "readout_variance": 4.5297099404706387e-13,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 0.0,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 2,
+        "frame": 76,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.2434497875801753e-14,
+            "offset": 1.1368683772161603e-13,
+            "readout_variance": 1.4064305275951483e-12,
+            "kappa": 1.9984014443252818e-15,
+            "kappa_inf": 8.881784197001252e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 3,
+        "frame": 3,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.9539925233402755e-14,
+            "offset": 1.4210854715202004e-14,
+            "readout_variance": 3.8305469907129464e-13,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 3,
+        "frame": 15,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.0658141036401503e-14,
+            "offset": 1.4210854715202004e-14,
+            "readout_variance": 0.0,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 3,
+        "frame": 26,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 7.105427357601002e-15,
+            "offset": 1.5631940186722204e-13,
+            "readout_variance": 1.7957857423311907e-12,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 8.881784197001252e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 3,
+        "frame": 38,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.7763568394002505e-15,
+            "offset": 1.4210854715202004e-14,
+            "readout_variance": 0.0,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 3,
+        "frame": 50,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 5.329070518200751e-15,
+            "offset": 1.4210854715202004e-14,
+            "readout_variance": 0.0,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 1.7763568394002505e-15,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 3,
+        "frame": 62,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.7763568394002505e-15,
+            "offset": 0.0,
+            "readout_variance": 5.617728504603292e-14,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 3,
+        "frame": 73,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.5987211554602254e-14,
+            "offset": 5.684341886080802e-14,
+            "readout_variance": 1.0464962230116726e-12,
+            "kappa": 1.3322676295501878e-15,
+            "kappa_inf": 1.7763568394002505e-15,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 3,
+        "frame": 85,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 3.552713678800501e-15,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 8.881784197001252e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 4,
+        "frame": 3,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 3.552713678800501e-15,
+            "offset": 1.4210854715202004e-14,
+            "readout_variance": 0.0,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 1.3322676295501878e-15,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 4,
+        "frame": 14,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 5.329070518200751e-15,
+            "offset": 1.4210854715202004e-14,
+            "readout_variance": 0.0,
+            "kappa": 8.881784197001252e-16,
+            "kappa_inf": 8.881784197001252e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 4,
+        "frame": 25,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 7.105427357601002e-15,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 4,
+        "frame": 36,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.2434497875801753e-14,
+            "offset": 2.842170943040401e-14,
+            "readout_variance": 0.0,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 8.881784197001252e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 4,
+        "frame": 48,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.2434497875801753e-14,
+            "offset": 1.4210854715202004e-14,
+            "readout_variance": 0.0,
+            "kappa": 1.3322676295501878e-15,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      },
+      {
+        "scan": 4,
+        "frame": 59,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 1.7763568394002505e-15,
+            "offset": 2.1316282072803006e-13,
+            "readout_variance": 2.3216983890961274e-12,
+            "kappa": 1.1102230246251565e-15,
+            "kappa_inf": 4.440892098500626e-16,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 4,
+        "frame": 70,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 5.329070518200751e-15,
+            "offset": 0.0,
+            "readout_variance": 0.0,
+            "kappa": 1.3322676295501878e-15,
+            "kappa_inf": 1.7763568394002505e-15,
+            "thresholds": 0.0
+          }
+        }
+      },
+      {
+        "scan": 4,
+        "frame": 81,
+        "parity": {
+          "pixel_differences": 0,
+          "max_absolute_errors": {
+            "gain": 5.329070518200751e-15,
+            "offset": 2.842170943040401e-14,
+            "readout_variance": 3.836930773104541e-13,
+            "kappa": 4.440892098500626e-16,
+            "kappa_inf": 8.881784197001252e-16,
+            "thresholds": 1.7763568394002505e-15
+          }
+        }
+      }
+    ],
+    "isig_edges": [
+      "-inf",
+      1,
+      2,
+      3,
+      5,
+      10,
+      20,
+      50,
+      "inf"
+    ],
+    "limitation": "Integrated reference is incomplete and DIALS-derived. Proximity recall does not prove twin separation or correct overlapping intensities.",
+    "crystal_models": {
+      "0": {
+        "before": {
+          "n": [
+            92,
+            25,
+            27,
+            25,
+            26,
+            23,
+            14,
+            11
+          ],
+          "found": [
+            0,
+            3,
+            12,
+            21,
+            26,
+            23,
+            14,
+            11
+          ],
+          "recall": [
+            0.0,
+            0.12,
+            0.4444444444444444,
+            0.84,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "after": {
+          "n": [
+            92,
+            25,
+            27,
+            25,
+            26,
+            23,
+            14,
+            11
+          ],
+          "found": [
+            0,
+            3,
+            12,
+            21,
+            26,
+            23,
+            14,
+            11
+          ],
+          "recall": [
+            0.0,
+            0.12,
+            0.4444444444444444,
+            0.84,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "dials": {
+          "n": [
+            92,
+            25,
+            27,
+            25,
+            26,
+            23,
+            14,
+            11
+          ],
+          "found": [
+            0,
+            0,
+            1,
+            2,
+            15,
+            21,
+            14,
+            11
+          ],
+          "recall": [
+            0.0,
+            0.0,
+            0.037037037037037035,
+            0.08,
+            0.5769230769230769,
+            0.9130434782608695,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "1": {
+        "before": {
+          "n": [
+            95,
+            37,
+            12,
+            20,
+            15,
+            26,
+            24,
+            17
+          ],
+          "found": [
+            4,
+            5,
+            5,
+            16,
+            15,
+            26,
+            24,
+            17
+          ],
+          "recall": [
+            0.042105263157894736,
+            0.13513513513513514,
+            0.4166666666666667,
+            0.8,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "after": {
+          "n": [
+            95,
+            37,
+            12,
+            20,
+            15,
+            26,
+            24,
+            17
+          ],
+          "found": [
+            4,
+            5,
+            5,
+            16,
+            15,
+            26,
+            24,
+            17
+          ],
+          "recall": [
+            0.042105263157894736,
+            0.13513513513513514,
+            0.4166666666666667,
+            0.8,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "dials": {
+          "n": [
+            95,
+            37,
+            12,
+            20,
+            15,
+            26,
+            24,
+            17
+          ],
+          "found": [
+            1,
+            1,
+            1,
+            1,
+            7,
+            24,
+            23,
+            17
+          ],
+          "recall": [
+            0.010526315789473684,
+            0.02702702702702703,
+            0.08333333333333333,
+            0.05,
+            0.4666666666666667,
+            0.9230769230769231,
+            0.9583333333333334,
+            1.0
+          ]
+        }
+      },
+      "2": {
+        "before": {
+          "n": [
+            138,
+            38,
+            23,
+            30,
+            23,
+            24,
+            20,
+            9
+          ],
+          "found": [
+            5,
+            9,
+            22,
+            26,
+            21,
+            24,
+            19,
+            9
+          ],
+          "recall": [
+            0.036231884057971016,
+            0.23684210526315788,
+            0.9565217391304348,
+            0.8666666666666667,
+            0.9130434782608695,
+            1.0,
+            0.95,
+            1.0
+          ]
+        },
+        "after": {
+          "n": [
+            138,
+            38,
+            23,
+            30,
+            23,
+            24,
+            20,
+            9
+          ],
+          "found": [
+            5,
+            9,
+            22,
+            26,
+            21,
+            24,
+            19,
+            9
+          ],
+          "recall": [
+            0.036231884057971016,
+            0.23684210526315788,
+            0.9565217391304348,
+            0.8666666666666667,
+            0.9130434782608695,
+            1.0,
+            0.95,
+            1.0
+          ]
+        },
+        "dials": {
+          "n": [
+            138,
+            38,
+            23,
+            30,
+            23,
+            24,
+            20,
+            9
+          ],
+          "found": [
+            3,
+            0,
+            0,
+            2,
+            13,
+            21,
+            19,
+            9
+          ],
+          "recall": [
+            0.021739130434782608,
+            0.0,
+            0.0,
+            0.06666666666666667,
+            0.5652173913043478,
+            0.875,
+            0.95,
+            1.0
+          ]
+        }
+      },
+      "3": {
+        "before": {
+          "n": [
+            156,
+            43,
+            30,
+            23,
+            28,
+            22,
+            13,
+            19
+          ],
+          "found": [
+            3,
+            10,
+            20,
+            22,
+            28,
+            22,
+            13,
+            19
+          ],
+          "recall": [
+            0.019230769230769232,
+            0.23255813953488372,
+            0.6666666666666666,
+            0.9565217391304348,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "after": {
+          "n": [
+            156,
+            43,
+            30,
+            23,
+            28,
+            22,
+            13,
+            19
+          ],
+          "found": [
+            3,
+            10,
+            20,
+            22,
+            28,
+            22,
+            13,
+            19
+          ],
+          "recall": [
+            0.019230769230769232,
+            0.23255813953488372,
+            0.6666666666666666,
+            0.9565217391304348,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "dials": {
+          "n": [
+            156,
+            43,
+            30,
+            23,
+            28,
+            22,
+            13,
+            19
+          ],
+          "found": [
+            1,
+            0,
+            0,
+            1,
+            12,
+            20,
+            13,
+            19
+          ],
+          "recall": [
+            0.00641025641025641,
+            0.0,
+            0.0,
+            0.043478260869565216,
+            0.42857142857142855,
+            0.9090909090909091,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "4": {
+        "before": {
+          "n": [
+            107,
+            32,
+            25,
+            18,
+            27,
+            25,
+            14,
+            17
+          ],
+          "found": [
+            2,
+            4,
+            14,
+            14,
+            27,
+            25,
+            14,
+            17
+          ],
+          "recall": [
+            0.018691588785046728,
+            0.125,
+            0.56,
+            0.7777777777777778,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "after": {
+          "n": [
+            107,
+            32,
+            25,
+            18,
+            27,
+            25,
+            14,
+            17
+          ],
+          "found": [
+            2,
+            4,
+            14,
+            14,
+            27,
+            25,
+            14,
+            17
+          ],
+          "recall": [
+            0.018691588785046728,
+            0.125,
+            0.56,
+            0.7777777777777778,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "dials": {
+          "n": [
+            107,
+            32,
+            25,
+            18,
+            27,
+            25,
+            14,
+            17
+          ],
+          "found": [
+            1,
+            0,
+            0,
+            1,
+            11,
+            23,
+            14,
+            17
+          ],
+          "recall": [
+            0.009345794392523364,
+            0.0,
+            0.0,
+            0.05555555555555555,
+            0.4074074074074074,
+            0.92,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "5": {
+        "before": {
+          "n": [
+            88,
+            35,
+            17,
+            19,
+            27,
+            26,
+            14,
+            18
+          ],
+          "found": [
+            3,
+            4,
+            10,
+            18,
+            27,
+            26,
+            14,
+            18
+          ],
+          "recall": [
+            0.03409090909090909,
+            0.11428571428571428,
+            0.5882352941176471,
+            0.9473684210526315,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "after": {
+          "n": [
+            88,
+            35,
+            17,
+            19,
+            27,
+            26,
+            14,
+            18
+          ],
+          "found": [
+            3,
+            4,
+            10,
+            18,
+            27,
+            26,
+            14,
+            18
+          ],
+          "recall": [
+            0.03409090909090909,
+            0.11428571428571428,
+            0.5882352941176471,
+            0.9473684210526315,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "dials": {
+          "n": [
+            88,
+            35,
+            17,
+            19,
+            27,
+            26,
+            14,
+            18
+          ],
+          "found": [
+            2,
+            0,
+            0,
+            1,
+            16,
+            23,
+            14,
+            18
+          ],
+          "recall": [
+            0.022727272727272728,
+            0.0,
+            0.0,
+            0.05263157894736842,
+            0.5925925925925926,
+            0.8846153846153846,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "6": {
+        "before": {
+          "n": [
+            139,
+            36,
+            21,
+            27,
+            25,
+            22,
+            23,
+            11
+          ],
+          "found": [
+            10,
+            3,
+            11,
+            21,
+            25,
+            21,
+            23,
+            11
+          ],
+          "recall": [
+            0.07194244604316546,
+            0.08333333333333333,
+            0.5238095238095238,
+            0.7777777777777778,
+            1.0,
+            0.9545454545454546,
+            1.0,
+            1.0
+          ]
+        },
+        "after": {
+          "n": [
+            139,
+            36,
+            21,
+            27,
+            25,
+            22,
+            23,
+            11
+          ],
+          "found": [
+            10,
+            3,
+            11,
+            21,
+            25,
+            21,
+            23,
+            11
+          ],
+          "recall": [
+            0.07194244604316546,
+            0.08333333333333333,
+            0.5238095238095238,
+            0.7777777777777778,
+            1.0,
+            0.9545454545454546,
+            1.0,
+            1.0
+          ]
+        },
+        "dials": {
+          "n": [
+            139,
+            36,
+            21,
+            27,
+            25,
+            22,
+            23,
+            11
+          ],
+          "found": [
+            1,
+            0,
+            0,
+            3,
+            17,
+            19,
+            23,
+            11
+          ],
+          "recall": [
+            0.007194244604316547,
+            0.0,
+            0.0,
+            0.1111111111111111,
+            0.68,
+            0.8636363636363636,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "7": {
+        "before": {
+          "n": [
+            122,
+            43,
+            15,
+            16,
+            32,
+            20,
+            26,
+            18
+          ],
+          "found": [
+            2,
+            2,
+            12,
+            14,
+            32,
+            20,
+            26,
+            18
+          ],
+          "recall": [
+            0.01639344262295082,
+            0.046511627906976744,
+            0.8,
+            0.875,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "after": {
+          "n": [
+            122,
+            43,
+            15,
+            16,
+            32,
+            20,
+            26,
+            18
+          ],
+          "found": [
+            2,
+            2,
+            12,
+            14,
+            32,
+            20,
+            26,
+            18
+          ],
+          "recall": [
+            0.01639344262295082,
+            0.046511627906976744,
+            0.8,
+            0.875,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "dials": {
+          "n": [
+            122,
+            43,
+            15,
+            16,
+            32,
+            20,
+            26,
+            18
+          ],
+          "found": [
+            2,
+            0,
+            0,
+            1,
+            13,
+            19,
+            25,
+            18
+          ],
+          "recall": [
+            0.01639344262295082,
+            0.0,
+            0.0,
+            0.0625,
+            0.40625,
+            0.95,
+            0.9615384615384616,
+            1.0
+          ]
+        }
+      },
+      "8": {
+        "before": {
+          "n": [
+            123,
+            43,
+            29,
+            26,
+            28,
+            30,
+            21,
+            12
+          ],
+          "found": [
+            2,
+            6,
+            18,
+            25,
+            27,
+            30,
+            20,
+            12
+          ],
+          "recall": [
+            0.016260162601626018,
+            0.13953488372093023,
+            0.6206896551724138,
+            0.9615384615384616,
+            0.9642857142857143,
+            1.0,
+            0.9523809523809523,
+            1.0
+          ]
+        },
+        "after": {
+          "n": [
+            123,
+            43,
+            29,
+            26,
+            28,
+            30,
+            21,
+            12
+          ],
+          "found": [
+            2,
+            6,
+            18,
+            25,
+            27,
+            30,
+            20,
+            12
+          ],
+          "recall": [
+            0.016260162601626018,
+            0.13953488372093023,
+            0.6206896551724138,
+            0.9615384615384616,
+            0.9642857142857143,
+            1.0,
+            0.9523809523809523,
+            1.0
+          ]
+        },
+        "dials": {
+          "n": [
+            123,
+            43,
+            29,
+            26,
+            28,
+            30,
+            21,
+            12
+          ],
+          "found": [
+            2,
+            0,
+            0,
+            1,
+            19,
+            26,
+            18,
+            12
+          ],
+          "recall": [
+            0.016260162601626018,
+            0.0,
+            0.0,
+            0.038461538461538464,
+            0.6785714285714286,
+            0.8666666666666667,
+            0.8571428571428571,
+            1.0
+          ]
+        }
+      },
+      "9": {
+        "before": {
+          "n": [
+            135,
+            31,
+            21,
+            22,
+            23,
+            21,
+            15,
+            14
+          ],
+          "found": [
+            0,
+            3,
+            11,
+            22,
+            22,
+            20,
+            15,
+            14
+          ],
+          "recall": [
+            0.0,
+            0.0967741935483871,
+            0.5238095238095238,
+            1.0,
+            0.9565217391304348,
+            0.9523809523809523,
+            1.0,
+            1.0
+          ]
+        },
+        "after": {
+          "n": [
+            135,
+            31,
+            21,
+            22,
+            23,
+            21,
+            15,
+            14
+          ],
+          "found": [
+            0,
+            3,
+            11,
+            22,
+            22,
+            20,
+            15,
+            14
+          ],
+          "recall": [
+            0.0,
+            0.0967741935483871,
+            0.5238095238095238,
+            1.0,
+            0.9565217391304348,
+            0.9523809523809523,
+            1.0,
+            1.0
+          ]
+        },
+        "dials": {
+          "n": [
+            135,
+            31,
+            21,
+            22,
+            23,
+            21,
+            15,
+            14
+          ],
+          "found": [
+            0,
+            0,
+            0,
+            1,
+            9,
+            18,
+            15,
+            14
+          ],
+          "recall": [
+            0.0,
+            0.0,
+            0.0,
+            0.045454545454545456,
+            0.391304347826087,
+            0.8571428571428571,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "model_scope": "Each scan has separate crystal models; these indices are not independently identified physical twin domains."
+  }
+}
